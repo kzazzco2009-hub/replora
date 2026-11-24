@@ -8,11 +8,11 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (backend half, B0). P0.1, P0.2 and P0.10 done. Skeleton [PR #2](https://github.com/kzazzco2009-hub/replora/pull/2) open for frontend review, CI green.** |
+| Current phase | **Phase 0 — Foundation (backend half, B0). P0.1, P0.2 and P0.10 done. Skeleton [PR #2](https://github.com/kzazzco2009-hub/replora/pull/2) merged into `main` (`1e0691b`). [PR #3](https://github.com/kzazzco2009-hub/replora/pull/3) (`CLAUDE.md` + CODEOWNERS follow-up) open.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend review and merge of the `chore/repo-skeleton` PR (24 h). CI on the PR must be green (T0.3). |
-| Next step | Address review comments on the skeleton PR. After merge, branch from `main` for P0.3 (backend skeleton, `/health`), then P0.5 (OpenAPI export from 501 stubs + drift job), P0.6 (pre-commit), P0.11 (observability). |
-| Blockers | none. On the second machine, a Claude Code session started before the winget installs must reload PATH from the registry (or restart) to see gitleaks and pnpm. |
+| Waiting on | Frontend review of PR #3, and their confirmation of `6ce85a8` (frontend package alignment): it was merged with #2, but their approval only covered `193b07a`. |
+| Next step | Branch from `main` for P0.3 (backend skeleton, `/health`), then P0.5 (OpenAPI export from 501 stubs + drift job), P0.6 (pre-commit), P0.11 (observability). |
+| Blockers | none. **`docs/` in the repo is now the single source**; the OneDrive `Planning/` and `Frontend_Planning/` folders are frozen. Dependabot `uv in /backend` fails until `backend/` exists (P0.3). |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
@@ -147,7 +147,11 @@ Done:
   - `Explanation` key/params vs AI text; i18n key parity (T9.4); pinned TS 6.0.3, Node 26.13.1, pnpm 12.23.0; S‑05 manual protection rule.
   - grep shows no `Web Crypto`, browser-hash or `(latest)` wording left. Sent to the frontend on PR #2 for approval.
 - Added a root `CLAUDE.md` (commit on PR #2) with the session start steps, ownership, process and phase gates, code style, contract rules, git rules and the Windows/multi-machine notes. Every Claude Code session on any machine loads it.
-- **Still open with the frontend:** PR #2 approval (incl. the root pnpm workspace layout), `docs/frontend/` ownership in CODEOWNERS, and the move to an organization. The `NEEDS_REVIEW` resolution endpoint and the full `error-codes.json` come at G1.
+- **PR #2 merged** by the frontend at 19:59 UTC (`1e0691b`), approved after they verified `193b07a`.
+  - `6ce85a8` (frontend alignment) was included in the merge, so I asked them to confirm it.
+  - `f75fa68` (`CLAUDE.md`) was pushed just after the merge and missed it. I cherry-picked it onto `chore/claude-md` from `main` (`f562659`) and added the requested `/docs/frontend/ @kzazzco2009-hub` CODEOWNERS line, as PR #3.
+  - Dependabot ran on `main`: github-actions and npm succeeded, while `uv in /backend` failed because `backend/` does not exist yet. That is expected until P0.3.
+- **Still open with the frontend (before the merge):** PR #2 approval (incl. the root pnpm workspace layout), `docs/frontend/` ownership in CODEOWNERS, and the move to an organization. The `NEEDS_REVIEW` resolution endpoint and the full `error-codes.json` come at G1.
 - `actionlint` was not run locally because the permission check blocked `uvx`; the CI run on the PR validates the workflow instead. The P0.7 contract-drift job is added with P0.5. P0.8 branch protection waits on the organization decision.
 
 ---
