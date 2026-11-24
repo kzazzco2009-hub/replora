@@ -8,10 +8,11 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 4/11 done (P0.1, P0.2, P0.3, P0.10). **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth stubs, with the review feedback applied) is open as a PR from `feat/p0.5-auth-stubs`. `main` at `887892a`. **This branch holds the newest session log until it merges.** |
+| Current phase | **Phase 0 — Foundation (B0).** Steps 4/11 done (P0.1, P0.2, P0.3, P0.10). **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth stubs, with the review feedback applied) is **PR #8** from `feat/p0.5-auth-stubs` (head `ed9999c`, CI green). `main` at `887892a`. **This branch holds the newest session log until it merges.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend: review the P0.5 part 2 PR (§2 auth stubs); F0 / P0.4 is in progress on their side. Owner: delete the old OpenRouter key on openrouter.ai, then retire the OneDrive `Replora/` folder and empty the OneDrive recycle bin; on the other machine, pull and create `.env`. |
+| Waiting on | Frontend: review **PR #8** (§2 auth stubs), confirm `ExportStatus.status = pending | ready | failed`, tick P0.1 in `docs/frontend/plan.md`; F0 / P0.4 is in progress on their side. Owner: delete the old OpenRouter key on openrouter.ai, then retire the OneDrive `Replora/` folder and empty the OneDrive recycle bin; on the other machine, pull and create `.env`. |
 | Next step | 1) After the part 2 PR merges, tell the frontend on issue #1 that `pnpm gen:api` can start for auth. 2) P0.5 part 3: §3–§4 stubs (workspaces, members, invitations, audit, files). 3) Part 4: §5–§8. 4) Then P0.6 (pre-commit), P0.11 (observability). |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `gh pr view 8 -R kzazzco2009-hub/replora --comments`; `gh api repos/kzazzco2009-hub/replora/pulls/8/reviews`; `gh issue view 1 -R kzazzco2009-hub/replora --comments` (new comments after id 7144709728); `gh pr list -R kzazzco2009-hub/replora --state all`. If #8 is merged: `git switch main; git pull --ff-only`, then post the `pnpm gen:api` note on #1 and start P0.5 part 3 on a new branch from `main`. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
