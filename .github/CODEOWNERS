@@ -8,3 +8,6 @@
 /contracts/  @khaledhagar @kzazzco2009-hub
 /docs/       @khaledhagar @kzazzco2009-hub
 /.github/    @khaledhagar @kzazzco2009-hub
+
+# Frontend package (after /docs/ so it wins).
+/docs/frontend/  @kzazzco2009-hub
