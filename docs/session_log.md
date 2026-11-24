@@ -124,6 +124,8 @@ Done:
   - **Security finding:** FastAPI's default 422 **echoed the rejected input**, so a too-short password came back in the response body. Proven by temporarily restoring the default handler: `'tiny-secret' is contained here`. Our handler never includes `input`. Also fixed a bug in my own test: the first secret (`short-secret`) was exactly 12 characters, so it was valid and proved nothing.
   - `operationId` = `<tag>_<function>` via `generate_unique_id_function` (20 IDs: `auth_login`, `auth_get_me`, …, `health_get`). They are unique and match `[a-z]+_[a-z_]+`.
   - Checks: **79 passed** · ruff clean · drift exit 0 · `uv sync --locked` · pip-audit clean.
+- **Track-plan ticks (found when the owner asked why only P0.3 looked ticked):** `docs/plan.md` was right (P0.1, P0.2, P0.3, P0.10 ticked). But `docs/backend_plan.md` B0 was **one combined checkbox**, so it could not show progress, even though the file says "tick here **and** in plan.md". I split it into one line per step and ticked P0.1, P0.2, P0.3, the api_contract draft, T0.1, T0.3, T0.4 and T0.6.
+  - `docs/frontend/plan.md` P0.1 is unticked although the frontend logged it as done. It is the frontend's file, so I asked them on #8 to tick it.
 
 **Handover:** the newest log is on `feat/p0.5-auth-stubs` until its PR merges (`main` has up to Session 10, through #6). Start the next session in `D:\Projects\replora` with `git fetch --all --prune`, then read this file on `main`, or on the branch if the PR is still open.
 
