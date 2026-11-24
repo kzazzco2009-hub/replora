@@ -91,4 +91,7 @@ Resolved versions (P0.4 install):
 
 - T0.3: added a deliberate `react-hooks/rules-of-hooks` violation to `src/app/page.tsx` (calling `useState` at module top level). `pnpm lint` failed as expected (`exit code 1`, 1 error). Reverted the file; `pnpm lint` passed again (`exit code 0`), confirmed clean. Done locally with the exact command CI runs (`pnpm -C frontend run lint`); the full CI-level proof (GitHub Actions run) still needs the branch pushed — that's stage (f), not done yet pending explicit "go".
 
-Next step: commit + PR text (stage f) — no commit/push without explicit "go".
+- Replaced "owner" with "Developer B" in `frontend/CLAUDE.md` (4 occurrences).
+- `gitleaks git .`: no leaks found. Committed by name (`80aafbd`), pushed `feat/p0.4-frontend-skeleton`, opened PR #9.
+
+Next step: wait for CI on PR #9, then review/merge with the backend developer. After merge: P0.6 (pre-commit), P0.7 gap (add `pnpm build` to ci.yml — separate shared-file PR), P0.5 once `contracts/openapi.json` exists.
