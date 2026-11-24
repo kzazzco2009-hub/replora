@@ -95,3 +95,5 @@ Resolved versions (P0.4 install):
 - `gitleaks git .`: no leaks found. Committed by name (`80aafbd`), pushed `feat/p0.4-frontend-skeleton`, opened PR #9.
 
 Next step: wait for CI on PR #9, then review/merge with the backend developer. After merge: P0.6 (pre-commit), P0.7 gap (add `pnpm build` to ci.yml — separate shared-file PR), P0.5 once `contracts/openapi.json` exists.
+
+PR #9 follow-up: ticked `[x] P0.1` and `[x] P0.4` in `docs/frontend/plan.md` §F0 (both verified above — versions recorded, skeleton built and tested). No other checklist item touched.
