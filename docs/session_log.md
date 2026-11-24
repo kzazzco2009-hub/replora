@@ -8,11 +8,11 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0). P0.1, P0.2, P0.3 and P0.10 done; P0.5 in progress (export + drift check PR open, then the 501 stubs by section). `main` at `8722ebf`.** |
+| Current phase | **Phase 0 — Foundation (B0).** Steps 4/11 done (P0.1, P0.2, P0.3, P0.10). **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth stubs, with the review feedback applied) is open as a PR from `feat/p0.5-auth-stubs`. `main` at `887892a`. **This branch holds the newest session log until it merges.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend review of the P0.5 export PR, and their merge of #5. Then F0 from `main`. |
-| Next step | P0.5 part 2: 501 stubs + Pydantic models for auth (§2), with `openapi.json` regenerated. Then §3–§4 and §5–§8. Then P0.6 (pre-commit) and P0.11 (observability). |
-| Blockers | none. **`docs/` in the repo is now the single source**; the OneDrive `Planning/` and `Frontend_Planning/` folders are frozen. Dependabot `uv in /backend` should pass once `backend/` is merged. |
+| Waiting on | Frontend: review the P0.5 part 2 PR (§2 auth stubs); F0 / P0.4 is in progress on their side. Owner: delete the old OpenRouter key on openrouter.ai, then retire the OneDrive `Replora/` folder and empty the OneDrive recycle bin; on the other machine, pull and create `.env`. |
+| Next step | 1) After the part 2 PR merges, tell the frontend on issue #1 that `pnpm gen:api` can start for auth. 2) P0.5 part 3: §3–§4 stubs (workspaces, members, invitations, audit, files). 3) Part 4: §5–§8. 4) Then P0.6 (pre-commit), P0.11 (observability). |
+| Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
@@ -93,6 +93,39 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 **Second dev machine (Developer A), checked 2026-11-24 in Session 8:** git 2.49.0 · gh 2.102.0 · uv 0.11.6 · Node 22.16.0 · npm 10.9.2 · Docker 29.5.2 · Python 3.13.3 and 3.12 only. Missing at first: gitleaks, pnpm, pre-commit, Python 3.14. `D:\Projects\replora` did not exist and was cloned again.
 **After the owner's installs (same session):** gitleaks 8.30.1 · pnpm 12.23.0 · Node 26.13.1 · uv 0.13.9 · Python 3.14 (uv-managed) · pre-commit 4.7.0. git 2.49 and gh 2.102 kept as they are.
+
+---
+
+## Session 11 — 2026-11-24 (second dev machine, handover)
+**Goal:** get the latest state to the frontend, retire the OneDrive folder, and hand over to a session opened in `D:\Projects\replora`.
+
+Done:
+- **PRs:**
+  - #5 (frontend log + `frontend/CLAUDE.md`) was merged by the frontend.
+  - #6 is approved.
+  - On issue #1 ([comment 7144367719](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7144367719)) I gave the owner's go to merge #6, asked for a review and merge of #7, and previewed part 2. Part 2 includes the proposal `ExportStatus.status = pending | ready | failed`, to confirm at G5.
+- **PR #7 (`docs/original-plan`):** `docs/history/Replora_Complete_Project_Plan_AR.md`, a byte-identical copy (SHA-256 `16247D27FCE2…C3`), plus a README marking it historical and superseded by `plan.md` v1.1. Read in full first: no secrets; it names a person and the old multi-AI-agent roles. CI green.
+- **OneDrive decision:** the repo lives on the local disk (`D:\Projects\replora`) and GitHub is the sync between machines. OneDrive is unsuitable for git: risk of `.git` corruption, conflict copies instead of merges, `.env` uploaded to the cloud, `.venv`/`node_modules` churn, and files-on-demand placeholders.
+  - Before deleting the OneDrive folder I checked its contents: `.env`, the frozen `Planning/` and `Frontend_Planning/`, the original plan (now in #7) and the frontend zip (a copy of `Frontend_Planning/`).
+- **Secrets (S‑01):**
+  - The owner created a **new OpenRouter key** in `D:\Projects\replora\.env`.
+  - Verified without printing it: `git check-ignore` gives `.gitignore:2:.env`; not tracked or staged; `Settings()` loads it (`sk-or-` prefix, 73 characters, no stray quotes or spaces; the repr hides it); it differs from the OneDrive copy.
+  - Still for the owner: **delete the old key** on openrouter.ai, then delete the OneDrive folder and empty the recycle bin (local and onedrive.com).
+- **Claude Code memory** copied to `~/.claude/projects/D--Projects-replora/memory/` (for sessions opened in the repo folder). It holds this machine only; the other machine relies on the root `CLAUDE.md`.
+- No code changes in this session.
+
+- **#6 and #7 merged** (squash, by the frontend: `7343aea`, `887892a`). Their #6 review asked for two things in the auth-stubs PR:
+  1. Errors documented as problem+json with a shared `ProblemDetails` schema (401, 403, 409, 422, 429).
+  2. Short, stable `operationId`s (`auth_login`).
+- **Rebased part 2** onto `main` (`git rebase --onto origin/main b156a40`; the squash dropped the old part 1 commit). 56 passed and the drift check was clean after the rebase.
+- **Feedback applied with TDD (23 new tests seen red first):**
+  - `Problem` renamed to **`ProblemDetails`**. Explicit 401/403/409/422/429/501 responses, all `application/problem+json` with `$ref ProblemDetails`. FastAPI's `HTTPValidationError` is not exposed.
+  - **Runtime 422 handler:** before, FastAPI answered `application/json` `{detail: […]}`, which bypassed the error-code mapper. Now it answers problem+json `VALIDATION_FAILED` with `errors[{path, code, params}]`, for example `body.password` / `STRING_TOO_SHORT` / `{min_length: 12}`.
+  - **Security finding:** FastAPI's default 422 **echoed the rejected input**, so a too-short password came back in the response body. Proven by temporarily restoring the default handler: `'tiny-secret' is contained here`. Our handler never includes `input`. Also fixed a bug in my own test: the first secret (`short-secret`) was exactly 12 characters, so it was valid and proved nothing.
+  - `operationId` = `<tag>_<function>` via `generate_unique_id_function` (20 IDs: `auth_login`, `auth_get_me`, …, `health_get`). They are unique and match `[a-z]+_[a-z_]+`.
+  - Checks: **79 passed** · ruff clean · drift exit 0 · `uv sync --locked` · pip-audit clean.
+
+**Handover:** the newest log is on `feat/p0.5-auth-stubs` until its PR merges (`main` has up to Session 10, through #6). Start the next session in `D:\Projects\replora` with `git fetch --all --prune`, then read this file on `main`, or on the branch if the PR is still open.
 
 ---
 

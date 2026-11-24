@@ -17,6 +17,6 @@ class Health(BaseModel):
 
 
 @router.get("/health")
-def get_health() -> Health:
+def get() -> Health:
     """Report that the API is up, and which version is running."""
     return Health(status="ok", version=version("replora-backend"))

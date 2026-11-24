@@ -1,8 +1,9 @@
-"""RFC 9457 problem+json errors: the model, the exception, its handler and the OpenAPI wiring."""
+"""RFC 9457 problem+json errors: the model, the exception, the handlers and the OpenAPI wiring."""
 
 from typing import Any
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.api.models import ApiModel
@@ -11,14 +12,14 @@ PROBLEM_MEDIA_TYPE = "application/problem+json"
 
 
 class ProblemItem(ApiModel):
-    """One field-level issue inside a problem."""
+    """One field-level issue. `code` is stable and translated by the client."""
 
     path: str
     code: str
     params: dict[str, Any] = {}
 
 
-class Problem(ApiModel):
+class ProblemDetails(ApiModel):
     """Error body. Clients translate `code`, never `detail` (docs/api_contract.md §1)."""
 
     type: str = "about:blank"
@@ -35,7 +36,7 @@ class ProblemError(Exception):
 
     def __init__(self, status: int, code: str, title: str) -> None:
         super().__init__(code)
-        self.problem = Problem(status=status, code=code, title=title)
+        self.problem = ProblemDetails(status=status, code=code, title=title)
 
 
 def not_implemented() -> ProblemError:
@@ -43,20 +44,24 @@ def not_implemented() -> ProblemError:
     return ProblemError(501, "NOT_IMPLEMENTED", "Not implemented")
 
 
+def _documented(description: str) -> dict[str, Any]:
+    return {"model": ProblemDetails, "description": description}
+
+
 ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
-    "4XX": {"model": Problem, "description": "Client error"},
-    501: {"model": Problem, "description": "Not implemented yet (contract stub)"},
+    401: _documented("Not signed in, or the session expired"),
+    403: _documented("CSRF check failed, or not allowed in this workspace"),
+    409: _documented("Conflict with the current state"),
+    422: _documented("Validation failed (`code: VALIDATION_FAILED`, details in `errors`)"),
+    429: _documented("Too many requests (see `Retry-After`)"),
+    501: _documented("Not implemented yet (contract stub)"),
 }
 
 
 def install(app: FastAPI) -> None:
-    """Register the problem handler and document error bodies as problem+json."""
-
-    async def handle(_: Request, error: ProblemError) -> JSONResponse:
-        body = error.problem.model_dump(exclude_none=True)
-        return JSONResponse(body, status_code=error.problem.status, media_type=PROBLEM_MEDIA_TYPE)
-
-    app.add_exception_handler(ProblemError, handle)
+    """Register the problem handlers and document error bodies as problem+json."""
+    app.add_exception_handler(ProblemError, _handle_problem)
+    app.add_exception_handler(RequestValidationError, _handle_validation)
     build_openapi = app.openapi
 
     def openapi() -> dict[str, Any]:
@@ -65,6 +70,36 @@ def install(app: FastAPI) -> None:
         return app.openapi_schema
 
     app.openapi = openapi
+
+
+async def _handle_problem(_: Request, error: ProblemError) -> JSONResponse:
+    return _problem_response(error.problem)
+
+
+async def _handle_validation(_: Request, error: RequestValidationError) -> JSONResponse:
+    """422 as problem+json. The rejected input is never echoed back (it may be a password)."""
+    items = [
+        ProblemItem(
+            path=".".join(str(part) for part in issue["loc"]),
+            code=issue["type"].upper(),
+            params={key: _plain(value) for key, value in issue.get("ctx", {}).items()},
+        )
+        for issue in error.errors()
+    ]
+    problem = ProblemDetails(
+        status=422, code="VALIDATION_FAILED", title="Validation failed", errors=items
+    )
+    return _problem_response(problem)
+
+
+def _problem_response(problem: ProblemDetails) -> JSONResponse:
+    body = problem.model_dump(exclude_none=True)
+    return JSONResponse(body, status_code=problem.status, media_type=PROBLEM_MEDIA_TYPE)
+
+
+def _plain(value: Any) -> Any:
+    """Keep JSON scalars; render anything else (for example an exception) as text."""
+    return value if isinstance(value, str | int | float | bool | None) else str(value)
 
 
 def use_problem_media_type(document: dict[str, Any]) -> dict[str, Any]:

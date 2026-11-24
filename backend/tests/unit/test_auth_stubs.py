@@ -1,5 +1,7 @@
 """P0.5: the §2 auth contract is served as 501 stubs and documented in OpenAPI."""
 
+import re
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -106,11 +108,55 @@ def test_login_documents_user_or_mfa_challenge(openapi):
     }
 
 
-def test_errors_are_documented_as_problem_json(openapi):
-    responses = openapi["paths"]["/api/v1/auth/login"]["post"]["responses"]
+ERROR_STATUSES = ("401", "403", "409", "422", "429", "501")
+PROBLEM_REF = {"$ref": "#/components/schemas/ProblemDetails"}
 
-    for status in ("4XX", "501"):
-        assert set(responses[status]["content"]) == {"application/problem+json"}
+
+@pytest.mark.parametrize(("method", "path", "status", "body"), AUTH_ENDPOINTS)
+def test_errors_are_documented_as_problem_details(openapi, method, path, status, body):
+    responses = openapi["paths"][openapi_path(path)][method]["responses"]
+
+    for error in ERROR_STATUSES:
+        assert responses[error]["content"] == {"application/problem+json": {"schema": PROBLEM_REF}}
+
+
+def test_problem_details_schema_carries_code_and_correlation_id(openapi):
+    properties = openapi["components"]["schemas"]["ProblemDetails"]["properties"]
+
+    assert {"type", "title", "status", "code", "correlation_id", "errors"} <= set(properties)
+
+
+def test_fastapi_default_validation_schema_is_not_exposed(openapi):
+    assert "HTTPValidationError" not in openapi["components"]["schemas"]
+
+
+def test_validation_error_is_problem_json_with_field_paths(client):
+    response = client.post("/api/v1/auth/login", json={"email": "not-an-email"})
+
+    assert response.status_code == 422
+    assert response.headers["content-type"] == "application/problem+json"
+    body = response.json()
+    assert body["code"] == "VALIDATION_FAILED"
+    assert {error["path"] for error in body["errors"]} == {"body.email", "body.password"}
+
+
+def test_validation_error_never_echoes_the_input(client):
+    secret = "tiny-secret"  # 11 characters: below the 12-character minimum
+    body = {"email": "a@example.com", "password": secret, "display_name": "A", "locale": "en"}
+
+    response = client.post("/api/v1/auth/register", json=body)
+
+    assert response.status_code == 422
+    assert secret not in response.text
+
+
+def test_operation_ids_are_short_stable_and_unique(openapi):
+    ids = [op["operationId"] for ops in openapi["paths"].values() for op in ops.values()]
+
+    assert len(ids) == len(set(ids))
+    assert openapi["paths"]["/api/v1/auth/login"]["post"]["operationId"] == "auth_login"
+    assert openapi["paths"]["/api/v1/health"]["get"]["operationId"] == "health_get"
+    assert all(re.fullmatch(r"[a-z]+_[a-z_]+", operation_id) for operation_id in ids)
 
 
 def test_register_rejects_a_password_shorter_than_12(client):
