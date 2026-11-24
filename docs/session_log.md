@@ -8,7 +8,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (backend half, B0). P0.1, P0.2 and P0.10 done. Skeleton PR (`chore/repo-skeleton`) opened for frontend review.** |
+| Current phase | **Phase 0 — Foundation (backend half, B0). P0.1, P0.2 and P0.10 done. Skeleton [PR #2](https://github.com/kzazzco2009-hub/replora/pull/2) open for frontend review, CI green.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | Frontend review and merge of the `chore/repo-skeleton` PR (24 h). CI on the PR must be green (T0.3). |
 | Next step | Address review comments on the skeleton PR. After merge, branch from `main` for P0.3 (backend skeleton, `/health`), then P0.5 (OpenAPI export from 501 stubs + drift job), P0.6 (pre-commit), P0.11 (observability). |
@@ -130,6 +130,12 @@ Done:
   - `gitleaks dir .`: no leaks, exit 0;
   - `gitleaks git .` over the history (1 commit): no leaks, exit 0.
   - **P0.2 done.** T0.5 proper (the pre-commit hook blocking a commit) is done with P0.6.
+- Commits `653876c` (skeleton) and `31cca94` (docs) on `chore/repo-skeleton`. A final `gitleaks git .` found no leaks; then pushed.
+- Opened [PR #2](https://github.com/kzazzco2009-hub/replora/pull/2) with reviewer `kzazzco2009-hub`.
+- **CI on PR #2** (`gh pr checks 2 --watch`, run 45471829251): `Detect project parts` pass (4 s), `Secret scan (gitleaks)` pass (11 s; checksum verified, full history), Backend and Frontend skipped as designed.
+  - The first half of T0.3 (green on a no-op PR) passed.
+  - The second half (CI fails on an intentional lint error) waits for the backend job to exist (P0.3), so T0.3 stays open.
+- Posted the final state on issue #1, with Node 26.13.1 confirmed and the PR link.
 - `actionlint` was not run locally because the permission check blocked `uvx`; the CI run on the PR validates the workflow instead. The P0.7 contract-drift job is added with P0.5. P0.8 branch protection waits on the organization decision.
 
 ---
