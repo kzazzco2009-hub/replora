@@ -136,6 +136,10 @@ Done:
   - The first half of T0.3 (green on a no-op PR) passed.
   - The second half (CI fails on an intentional lint error) waits for the backend job to exist (P0.3), so T0.3 stays open.
 - Posted the final state on issue #1, with Node 26.13.1 confirmed and the PR link.
+- **PR #2 review (frontend):** no blockers, but four questions.
+  - Cause of points 1 and 3: `docs/` was copied from `Planning/` only, so the agreed `Frontend_Planning/` package (plan 191 lines, testing, security, README) was missing, and with it T0.F1, T9.U1, T10.U1/U2 and T12.U1.
+  - Fix: the package is copied to `docs/frontend/` (without its outdated `api_contract.md`/`design.md` copies or its session log), `docs/frontend_plan.md` became a pointer, and the "hand-written OpenAPI" wording now says "generated from 501 stubs".
+  - Verified: every listed ID is found by grep in `docs/frontend/`, and no hand-written wording is left. Replied on PR #2.
 - `actionlint` was not run locally because the permission check blocked `uvx`; the CI run on the PR validates the workflow instead. The P0.7 contract-drift job is added with P0.5. P0.8 branch protection waits on the organization decision.
 
 ---

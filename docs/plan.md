@@ -14,7 +14,8 @@ Companion documents (all in `docs/` in the repo; the old OneDrive `Planning/` co
 | `design.md` | UI/UX design system, screens, responsive rules, i18n (AR/EN), dark/light. |
 | `api_contract.md` | The API contract that connects the two developer tracks. |
 | `backend_plan.md` | Developer A track (backend). |
-| `frontend_plan.md` | Developer B track (frontend). |
+| `frontend_plan.md` | Pointer to the frontend package. |
+| `frontend/` | The agreed frontend package (README, plan, testing, security). Owned by Developer B. |
 | `session_log.md` | Progress log. Read it first at the start of every session. |
 | `plan_review.md` | Full review of plan v1 and the 24 fixes applied in v1.1. |
 | `decisions.md` | One line per final decision (decisions reached in Issues are recorded here). |
