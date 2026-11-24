@@ -96,8 +96,8 @@ frontend/
 ## 6. Phases
 
 ### F0 — Foundation (frontend half of Phase 0)
-- [ ] P0.1 Verify the latest stable versions of every frontend library. Record them in session_log.
-- [ ] P0.4 Next.js skeleton (TS, App Router, Tailwind v4, ESLint) with pnpm. It renders one page.
+- [x] P0.1 Verify the latest stable versions of every frontend library. Record them in session_log.
+- [x] P0.4 Next.js skeleton (TS, App Router, Tailwind v4, ESLint) with pnpm. It renders one page.
 - [ ] P0.5 `pnpm gen:api` generates the types from `contracts/openapi.json`. `contracts/openapi.json` is generated from the FastAPI route stubs (handlers return 501) from B0, never hand-written (api_contract.md §0). Regenerate the types whenever it changes.
 - [ ] P0.6 Pre-commit: ESLint, prettier, typecheck, gitleaks.
 - [ ] P0.7 CI jobs: lint, typecheck, Vitest, `pnpm build`, `pnpm audit --audit-level=high`, and a contract type check.
