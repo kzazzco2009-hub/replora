@@ -18,4 +18,3 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.include_router(v1.router)
     return app
-import os  # T0.3: deliberate lint error, reverted next
