@@ -33,7 +33,7 @@
 - [x] P0.1 versions (backend libraries)
 - [x] P0.2 git and `.gitignore`
 - [x] P0.3 FastAPI health
-- [ ] P0.5 OpenAPI export *(in progress: export + drift check merged in #6; §2 auth stubs in #8; §3–§4 and §5–§8 next)*
+- [ ] P0.5 OpenAPI export *(in progress: export + drift check merged in #6; §2 auth stubs in #8; §3 and §4 stubs on stacked branches; §5–§8 next)*
 - [ ] P0.6 pre-commit (ruff, gitleaks)
 - [ ] P0.7 backend CI jobs (SQLite now, Postgres job added in B4) *(backend job and drift check live; done with P0.6)*
 - [x] Write the **api_contract.md draft** together with Developer B *(agreed at G0 in issue #1; `docs/api_contract.md`)*

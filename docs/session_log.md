@@ -8,11 +8,11 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 4/11 done (P0.1, P0.2, P0.3, P0.10). **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth stubs, with the review feedback applied) is **PR #8** from `feat/p0.5-auth-stubs` (head `ed9999c`, CI green). `main` at `887892a`. **This branch holds the newest session log until it merges.** |
+| Current phase | **Phase 0 — Foundation (B0).** Steps 4/11 done (P0.1, P0.2, P0.3, P0.10). **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth) is **PR #8**, approved by the frontend, not merged yet (head `50ccf31`). Part 3 is split into two stacked branches (pushed, no PR yet): **`feat/p0.5-workspace-stubs`** (§3, `ea4464a`, on #8) and **`feat/p0.5-file-stubs`** (§4, on 3a). `main` at `887892a`. **`feat/p0.5-file-stubs` holds the newest session log.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend: review **PR #8** (§2 auth stubs), confirm `ExportStatus.status = pending | ready | failed`, tick P0.1 in `docs/frontend/plan.md`; F0 / P0.4 is in progress on their side. Owner: delete the old OpenRouter key on openrouter.ai, then retire the OneDrive `Replora/` folder and empty the OneDrive recycle bin; on the other machine, pull and create `.env`. |
-| Next step | 1) After the part 2 PR merges, tell the frontend on issue #1 that `pnpm gen:api` can start for auth. 2) P0.5 part 3: §3–§4 stubs (workspaces, members, invitations, audit, files). 3) Part 4: §5–§8. 4) Then P0.6 (pre-commit), P0.11 (observability). |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `gh pr view 8 -R kzazzco2009-hub/replora --comments`; `gh api repos/kzazzco2009-hub/replora/pulls/8/reviews`; `gh issue view 1 -R kzazzco2009-hub/replora --comments` (new comments after id 7144709728); `gh pr list -R kzazzco2009-hub/replora --state all`. If #8 is merged: `git switch main; git pull --ff-only`, then post the `pnpm gen:api` note on #1 and start P0.5 part 3 on a new branch from `main`. |
+| Waiting on | Frontend: merge **PR #8**; act on the PR #9 review comment (6 follow-ups); confirm `ExportStatus.status`; tick P0.1 in `docs/frontend/plan.md`. Owner: approve PR #9 (command in Session 12); delete the old OpenRouter key; retire the OneDrive `Replora/` folder; on the other machine, pull and create `.env`. |
+| Next step | 1) When #8 merges: rebase `feat/p0.5-workspace-stubs` onto `main` (`git rebase --onto origin/main 50ccf31`), open its PR, and post the `pnpm gen:api` note on #1. 2) When 3a merges: rebase `feat/p0.5-file-stubs` onto `main` the same way (`--onto origin/main ea4464a`) and open its PR. 3) Part 4: §5–§8. 4) Then P0.6 (pre-commit), P0.11 (observability). |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `gh pr list -R kzazzco2009-hub/replora --state all`; `gh pr view 9 -R kzazzco2009-hub/replora --comments` (after comment 7145011476); `gh issue view 1 -R kzazzco2009-hub/replora --comments` (after id 7144709728). If #8 is merged, do Next step 1. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -94,6 +94,44 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 **Second dev machine (Developer A), checked 2026-11-24 in Session 8:** git 2.49.0 · gh 2.102.0 · uv 0.11.6 · Node 22.16.0 · npm 10.9.2 · Docker 29.5.2 · Python 3.13.3 and 3.12 only. Missing at first: gitleaks, pnpm, pre-commit, Python 3.14. `D:\Projects\replora` did not exist and was cloned again.
 **After the owner's installs (same session):** gitleaks 8.30.1 · pnpm 12.23.0 · Node 26.13.1 · uv 0.13.9 · Python 3.14 (uv-managed) · pre-commit 4.7.0. git 2.49 and gh 2.102 kept as they are.
+
+---
+
+## Session 12 — 2026-11-24 (first session in `D:\Projects\replora`)
+**Goal:** review frontend PR #9 (P0.4) and do P0.5 part 3 (§3–§4 stubs) while #8 waits.
+
+Before starting: `git fetch --all --prune`. PR #8 is **approved** by the frontend but not merged. New PR #9 from the frontend: P0.4 Next.js skeleton, CI green.
+
+**PR #9 review:**
+- Manual review plus `/code-review`. Nothing blocks the merge. The skeleton is minimal and its versions match the agreement. `.gitignore` covers `.next/`, `next-env.d.ts` and `*.tsbuildinfo`, and none of them are tracked. The tested SHA `80aafbd` ≠ head `6150624`, but the only difference is 4 lines in their session log.
+- Posted 6 follow-ups on #9 ([comment 7145011476](https://github.com/kzazzco2009-hub/replora/pull/9#issuecomment-7145011476)):
+  1. Testing Library cleanup is not wired (no `globals` and no setup file).
+  2. Record the ESLint 10 vs plugin-peer (^9) risk in `decisions.md`.
+  3. The `toBeDefined()` after `getByRole` is redundant.
+  4. Stale T0.3 note in their log.
+  5. `next build` in CI goes in a separate `ci.yml` PR.
+  6. Tick §4 in the PR body.
+- Not kept: the hardcoded `lang="en"`, because locale routing is planned work (D10, Phase 9).
+- The approval must come from the owner's account (the permission check blocks `gh pr review --approve` for me): `gh pr review 9 -R kzazzco2009-hub/replora --approve -b LGTM`.
+
+**P0.5 part 3**, split in two because the hand-written diff was 479 lines (> 400). §3 freezes at G5 and §4 at G6:
+- **3a `feat/p0.5-workspace-stubs` (`ea4464a`, stacked on #8), 291 lines:**
+  - 11 routes (workspaces, members, invitations + `/invitations/accept`, audit).
+  - Generic `Page[T]` (`items`, `next_cursor`) with `Cursor`/`Limit` (1..100) query types.
+  - `GrantableRole` (no `owner` by invitation or role change; S‑23, S‑29).
+  - `AuditEvent.actor_id` is nullable (anonymized on deletion, S‑29).
+  - Shared `client`/`openapi`/`schemas` fixtures moved to `tests/conftest.py`.
+  - Finding: FastAPI **merges** route-level `responses` into the router-level ones, so a per-route override cannot remove the 404. Fixed with a nested `scoped` router for `/workspaces/{ws_id}`. Proven: with 404 back on the main router, `test_unscoped_routes_document_no_404` failed 3 times; after the fix it passed.
+- **3b `feat/p0.5-file-stubs` (stacked on 3a), 260 lines:**
+  - 7 routes. The raw `PUT upload.url` is a storage URL, so it is not in the contract.
+  - upload-intent: no client `sha256` (422), `size > 0`, 413 on this route only.
+  - `FilePage` with a `type` filter.
+  - `DetectedType = csv | zip`, the MVP set; Phases 14–16 add values.
+  - `sha256` and `detected_type` are null until `complete`.
+  - **To confirm with the frontend in the PR:** the `detected_type` set, the nullable fields, and `ws_id`/`file_id`/`user_id`/`invitation_id` as path-parameter names.
+- TDD: 41 + 30 tests, all red first (404 or `KeyError` on missing paths and schemas), then green.
+- Checks on 3b: **150 passed** · ruff clean · 22 files formatted · drift check exit 0 · `uv sync --locked` · pip-audit "No known vulnerabilities found" · `gitleaks git --pre-commit --staged` no leaks (PATH reloaded first: gitleaks was not on this session's PATH).
+- No PRs opened yet: stacked parts open after their base merges (same as part 2).
 
 ---
 
