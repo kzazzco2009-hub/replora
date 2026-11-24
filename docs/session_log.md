@@ -10,7 +10,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|
 | Current phase | **Phase 0 — Foundation (backend half, B0). P0.1, P0.2, P0.3 and P0.10 done. PRs #2 and #3 merged (`main` at `47d2863`). P0.3 PR (backend skeleton, `/health`) open.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend review of the P0.3 PR. Frontend reply on issue #1 with the alignment checklist and version output (comment 7143099550). |
+| Waiting on | Frontend review of PR #4 (P0.3). Their follow-up PR (`docs/frontend/session_log.md` + `frontend/CLAUDE.md`), then F0 from `main`, then a shared `.devcontainer` PR. Owner to delete `backend/setup` (the permission check blocked it). |
 | Next step | After the P0.3 merge: P0.5 (OpenAPI export from 501 stubs + drift job), then P0.6 (pre-commit), P0.11 (observability), P0.9 (dev commands with the frontend). |
 | Blockers | none. **`docs/` in the repo is now the single source**; the OneDrive `Planning/` and `Frontend_Planning/` folders are frozen. Dependabot `uv in /backend` should pass once `backend/` is merged. |
 
@@ -109,7 +109,11 @@ Before starting:
   - P0.1 recorded in `docs/frontend/session_log.md`;
   - `frontend/CLAUDE.md` without contradictions to the root file;
   - what the F0 CI job needs.
-  - Waiting for their reply with the version output.
+  - **Frontend reply (20:13 and 20:18 UTC): every point agreed. Their environment matches:** Node v26.13.1 (`nvm install 26.13.1`), pnpm 12.23.0, gitleaks 8.30.1 (checksum verified), pre-commit 4.7.0.
+    - They work only from `docs/`. F0 branches from `main`.
+    - Branch cleanup is agreed: the owner deletes `backend/setup` (0 ahead), and the frontend deletes `frontend/setup` once F0 exists. They merged `origin/main` into it (`8b88af0`), so it holds no work of its own.
+    - They will propose a shared `.devcontainer/devcontainer.json` that pins Node 26.13.1.
+    - **Both sides are now on the same state.**
 
 Done (branch `feat/p0.3-backend-skeleton` from `main`):
 - `uv init backend --bare --no-pin-python --name replora-backend --python 3.14`.
