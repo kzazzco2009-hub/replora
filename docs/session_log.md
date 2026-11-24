@@ -146,6 +146,7 @@ Done:
   - limits from `GET /limits`; preview `status`/`q`; full-definition PATCH and the `params_schema` form;
   - `Explanation` key/params vs AI text; i18n key parity (T9.4); pinned TS 6.0.3, Node 26.13.1, pnpm 12.23.0; S‑05 manual protection rule.
   - grep shows no `Web Crypto`, browser-hash or `(latest)` wording left. Sent to the frontend on PR #2 for approval.
+- Added a root `CLAUDE.md` (commit on PR #2) with the session start steps, ownership, process and phase gates, code style, contract rules, git rules and the Windows/multi-machine notes. Every Claude Code session on any machine loads it.
 - **Still open with the frontend:** PR #2 approval (incl. the root pnpm workspace layout), `docs/frontend/` ownership in CODEOWNERS, and the move to an organization. The `NEEDS_REVIEW` resolution endpoint and the full `error-codes.json` come at G1.
 - `actionlint` was not run locally because the permission check blocked `uvx`; the CI run on the PR validates the workflow instead. The P0.7 contract-drift job is added with P0.5. P0.8 branch protection waits on the organization decision.
 
