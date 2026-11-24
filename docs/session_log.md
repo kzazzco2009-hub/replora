@@ -8,16 +8,16 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (backend half, B0). P0.1, P0.2, P0.3 and P0.10 done. PRs #2 and #3 merged (`main` at `47d2863`). P0.3 PR (backend skeleton, `/health`) open.** |
+| Current phase | **Phase 0 — Foundation (B0). P0.1, P0.2, P0.3 and P0.10 done; P0.5 in progress (export + drift check PR open, then the 501 stubs by section). `main` at `8722ebf`.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend review of PR #4 (P0.3). Their follow-up PR (`docs/frontend/session_log.md` + `frontend/CLAUDE.md`), then F0 from `main`, then a shared `.devcontainer` PR. Owner to delete `backend/setup` (the permission check blocked it). |
-| Next step | After the P0.3 merge: P0.5 (OpenAPI export from 501 stubs + drift job), then P0.6 (pre-commit), P0.11 (observability), P0.9 (dev commands with the frontend). |
+| Waiting on | Frontend review of the P0.5 export PR, and their merge of #5. Then F0 from `main`. |
+| Next step | P0.5 part 2: 501 stubs + Pydantic models for auth (§2), with `openapi.json` regenerated. Then §3–§4 and §5–§8. Then P0.6 (pre-commit) and P0.11 (observability). |
 | Blockers | none. **`docs/` in the repo is now the single source**; the OneDrive `Planning/` and `Frontend_Planning/` folders are frozen. Dependabot `uv in /backend` should pass once `backend/` is merged. |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 4/11 | 3/7 | 0/5 | ☐ |
+| 0 Foundation | 4/11 | 4/7 | 0/5 | ☐ |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -93,6 +93,39 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 **Second dev machine (Developer A), checked 2026-11-24 in Session 8:** git 2.49.0 · gh 2.102.0 · uv 0.11.6 · Node 22.16.0 · npm 10.9.2 · Docker 29.5.2 · Python 3.13.3 and 3.12 only. Missing at first: gitleaks, pnpm, pre-commit, Python 3.14. `D:\Projects\replora` did not exist and was cloned again.
 **After the owner's installs (same session):** gitleaks 8.30.1 · pnpm 12.23.0 · Node 26.13.1 · uv 0.13.9 · Python 3.14 (uv-managed) · pre-commit 4.7.0. git 2.49 and gh 2.102 kept as they are.
+
+---
+
+## Session 10 — 2026-11-24 (second dev machine)
+**Goal:** review PR #5, then start P0.5 (generated OpenAPI + drift check).
+
+Before starting:
+- **PR #4 (P0.3)** was approved and merged by the frontend (`8722ebf`, squash), and CI on `main` is green.
+  - They could not check the `setup-node` and `pnpm/action-setup` SHAs, so I posted the tag-to-commit lookups ([comment](https://github.com/kzazzco2009-hub/replora/pull/4#issuecomment-7143688000)).
+- **PR #5 (frontend):** adds `docs/frontend/session_log.md` (P0.1 versions match the agreement) and `frontend/CLAUDE.md` (no conflict with the root file).
+  - I reviewed it. The `gh pr review --approve` call was blocked by the permission check, so the owner approved it from their own account. It is approved, and the merge is theirs.
+  - I posted the full Phase 0 status on issue #1 ([comment](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7143770831)).
+- **`backend/setup` deleted** by the owner (the `gh api -X DELETE` call was also blocked for me). `frontend/setup` goes once F0 exists.
+- The OneDrive `Planning/` still showed `[ ] P0.3` because it is frozen, which confused the owner. I added `00_FROZEN_README.md` to `Planning/` and `Frontend_Planning/`.
+- Found a slip of mine: T0.6 had passed in Session 8 but was not ticked in `testing.md`. Fixed here.
+
+**P0.5 is split into small PRs:**
+1. The export pipeline and drift check (this PR).
+2. 501 stubs for auth (§2).
+3. 501 stubs for workspaces and files (§3–§4).
+4. 501 stubs for operations, drafts, runs and workflows (§5–§8).
+- The frontend `pnpm gen:api` follows the first stubs.
+
+Done (branch `feat/p0.5-openapi-export`):
+- **TDD:** `tests/unit/test_export_openapi.py`, 5 tests: health is in the document with the package version, rendering is deterministic, `check` passes after `write`, fails on a drifted file (T0.4) and fails on a missing file. All 5 were red first (`NotImplementedError` stubs), then green.
+  - The version assertion cannot yet tell explicit wiring from FastAPI's default `"0.1.0"`; it catches a missing wiring at the first version bump. `create_app` now sets `version=` from the package metadata explicitly.
+- `app/export_openapi.py`: `uv run python -m app.export_openapi` writes `contracts/openapi.json` (OpenAPI 3.1.0, 55 lines, `/api/v1/health` only), and `--check` exits 1 on drift.
+  - CLI proof: I changed the title in the file, and `--check` printed `…openapi.json is out of date…` with exit 1. After regenerating, it exited 0.
+- CI: new backend step "Contract drift check" (`uv run python -m app.export_openapi --check`).
+- Root `CLAUDE.md`: phase gates now name the gate approver (Developer A for backend gates, Developer B for frontend gates, both for shared gates), as noted in the PR #5 review.
+- `contracts/README.md` (what is generated and how). README: the export command.
+- **T0.4 passed** (unit and CLI). **T0.6 ticked** (evidence in Session 8).
+- **P0.5 partly done:** the export and the drift check are done; the stubs and the frontend client are next.
 
 ---
 

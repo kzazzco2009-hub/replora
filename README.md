@@ -22,6 +22,7 @@ Start with `docs/plan.md`, then `docs/session_log.md` for the current status.
 uv sync                                                  # install the locked dependencies
 uv run uvicorn app.main:create_app --factory --reload    # http://localhost:8000/api/v1/health
 uv run pytest                                            # tests
+uv run python -m app.export_openapi                      # regenerate contracts/openapi.json (commit it)
 uv run ruff check . && uv run ruff format --check .      # lint
 ```
 The full local dev setup, with the frontend `/api` rewrite, is added in P0.9.

@@ -17,7 +17,7 @@ Replora is a bilingual (Arabic RTL and English) SaaS app for repetitive file wor
 ## Process (mandatory)
 - Work incrementally in small steps, and validate each step before the next.
 - Mark a plan step `[x]` only after its tests pass and the evidence (command plus result) is in the session log.
-- **Phase gates:** a phase is done only when all its steps, tests (`testing.md`) and security items (`security.md`) are verified. Then stop, report, and **ask the owner for permission** before starting the next phase. Shared gates (0, 17, 18, 19) need both developers.
+- **Phase gates:** a phase is done only when all its steps, tests (`testing.md`) and security items (`security.md`) are verified. Then stop, report, and **ask the gate approver for permission** before starting the next phase: Developer A (the owner) for backend gates, Developer B for frontend gates, and both for the shared gates (0, 17, 18, 19).
 - Check the production compatibility checklist (`docs/plan.md` §4) at every step.
 - End of session: update the session log, commit and push. Never leave uncommitted work, because the next session may be on another machine.
 
