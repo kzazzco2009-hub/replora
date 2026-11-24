@@ -2,17 +2,17 @@
 Extends the root `CLAUDE.md` for work inside `frontend/`. The root rules still apply; the rules here are stricter or frontend-specific.
 
 ## Language & style
-- Reply to the owner in short, simple Egyptian Arabic (tech terms in English). Lean reports. One command at a time when the owner must run something.
+- Reply to Developer B in short, simple Egyptian Arabic (tech terms in English). Lean reports. One command at a time when Developer B must run something.
 - Anything posted to GitHub (issues, PRs, comments) for the backend developer: English only.
 - Default UI language (D10): from Accept-Language (ar or en), fallback English. Never assume Arabic is the default.
 
 ## Scope
 - Work only in `frontend/**` (and `docs/frontend/**` for the frontend plan and session log). Never edit `backend/**`.
-- `contracts/**`, `docs/` outside `docs/frontend/`, `.github/` and root files are shared: change them only in a dedicated PR that the other developer reviews, and only with the owner's explicit go.
+- `contracts/**`, `docs/` outside `docs/frontend/`, `.github/` and root files are shared: change them only in a dedicated PR that the other developer reviews, and only with Developer B's explicit go.
 - Never touch OrderPilot or the `replora-archive-2026` repo.
 
 ## Git
-- Branch from `main` (short-lived feature branches, <= 2 days). Never push to `main`; never merge any PR without the owner's explicit approval.
+- Branch from `main` (short-lived feature branches, <= 2 days). Never push to `main`; never merge any PR without Developer B's explicit approval.
 - Small PRs (<= 400 lines). No self-merge. No force-push. Run `gitleaks git .` before every push.
 - Add files by name, never `git add .` (generated files such as `pnpm-lock.yaml` are committed deliberately).
 
@@ -22,7 +22,7 @@ Extends the root `CLAUDE.md` for work inside `frontend/`. The root rules still a
 - Read `docs/frontend/session_log.md` at the start of every session. At the end, log steps, commands, results, decisions and the next step.
 
 ## Process
-- No code, files, installs, commits or pushes without the owner's explicit "go" for that specific step. Do NOT work in auto mode; stay in plan/default mode and ask first.
+- No code, files, installs, commits or pushes without Developer B's explicit "go" for that specific step. Do NOT work in auto mode; stay in plan/default mode and ask first.
 - Phase gate = stop, report, ask permission.
 - Mark a step [x] only after its tests pass and the evidence is logged.
 - Root cause first; write a failing test that reproduces each bug before fixing.
