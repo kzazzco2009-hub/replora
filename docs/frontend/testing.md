@@ -57,8 +57,8 @@ Each project runs in `ar` and `en` and in `light` and `dark`, through the test p
   - every key exists in both `ar.json` and `en.json` (key parity test);
   - Arabic plural forms (zero, one, two, few, many, other) render;
   - numbers and dates are formatted per locale.
-- [ ] T9.4 The error-code mapper has an AR and an EN message for **every** code in `contracts/error-codes.json` (parity test).
-- [ ] T9.U1 The API client sends `X-CSRF-Token` on POST, PUT, PATCH and DELETE, and never on GET. On a 401 it refreshes once and retries once; a second 401 redirects to sign-in.
+- [ ] T9.4 The error-code mapper has an AR and an EN message for **every** code in `contracts/error-codes.json` (parity test), and `ar.json` and `en.json` have identical key sets (CI check).
+- [ ] T9.U1 With no `replora_csrf` cookie, the app calls `GET /auth/csrf` before the first unsafe request. The API client sends `X-CSRF-Token` on POST, PUT, PATCH and DELETE (login and register included), and never on GET. After login and logout it uses the rotated token. On a 401 it refreshes once and retries once; a second 401 redirects to sign-in.
 
 **E2E (mocked API)**
 - [ ] T9.5 Sign up, sign in, sign out, and the MFA challenge, plus validation errors, on phone, tablet and laptop.
@@ -72,10 +72,12 @@ Each project runs in `ar` and `en` and in `light` and `dark`, through the test p
 - [ ] T10.1 The full wizard (upload, describe, review, approve, run, results) with the acceptance data shows 4 statuses: matched, different, missing on each side. It runs on phone, tablet and laptop × AR and EN × light and dark.
 - [ ] T10.2 Upload edge cases:
   - wrong type gives a per-file error;
-  - oversize (50 MiB + 1) is blocked;
-  - an 11th file is blocked;
+  - oversize (`max_file_size` + 1 byte, 50 MiB today) is blocked;
+  - one file more than `max_files_per_run` (an 11th file today) is blocked;
+  - the limits come from a mocked `GET /limits` (change them in MSW and the UI follows);
   - a network drop mid-upload shows retry, and the retry succeeds;
-  - a duplicate file is detected;
+  - a duplicate file is flagged after `complete` (same `sha256` returned by the server as an existing file);
+  - `upload-intent` is sent without `sha256`;
   - a 413 `QUOTA_EXCEEDED` message is shown.
 - [ ] T10.3 Validation errors appear on the correct station in the pipeline rail and in the list fallback.
 - [ ] T10.4 Approve:

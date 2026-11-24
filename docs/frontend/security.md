@@ -10,7 +10,7 @@ The backend enforces all authorization. **The frontend never relies on hiding UI
 | S‑01 | Secrets are never committed | `.env*` is gitignored except `.env.example`. gitleaks runs in pre-commit and CI. Only `NEXT_PUBLIC_*` variables reach the browser, and **they must not contain secrets**. | T0.5, a CI grep of the build output for `sk-`, `service_role` and `SUPABASE_SERVICE` |
 | S‑03 | Locked dependencies | `pnpm-lock.yaml` is committed, and CI uses `pnpm install --frozen-lockfile`. | CI |
 | S‑04 | Vulnerability scanning | `pnpm audit --audit-level=high` and Dependabot (weekly). CI fails on high or critical. | CI |
-| S‑05 | Repository protection | Protected `main`, required reviews and CI, no force-push, and CODEOWNERS (`frontend/**` is yours, `contracts/**` needs both developers). | manual check, logged |
+| S‑05 | Repository protection | Protected `main`, required reviews and CI, no force-push, and CODEOWNERS (`frontend/**` is yours; `contracts/**`, `docs/**`, `.github/**` and root files need both developers). Until the repo moves to an organization, protection is a manual rule: no direct push to `main`, no self-merge. | manual check, logged |
 
 ## F1–F3 (Phase 9)
 | ID | Control | Implementation | Verify |
@@ -20,13 +20,13 @@ The backend enforces all authorization. **The frontend never relies on hiding UI
 | S‑62 | Open redirect | `returnTo` accepts only paths that start with a single `/`. `//`, `http:`, `https:`, `javascript:` and backslashes are rejected. | T9.6 |
 | S‑63 | No tokens in JavaScript | Auth cookies are `HttpOnly`, so the app never reads them. Only the theme, locale and onboarding-dismissed flag are stored client-side. Nothing sensitive goes in `localStorage` or `sessionStorage`. | code review, an E2E assertion on storage contents |
 | S‑64 | Client checks are UX only | Every limit and permission shown in the UI is also enforced by the API. The UI handles 401, 403, 404, 413 and 429 gracefully. | T10.U2 |
-| S‑25 | CSRF (client side) | Read the `replora_csrf` cookie and send it as `X-CSRF-Token` on unsafe methods, through the generated client only. | T9.U1 |
+| S‑25 | CSRF (client side) | Get the cookie from `GET /auth/csrf` when it is missing. Read the `replora_csrf` cookie and send it as `X-CSRF-Token` on every unsafe method (login and register included), through the generated client only. Use the rotated token after login and logout. | T9.U1 |
 | S‑28 | MFA UX safety | Recovery codes are shown once with "copy" and "download as .txt" options and are never stored client-side. The OTP input is `autocomplete="one-time-code"`, LTR and numeric. The login challenge state lives only in the HttpOnly `replora_mfa_challenge` cookie; the app keeps nothing about it client-side and returns to the sign-in form on 401 `MFA_CHALLENGE_INVALID`. | T10.U1 |
 
 ## F4–F7 (Phase 10)
 | ID | Control | Implementation | Verify |
 |---|---|---|---|
-| S‑65 | Direct upload safety | The PUT goes only to the `upload.url` returned by the API, with its exact method and headers. The URL is never built from user input. sha256 is computed with Web Crypto and declared in the upload intent. | T10.2 |
+| S‑65 | Direct upload safety | The PUT goes only to the `upload.url` returned by the API, with its exact method and headers. The URL is never built from user input. The browser does not hash files: the server computes sha256 on `complete` and never trusts a client hash (backend S‑34). | T10.2 |
 | S‑66 | Clickjacking and MIME sniffing | `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff` and `Referrer-Policy: strict-origin-when-cross-origin`. | T19.F3 |
 | S‑F1 | Safe downloads | Downloads use the short-lived signed URL from the API, opened as a download (`attachment`). File contents are never rendered as HTML, and previews come from the JSON preview endpoint. | E2E |
 | S‑F2 | Destructive actions | Delete account and delete workspace need typed confirmation. Delete file and cancel run need a confirm dialog. | T10.U1 |

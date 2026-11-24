@@ -42,12 +42,13 @@ Step IDs (`P9.1`, `T10.2`, `S‑60`…) match the master plan, so both developer
 | D10 | Default language comes from `Accept-Language` (ar or en), with English as the fallback. The choice is saved in a cookie. |
 | D12 | Optional TOTP MFA, strongly prompted for owners and admins. The UI needs enroll (QR plus recovery codes), challenge and disable screens. |
 | D14 | Privacy policy and terms pages (bilingual), following Egypt PDPL plus GDPR-ready practices. |
-| — | Limits shown in the UI: 50 MiB per file, 10 files per run, a per-workspace storage quota (413 `QUOTA_EXCEEDED`). |
+| — | Limits shown in the UI come from `GET /limits` (`max_file_size`, `max_files_per_run`, `max_nodes`, `workspace_quota`), never hard-coded. Today: 50 MiB per file, 10 files per run, a per-workspace storage quota (413 `QUOTA_EXCEEDED`). |
 
 ---
 
 ## 3. Stack
-Next.js (App Router, latest) · React (latest) · TypeScript strict · Tailwind CSS v4 · next-intl · next-themes · TanStack Query · openapi-typescript + openapi-fetch · MSW · Vitest + Testing Library · Playwright + @axe-core/playwright · Lighthouse CI · Lucide icons · TanStack Virtual.
+Next.js (App Router) · React · TypeScript strict, **pinned to 6.0.3** (typescript-eslint supports `<6.1.0`; revisit TS 7 later) · Tailwind CSS v4 · next-intl · next-themes · TanStack Query · openapi-typescript + openapi-fetch · MSW · Vitest + Testing Library · Playwright + @axe-core/playwright · Lighthouse CI · Lucide icons · TanStack Virtual.
+Runtimes are pinned in the repo: Node **26.13.1** (`.nvmrc`, `engines`) and pnpm **12.23.0** (root `package.json` → `packageManager`). The versions agreed at P0.1 are in `../session_log.md` (Recorded versions).
 Verify the current major versions at P0.1. For example, Next.js 16 renamed `middleware.ts` to `proxy.ts`; confirm the current API before using it.
 
 ## 4. Frontend architecture
@@ -114,7 +115,7 @@ frontend/
 
 ### F2 — UI kit and data layer (P9.5–P9.6)
 - [ ] P9.5 Components: Button, Input, Select, Dialog, Sheet, Toast, Tabs, Table, Badge, StatusChip (icon plus text), EmptyState, ErrorState, and Skeleton variants per layout. Each has a Vitest test in LTR and RTL.
-- [ ] P9.6 The generated client (openapi-fetch) with CSRF header injection, an ETag-aware fetch and a 401 → refresh → retry-once flow. TanStack Query provider. MSW handlers from `contracts/fixtures`, with scenario switches (each run state, slow network, each error code). An error-code → AR/EN message mapper with a parity test against `contracts/error-codes.json`.
+- [ ] P9.6 The generated client (openapi-fetch) with CSRF header injection (on app start, call `GET /auth/csrf` if the `replora_csrf` cookie is missing; login and register send the token too; re-read the cookie after login and logout because the token rotates), an ETag-aware fetch and a 401 → refresh → retry-once flow. TanStack Query provider. MSW handlers from `contracts/fixtures`, with scenario switches (each run state, slow network, each error code). An error-code → AR/EN message mapper with a parity test against `contracts/error-codes.json`, and a CI check that `ar.json` and `en.json` have the same keys.
 - [ ] Tests T9.1, T9.4
 
 ### F3 — Auth screens and loading routes (P9.7–P9.8) · Gate G9
@@ -123,14 +124,14 @@ frontend/
 - [ ] Tests T9.5, T9.6, T9.8 · Security S‑60…S‑64 · **Gate G9**
 
 ### F4 — Wizard: upload, describe, review, approve (P10.1–P10.4)
-- [ ] P10.1 Upload: drag and drop plus file picker. For each file: compute sha256 in the browser (Web Crypto), call `upload-intent`, **PUT to the exact returned URL, method and headers**, then call `complete`. Show per-file progress and per-file validation errors. Enforce the 10-file and 50 MiB limits in the UI as well (the server still decides).
-- [ ] P10.2 Describe: a template picker (`GET /templates`) in the MVP. The free-text prompt with example prompts in AR and EN is enabled at F9.
-- [ ] P10.3 Review: the **pipeline rail** (design.md §2). It is horizontal on laptop and follows reading direction (RTL in Arabic), and vertical on phone and tablet. Station detail opens in a side panel (laptop) or a bottom sheet (phone). Validation errors and warnings are mapped to stations. There is a keyboard-navigable list fallback for screen readers. Parameter edits send a PATCH with `If-Match`; on 412, show "This plan changed in another tab. Reload to see the latest version."
+- [ ] P10.1 Upload: drag and drop plus file picker. For each file: call `upload-intent` (`display_name`, `size`, `content_type`; **no sha256**, the server computes it on `complete`), **PUT to the exact returned URL, method and headers**, then call `complete`. Show per-file progress and per-file validation errors. Enforce the file-count and size limits from `GET /limits` in the UI as well (the server still decides).
+- [ ] P10.2 Describe: a template picker (`GET /templates`) in the MVP. The draft's `explanation` from the TemplatePlanner is `{key, params}`; translate it through next-intl (no free text from the server). The free-text prompt with example prompts in AR and EN is enabled at F9.
+- [ ] P10.3 Review: the **pipeline rail** (design.md §2). It is horizontal on laptop and follows reading direction (RTL in Arabic), and vertical on phone and tablet. Station detail opens in a side panel (laptop) or a bottom sheet (phone). Validation errors and warnings are mapped to stations. There is a keyboard-navigable list fallback for screen readers. The parameter form is rendered from the operation's `params_schema` (the supported subset in `../api_contract.md` §5: `string`, `integer`, `boolean`, `enum`, string arrays, decimals as strings with `pattern`, and `x-replora-widget: "column"` for a column picker). Parameter edits send a PATCH with the **full** `definition` and `If-Match`; the server re-validates and returns the new `plan_hash`. On 412, show "This plan changed in another tab. Reload to see the latest version."
 - [ ] P10.4 Approve: a plan summary and the saffron "Approve and run" button, sent with a single `Idempotency-Key` per click (reused on retry) and the current `plan_hash`. On 409 `PLAN_HASH_MISMATCH`, ask the user to review again.
 
 ### F5 — Run detail and results (P10.5–P10.6)
 - [ ] P10.5 Run detail: poll `events?after=last_seq` every 1 s, backing off to 5 s, and stop at a terminal state. The rail fill animation is the one orchestrated motion in the product. Cancel run is optimistic, then confirmed. FAILED, PARTIAL and NEEDS_REVIEW each have an explanation and a next action.
-- [ ] P10.6 Results: status summary, filter tabs (All, Different, Missing), a virtualized table backed by server pagination (`preview?offset&limit`), sticky header and first column, RTL column order, a lineage side sheet on row click, and downloads (signed URL from the API).
+- [ ] P10.6 Results: status summary, filter tabs (All, Different, Missing) and a search box mapped to `preview?offset&limit&status=matched|value_diff|missing_left|missing_right&q=`, a virtualized table backed by server pagination, sticky header and first column, RTL column order, a lineage side sheet on row click, and downloads (signed URL from the API).
 
 ### F6 — App pages, settings, onboarding (P10.7, P10.9, P10.10)
 - [ ] P10.7 Home (recent runs, saved workflows), Files, Runs history. Settings: profile, language, theme, timezone; Security (MFA enroll with QR and recovery codes shown once, disable MFA); Members and invitations (by role); Export my data; Delete account (danger zone with typed confirmation). An invitation-accept page.
@@ -150,7 +151,7 @@ frontend/
 - [ ] Tests T11.* · **Gate G11**
 
 ### F9 — AI planner UI (P12.5) · Gate G12 (joint)
-- [ ] Enable the free-text prompt. Add a planner explanation panel and a "What will be sent to AI" disclosure (from `ai_disclosure`). The sample-rows consent toggle is off by default. Fallback messages appear when the AI is unavailable or the budget is exceeded (`PLANNER_BUDGET_EXCEEDED`).
+- [ ] Enable the free-text prompt. Add a planner explanation panel (the AI planner returns `explanation.text`, already written in `user.locale`; template drafts keep using `key` + `params`) and a "What will be sent to AI" disclosure (from `ai_disclosure`). The sample-rows consent toggle is off by default. Fallback messages appear when the AI is unavailable or the budget is exceeded (`PLANNER_BUDGET_EXCEEDED`).
 - [ ] Tests T12.U1–T12.U3
 
 ### F10 — Workflows and replay UI (P13.4) · Gate G13 (joint)

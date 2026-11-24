@@ -140,6 +140,13 @@ Done:
   - Cause of points 1 and 3: `docs/` was copied from `Planning/` only, so the agreed `Frontend_Planning/` package (plan 191 lines, testing, security, README) was missing, and with it T0.F1, T9.U1, T10.U1/U2 and T12.U1.
   - Fix: the package is copied to `docs/frontend/` (without its outdated `api_contract.md`/`design.md` copies or its session log), `docs/frontend_plan.md` became a pointer, and the "hand-written OpenAPI" wording now says "generated from 501 stubs".
   - Verified: every listed ID is found by grep in `docs/frontend/`, and no hand-written wording is left. Replied on PR #2.
+- **Frontend package aligned with issue #1** (commit on PR #2; 17 edits in `docs/frontend/` plan, testing and security):
+  - no browser sha256 (P10.1, S‑65; T10.2 duplicate check now uses the server `sha256`);
+  - `GET /auth/csrf` bootstrap and CSRF on login and register (P9.6, T9.U1, S‑25);
+  - limits from `GET /limits`; preview `status`/`q`; full-definition PATCH and the `params_schema` form;
+  - `Explanation` key/params vs AI text; i18n key parity (T9.4); pinned TS 6.0.3, Node 26.13.1, pnpm 12.23.0; S‑05 manual protection rule.
+  - grep shows no `Web Crypto`, browser-hash or `(latest)` wording left. Sent to the frontend on PR #2 for approval.
+- **Still open with the frontend:** PR #2 approval (incl. the root pnpm workspace layout), `docs/frontend/` ownership in CODEOWNERS, and the move to an organization. The `NEEDS_REVIEW` resolution endpoint and the full `error-codes.json` come at G1.
 - `actionlint` was not run locally because the permission check blocked `uvx`; the CI run on the PR validates the workflow instead. The P0.7 contract-drift job is added with P0.5. P0.8 branch protection waits on the organization decision.
 
 ---
