@@ -10,9 +10,9 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|
 | Current phase | **Phase 0 — Foundation (B0).** Steps 4/11 done (P0.1, P0.2, P0.3, P0.10). **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth) is **PR #8**, approved by the frontend, not merged yet (head `50ccf31`). Part 3 is split into two stacked branches (pushed, no PR yet): **`feat/p0.5-workspace-stubs`** (§3, `ea4464a`, on #8) and **`feat/p0.5-file-stubs`** (§4, on 3a). `main` at `887892a`. **`feat/p0.5-file-stubs` holds the newest session log.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend: merge **PR #8**; act on the PR #9 review comment (6 follow-ups); confirm `ExportStatus.status`; tick P0.1 in `docs/frontend/plan.md`. Owner: approve PR #9 (command in Session 12); delete the old OpenRouter key; retire the OneDrive `Replora/` folder; on the other machine, pull and create `.env`. |
+| Waiting on | Frontend: **squash-merge PR #8** (asked on #1, [comment 7145266627](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145266627)); the non-blocking #9 follow-ups in a later PR; the `ci.yml` `next build` PR; confirm `ExportStatus.status` and the 4 part-3 points (`detected_type` set, nullable `sha256`/`detected_type`, path-param names, operationIds). Owner: **approve and squash-merge PR #9**: `gh pr review 9 -R kzazzco2009-hub/replora --approve -b LGTM`, then `gh pr merge 9 -R kzazzco2009-hub/replora --squash --delete-branch`; delete the old OpenRouter key; retire the OneDrive `Replora/` folder; on the other machine, pull and create `.env`. |
 | Next step | 1) When #8 merges: rebase `feat/p0.5-workspace-stubs` onto `main` (`git rebase --onto origin/main 50ccf31`), open its PR, and post the `pnpm gen:api` note on #1. 2) When 3a merges: rebase `feat/p0.5-file-stubs` onto `main` the same way (`--onto origin/main ea4464a`) and open its PR. 3) Part 4: §5–§8. 4) Then P0.6 (pre-commit), P0.11 (observability). |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `gh pr list -R kzazzco2009-hub/replora --state all`; `gh pr view 9 -R kzazzco2009-hub/replora --comments` (after comment 7145011476); `gh issue view 1 -R kzazzco2009-hub/replora --comments` (after id 7144709728). If #8 is merged, do Next step 1. |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --jq '.[] | select(.id > 7145266627) | .body'`; `gh pr view 9 -R kzazzco2009-hub/replora --comments`. If #9 is still open, the owner approves and merges it (commands under "Waiting on"). If #8 is merged, do Next step 1. If gitleaks is not found, reload PATH (root `CLAUDE.md`). |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -132,6 +132,24 @@ Before starting: `git fetch --all --prune`. PR #8 is **approved** by the fronten
 - TDD: 41 + 30 tests, all red first (404 or `KeyError` on missing paths and schemas), then green.
 - Checks on 3b: **150 passed** · ruff clean · 22 files formatted · drift check exit 0 · `uv sync --locked` · pip-audit "No known vulnerabilities found" · `gitleaks git --pre-commit --staged` no leaks (PATH reloaded first: gitleaks was not on this session's PATH).
 - No PRs opened yet: stacked parts open after their base merges (same as part 2).
+
+**Frontend reply on issue #1** (comment 7145138629, 21:35 UTC):
+- They approved #8 and run `pnpm gen:api` once it is merged.
+- They asked us to squash-merge #9.
+- T0.3 proven in real CI. I verified both runs with `gh run view`:
+  - 45491885639 (`0e592cc`) failed in the Frontend job at `pnpm -C frontend run lint`;
+  - the revert 45492118286 (`4b1da81`) made every job green again.
+- `git diff 6150624 5756b20` shows only docs changed since my review.
+- They ticked P0.1 and P0.4 in `docs/frontend/plan.md`, which closes my #8 request.
+- Their reply came before my #9 comment, so it does not answer the follow-ups.
+
+**Reply posted** ([comment 7145266627](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145266627)):
+- T0.3 runs verified; the owner approves and squash-merges #9.
+- The #9 follow-ups are non-blocking and fine in a later PR.
+- **Please squash-merge #8 yourselves**: under no-self-merge we cannot merge our own PR. This settles who merges what: the reviewer merges the other side's PR.
+- Part 3 is ready on two stacked branches, with the 4 points to confirm.
+
+**End of session:** everything is committed and pushed on `feat/p0.5-file-stubs`, which holds the newest log. `feat/p0.5-workspace-stubs` and `feat/p0.5-auth-stubs` (#8) are pushed. No uncommitted work.
 
 ---
 
