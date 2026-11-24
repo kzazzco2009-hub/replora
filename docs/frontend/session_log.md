@@ -96,4 +96,10 @@ Resolved versions (P0.4 install):
 
 Next step: wait for CI on PR #9, then review/merge with the backend developer. After merge: P0.6 (pre-commit), P0.7 gap (add `pnpm build` to ci.yml — separate shared-file PR), P0.5 once `contracts/openapi.json` exists.
 
-PR #9 follow-up: ticked `[x] P0.1` and `[x] P0.4` in `docs/frontend/plan.md` §F0 (both verified above — versions recorded, skeleton built and tested). No other checklist item touched.
+PR #9 follow-up: ticked `[x] P0.1` and `[x] P0.4` in `docs/frontend/plan.md` §F0 (both verified above — versions recorded, skeleton built and tested). No other checklist item touched. Commit `3525107`.
+
+T0.3 in real CI: pushed the deliberate `react-hooks/rules-of-hooks` violation (commit `0e592cc`) — the `Frontend` job failed exactly at `pnpm -C frontend run lint`:
+> React Hook "useState" cannot be called at the top level. React Hooks must be called in a React function component or a custom React Hook function (frontend/src/app/page.tsx#4)
+Failed run: https://github.com/kzazzco2009-hub/replora/actions/runs/45491885639
+Reverted with `git revert` (no force-push), commit `4b1da81`. `Frontend` job green again.
+Green run: https://github.com/kzazzco2009-hub/replora/actions/runs/45492118286
