@@ -1,0 +1,12 @@
+# Normalize line endings in the repo (two developers on different OSes).
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.zip binary
+*.xlsx binary
+*.xls binary
+*.pdf binary
+*.docx binary
+*.pptx binary

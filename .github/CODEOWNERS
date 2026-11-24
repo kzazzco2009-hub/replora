@@ -1,0 +1,10 @@
+# The last matching pattern wins.
+# Shared by default: root files, .github/, contracts/ and docs/ need the other developer's review.
+*            @khaledhagar @kzazzco2009-hub
+
+/backend/    @khaledhagar
+/frontend/   @kzazzco2009-hub
+
+/contracts/  @khaledhagar @kzazzco2009-hub
+/docs/       @khaledhagar @kzazzco2009-hub
+/.github/    @khaledhagar @kzazzco2009-hub
