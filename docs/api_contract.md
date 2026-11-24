@@ -7,7 +7,7 @@ This contract is what lets the two developers work at the same time. **Draft agr
 **Revision 2026-11-24 (G0 must-haves):** MFA login challenge (§2), sessions list and revoke (§2), `timezone` in `PATCH /auth/me` (§2), workspace deletion (§3), onboarding samples endpoint and the cross-origin upload note (§4), run state rules (§7). New error codes: `MFA_CHALLENGE_INVALID`, `PERSONAL_WORKSPACE_UNDELETABLE`, `DRAFT_INVALID`, `INVALID_STATE_TRANSITION`.
 
 ## 0. Freeze schedule
-- From B0, `contracts/openapi.json` is **generated from FastAPI route stubs** (real Pydantic request and response models, handlers return 501). It is never hand-written, so the frontend can generate its client from day one.
+- From B0, `contracts/openapi.json` is **generated from FastAPI route stubs** (real Pydantic request and response models, handlers return 501 `application/problem+json` with `code: "NOT_IMPLEMENTED"`). Request bodies reject unknown fields (422). §2 auth stubs: P0.5 part 2. `ExportStatus.status` is proposed as `pending | ready | failed` (confirm at G5). It is never hand-written, so the frontend can generate its client from day one.
 - The contract freezes **per section** when its backend phase passes its gate: auth (§2, §3) at G5, files (§4) at G6, operations, drafts, runs and outputs (§5–§7) at G8. The whole of v1 is frozen at P8.7.
 - Until a section is frozen, changes are made by PR with the other developer's review. After it is frozen, changes follow §9.
 

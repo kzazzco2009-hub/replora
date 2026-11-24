@@ -4,7 +4,7 @@ from importlib.metadata import version
 
 from fastapi import FastAPI
 
-from app.api import v1
+from app.api import problem, v1
 from app.config import Settings
 
 
@@ -20,4 +20,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url="/openapi.json" if docs else None,
     )
     app.include_router(v1.router)
+    problem.install(app)
     return app

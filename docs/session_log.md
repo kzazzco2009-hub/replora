@@ -126,6 +126,13 @@ Done (branch `feat/p0.5-openapi-export`):
 - `contracts/README.md` (what is generated and how). README: the export command.
 - **T0.4 passed** (unit and CLI). **T0.6 ticked** (evidence in Session 8).
 - **P0.5 partly done:** the export and the drift check are done; the stubs and the frontend client are next.
+- **P0.5 part 2 (§2 auth stubs)**, branch `feat/p0.5-auth-stubs` (stacked on part 1; its PR opens after #6 merges):
+  - TDD: `tests/unit/test_auth_stubs.py` with 44 tests. They cover: every §2 operation documented with its success status; every stub answering 501 `application/problem+json` `{type, title, status, code: NOT_IMPLEMENTED}`; exactly the 19 contract operations and nothing more; the `User` fields and enums; login documented as `User | MfaRequired`; errors documented only as problem+json; register rejecting a password under 12 characters; unknown body fields rejected. All 44 were red first (routes missing), then green.
+  - Code: `app/api/models.py` (`ApiModel`, `extra=forbid`), `app/api/problem.py` (`Problem`, `ProblemError`, `not_implemented()`, the handler, and `use_problem_media_type`), `app/api/v1/auth_models.py`, `app/api/v1/workspace_models.py` (`Workspace`, `Role`) and `app/api/v1/auth.py` (19 routes). `uv add email-validator` (2.4.0) for `EmailStr`.
+  - Finding: FastAPI documents error models under `application/json`, the route's media type, and has no option to change that (I checked with a scratch script). `problem.install` post-processes the document, moving `4XX`/`5XX` schemas to `application/problem+json`, so the live and committed documents match the real responses.
+  - Bug found and fixed (in my test): the drift test wrote with `write_text()` and no encoding, which is cp1252 on Windows. Once the document contained `§`, the UTF-8 read failed (`0xa7`). Proven with `locale.getpreferredencoding()` and the offending text; fixed with `encoding="utf-8"`. It would have passed on Linux CI and failed on Windows only.
+  - ruff `S105`/`S106` are ignored in `tests/**` only, for fake credentials.
+  - Checks: ruff clean · 16 files formatted · **56 passed** · drift check exit 0 · `uv sync --locked` · pip-audit clean. `openapi.json` now has 19 auth operations and 21 schemas (1,569 generated lines).
 
 ---
 

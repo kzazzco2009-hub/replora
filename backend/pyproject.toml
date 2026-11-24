@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Replora API: typed file-workflow engine (FastAPI)."
 requires-python = ">=3.14"
 dependencies = [
+    "email-validator>=2.4.0",
     "fastapi>=0.165.0",
     "pydantic-settings>=2.16.3",
     "uvicorn>=0.54.0",
@@ -33,7 +34,7 @@ target-version = "py314"
 select = ["E", "W", "F", "I", "UP", "B", "SIM", "S"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101"]
+"tests/**" = ["S101", "S105", "S106"]  # asserts and fake test credentials
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
