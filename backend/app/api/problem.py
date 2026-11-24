@@ -85,6 +85,9 @@ WRONG_SECRET_RESPONSE: dict[int | str, dict[str, Any]] = {
 NOT_FOUND_RESPONSE: dict[int | str, dict[str, Any]] = {
     404: _documented("Not found, or not yours"),
 }
+TOO_LARGE_RESPONSE: dict[int | str, dict[str, Any]] = {
+    413: _documented("`FILE_TOO_LARGE`, or the workspace storage quota is full (`QUOTA_EXCEEDED`)"),
+}
 
 
 def install(app: FastAPI) -> None:
