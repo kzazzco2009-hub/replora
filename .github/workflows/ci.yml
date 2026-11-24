@@ -64,6 +64,8 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run pytest
+      - name: Contract drift check (contracts/openapi.json)
+        run: uv run python -m app.export_openapi --check
       - run: uv run pip-audit
 
   frontend:

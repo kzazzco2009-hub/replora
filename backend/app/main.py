@@ -1,5 +1,7 @@
 """FastAPI application factory."""
 
+from importlib.metadata import version
+
 from fastapi import FastAPI
 
 from app.api import v1
@@ -12,6 +14,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     docs = settings.app_env != "production"
     app = FastAPI(
         title="Replora API",
+        version=version("replora-backend"),
         docs_url="/docs" if docs else None,
         redoc_url=None,
         openapi_url="/openapi.json" if docs else None,
