@@ -177,7 +177,7 @@ Sizing: S ≈ ≤ 1 week, M ≈ 1–2 weeks, L ≈ 2–4 weeks for one developer
 Goal: a clean, secure, reproducible monorepo with CI that is green on empty skeletons.
 - [x] P0.1 Verify the latest stable versions (Python, uv, FastAPI, Pydantic, SQLAlchemy, Alembic, Next.js, React, Tailwind, next-intl, TanStack Query, Playwright, Vitest). Record them in session_log.
 - [x] P0.2 `git init`. Add a root `.gitignore` (`.env*`, `.data/`, `.venv/`, `node_modules/`, `.next/`, coverage) **before the first commit**. Add `.env.example` with key names only. Run a gitleaks scan.
-- [ ] P0.3 Backend skeleton: `uv init backend`. Add FastAPI, pydantic-settings, ruff and pytest. `GET /api/v1/health` returns `{status:"ok", version}`.
+- [x] P0.3 Backend skeleton: `uv init backend`. Add FastAPI, pydantic-settings, ruff and pytest. `GET /api/v1/health` returns `{status:"ok", version}`.
 - [ ] P0.4 Frontend skeleton: create a Next.js app (TS, App Router, Tailwind v4, ESLint) with pnpm. It renders one page.
 - [ ] P0.5 `contracts/` folder: an OpenAPI export script (`uv run python -m app.export_openapi`). Generate the TS client with `openapi-typescript` and `openapi-fetch`.
 - [ ] P0.6 Pre-commit hooks: ruff (lint and format), the TS linter and prettier, and gitleaks.

@@ -8,16 +8,16 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (backend half, B0). P0.1, P0.2 and P0.10 done. Skeleton [PR #2](https://github.com/kzazzco2009-hub/replora/pull/2) merged into `main` (`1e0691b`). [PR #3](https://github.com/kzazzco2009-hub/replora/pull/3) (`CLAUDE.md` + CODEOWNERS follow-up) open.** |
+| Current phase | **Phase 0 — Foundation (backend half, B0). P0.1, P0.2, P0.3 and P0.10 done. PRs #2 and #3 merged (`main` at `47d2863`). P0.3 PR (backend skeleton, `/health`) open.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend review of PR #3, and their confirmation of `6ce85a8` (frontend package alignment): it was merged with #2, but their approval only covered `193b07a`. |
-| Next step | Branch from `main` for P0.3 (backend skeleton, `/health`), then P0.5 (OpenAPI export from 501 stubs + drift job), P0.6 (pre-commit), P0.11 (observability). |
-| Blockers | none. **`docs/` in the repo is now the single source**; the OneDrive `Planning/` and `Frontend_Planning/` folders are frozen. Dependabot `uv in /backend` fails until `backend/` exists (P0.3). |
+| Waiting on | Frontend review of PR #4 (P0.3). Their follow-up PR (`docs/frontend/session_log.md` + `frontend/CLAUDE.md`), then F0 from `main`, then a shared `.devcontainer` PR. Owner to delete `backend/setup` (the permission check blocked it). |
+| Next step | After the P0.3 merge: P0.5 (OpenAPI export from 501 stubs + drift job), then P0.6 (pre-commit), P0.11 (observability), P0.9 (dev commands with the frontend). |
+| Blockers | none. **`docs/` in the repo is now the single source**; the OneDrive `Planning/` and `Frontend_Planning/` folders are frozen. Dependabot `uv in /backend` should pass once `backend/` is merged. |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 3/11 | 1/7 | 0/5 | ☐ |
+| 0 Foundation | 4/11 | 3/7 | 0/5 | ☐ |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -93,6 +93,55 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 **Second dev machine (Developer A), checked 2026-11-24 in Session 8:** git 2.49.0 · gh 2.102.0 · uv 0.11.6 · Node 22.16.0 · npm 10.9.2 · Docker 29.5.2 · Python 3.13.3 and 3.12 only. Missing at first: gitleaks, pnpm, pre-commit, Python 3.14. `D:\Projects\replora` did not exist and was cloned again.
 **After the owner's installs (same session):** gitleaks 8.30.1 · pnpm 12.23.0 · Node 26.13.1 · uv 0.13.9 · Python 3.14 (uv-managed) · pre-commit 4.7.0. git 2.49 and gh 2.102 kept as they are.
+
+---
+
+## Session 9 — 2026-11-24 (second dev machine)
+**Goal:** P0.3, the backend skeleton with `GET /api/v1/health`.
+
+Before starting:
+- PR #3 (`CLAUDE.md` + `/docs/frontend/` CODEOWNERS) was approved and merged by the frontend (`47d2863`, CI green on `main`).
+- The frontend confirmed `6ce85a8` (alignment of the frontend package) on PR #2: "happy with all of it".
+- I posted the alignment checklist on issue #1 ([comment 7143099550](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7143099550)):
+  - F0 branches from `main`, because `frontend/setup` and `backend/setup` are 0 ahead / 9 behind;
+  - only the repo `docs/` is used, since the OneDrive copies are frozen;
+  - environment check: Node 26.13.1, pnpm 12.23.0, gitleaks 8.30.1, pre-commit 4.7.0;
+  - P0.1 recorded in `docs/frontend/session_log.md`;
+  - `frontend/CLAUDE.md` without contradictions to the root file;
+  - what the F0 CI job needs.
+  - **Frontend reply (20:13 and 20:18 UTC): every point agreed. Their environment matches:** Node v26.13.1 (`nvm install 26.13.1`), pnpm 12.23.0, gitleaks 8.30.1 (checksum verified), pre-commit 4.7.0.
+    - They work only from `docs/`. F0 branches from `main`.
+    - Branch cleanup is agreed: the owner deletes `backend/setup` (0 ahead), and the frontend deletes `frontend/setup` once F0 exists. They merged `origin/main` into it (`8b88af0`), so it holds no work of its own.
+    - They will propose a shared `.devcontainer/devcontainer.json` that pins Node 26.13.1.
+    - **Both sides are now on the same state.**
+
+Done (branch `feat/p0.3-backend-skeleton` from `main`):
+- `uv init backend --bare --no-pin-python --name replora-backend --python 3.14`.
+  - `uv add fastapi pydantic-settings uvicorn`.
+  - `uv add --dev pytest httpx2 ruff pip-audit`.
+  - Resolved: fastapi 0.165.0, pydantic 2.14.4, pydantic-settings 2.16.3, uvicorn 0.54.0, starlette 1.10.0, pytest 9.2.0, ruff 0.17.6, pip-audit 2.10.1, httpx2 2.16.2, on Python 3.14.10.
+- **`httpx2` instead of `httpx`:** Starlette 1.10 deprecates `httpx` for its test client (`StarletteDeprecationWarning: … install httpx2 instead`), so the dev dependency uses `httpx2`.
+- `app` is an installed package (`uv_build`, `module-root = ""`). `/health` reads the version from the package metadata, so `pyproject.toml` is the single source.
+- **TDD** (each test seen red first, for the right reason):
+  - T0.1 health: red with `404 != 200`, then green.
+  - Config, 6 tests: unknown `APP_ENV` rejected (`literal_error`), `SecretStr` never in repr or dump, values read from the environment, blank `.env.example` values fall back to the defaults, `/docs` and `/openapi.json` 404 in production and served in development.
+    - The first version of the `APP_ENV` test passed for the wrong reason (`extra_forbidden`), so I tightened it to assert the `literal_error` on `app_env`.
+    - The blank-value test was written together with its fix, so I removed `env_ignore_empty` to watch it fail (`literal_error`, `input_value=''`), then restored it.
+  - Tests never read the developer's real `.env` (`_env_file=None`).
+- **Local CI checks (in `backend/`):** `uv sync --locked` ok · `uv run ruff check .` all passed · `uv run ruff format --check .` 8 files formatted · `uv run pytest` **7 passed**, no warnings · `uv run pip-audit` no known vulnerabilities (skips only our own package).
+- **Real run:** `uv run uvicorn app.main:create_app --factory --port 8000`, then `GET /api/v1/health` gave **200 `{"status":"ok","version":"0.1.0"}`** and `/docs` gave 200.
+- **P0.3 done. T0.1 passed.**
+- **PR #4** opened. The first backend CI run **failed in 2 s**: `Unable to resolve action astral-sh/setup-uv@v10, unable to find version v10`.
+  - Root cause: setup-uv publishes only full release tags (`v10.4.0`). This was my mistake in the PR #2 workflow, and it showed up only now because the backend job ran for the first time.
+  - I checked all action refs with `gh api …/git/ref/tags/…`. Fix (`018c525`): **every action is pinned to its commit SHA** with the version as a comment (checkout v7.0.1, setup-uv v10.4.0, setup-node v7.1.0, pnpm/action-setup v6.1.1).
+  - After the fix, the backend job passed in 15 s on CPython 3.14.4: 51 packages, ruff clean, 8 files formatted, 7 passed, no known vulnerabilities.
+- **T0.3 passed.** The clean PR was green.
+  - A deliberate unused import (`09f66e2`) made the backend job fail (`F401`, `E402`, `Found 2 errors`, exit 1).
+  - The revert (`a8ea5e4`) brought the tree back to `018c525` (`git diff --stat` empty) and CI green again.
+  - On the first revert attempt, `git revert -q` was rejected and my `--amend` then mislabeled the lint commit locally. The push was rejected (non-fast-forward), so nothing wrong reached GitHub. I checked that the trees were identical, reset to the remote, and reverted properly.
+- `gitleaks dir backend` reports 200 findings, all in the git-ignored `.venv` (SPDX data in `license_expression`, a pip-audit dependency), and 0 in tracked files. `gitleaks git .` is clean.
+- **S‑02 partly done:** env-only config and `SecretStr` are verified. The "refuse to start in production when a required secret is missing" check is added with the first required secret (`DATABASE_URL` at P4 or the session key at P5).
+- On this machine, uv warns about hardlinks between the C: cache and the D: repo. `UV_LINK_MODE=copy` silences it. It's cosmetic.
 
 ---
 

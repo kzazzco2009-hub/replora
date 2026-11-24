@@ -17,7 +17,14 @@ Start with `docs/plan.md`, then `docs/session_log.md` for the current status.
 - Node 26 LTS (`.nvmrc`) with pnpm 12.23.0 (pinned in `package.json` → `packageManager`).
 - Local setup: copy `.env.example` to `.env` and fill in the values. `.env` is git-ignored.
 
-Local dev commands are added in P0.9.
+### Backend (from `backend/`)
+```
+uv sync                                                  # install the locked dependencies
+uv run uvicorn app.main:create_app --factory --reload    # http://localhost:8000/api/v1/health
+uv run pytest                                            # tests
+uv run ruff check . && uv run ruff format --check .      # lint
+```
+The full local dev setup, with the frontend `/api` rewrite, is added in P0.9.
 
 ## Contributing
 - Every change reaches `main` through a small PR (≤ 400 lines) reviewed by the other developer. No direct pushes and no self-merge.
