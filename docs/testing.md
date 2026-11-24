@@ -45,7 +45,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 ## Phase 0 — Foundation
 - [x] T0.1 `GET /api/v1/health` returns 200 with `status: "ok"` (unit, TestClient).
 - [ ] T0.2 The frontend home page renders (Vitest smoke) and `pnpm build` succeeds.
-- [ ] T0.3 CI runs green on a no-op PR. CI fails on an intentional lint error (verify the gate works, then revert).
+- [x] T0.3 CI runs green on a no-op PR. CI fails on an intentional lint error (verify the gate works, then revert).
 - [ ] T0.4 The contract drift check fails when the OpenAPI output differs from the committed file.
 - [ ] T0.5 gitleaks blocks a commit containing a fake `OPENROUTER_API_KEY=sk-or-…` (pre-commit test in a scratch branch).
 - [ ] T0.6 `git check-ignore .env` confirms that `.env` is ignored.

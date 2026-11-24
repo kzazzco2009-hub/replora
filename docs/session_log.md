@@ -17,7 +17,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 4/11 | 2/7 | 0/5 | ☐ |
+| 0 Foundation | 4/11 | 3/7 | 0/5 | ☐ |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -127,6 +127,15 @@ Done (branch `feat/p0.3-backend-skeleton` from `main`):
 - **Local CI checks (in `backend/`):** `uv sync --locked` ok · `uv run ruff check .` all passed · `uv run ruff format --check .` 8 files formatted · `uv run pytest` **7 passed**, no warnings · `uv run pip-audit` no known vulnerabilities (skips only our own package).
 - **Real run:** `uv run uvicorn app.main:create_app --factory --port 8000`, then `GET /api/v1/health` gave **200 `{"status":"ok","version":"0.1.0"}`** and `/docs` gave 200.
 - **P0.3 done. T0.1 passed.**
+- **PR #4** opened. The first backend CI run **failed in 2 s**: `Unable to resolve action astral-sh/setup-uv@v10, unable to find version v10`.
+  - Root cause: setup-uv publishes only full release tags (`v10.4.0`). This was my mistake in the PR #2 workflow, and it showed up only now because the backend job ran for the first time.
+  - I checked all action refs with `gh api …/git/ref/tags/…`. Fix (`018c525`): **every action is pinned to its commit SHA** with the version as a comment (checkout v7.0.1, setup-uv v10.4.0, setup-node v7.1.0, pnpm/action-setup v6.1.1).
+  - After the fix, the backend job passed in 15 s on CPython 3.14.4: 51 packages, ruff clean, 8 files formatted, 7 passed, no known vulnerabilities.
+- **T0.3 passed.** The clean PR was green.
+  - A deliberate unused import (`09f66e2`) made the backend job fail (`F401`, `E402`, `Found 2 errors`, exit 1).
+  - The revert (`a8ea5e4`) brought the tree back to `018c525` (`git diff --stat` empty) and CI green again.
+  - On the first revert attempt, `git revert -q` was rejected and my `--amend` then mislabeled the lint commit locally. The push was rejected (non-fast-forward), so nothing wrong reached GitHub. I checked that the trees were identical, reset to the remote, and reverted properly.
+- `gitleaks dir backend` reports 200 findings, all in the git-ignored `.venv` (SPDX data in `license_expression`, a pip-audit dependency), and 0 in tracked files. `gitleaks git .` is clean.
 - **S‑02 partly done:** env-only config and `SecretStr` are verified. The "refuse to start in production when a required secret is missing" check is added with the first required secret (`DATABASE_URL` at P4 or the session key at P5).
 - On this machine, uv warns about hardlinks between the C: cache and the D: repo. `UV_LINK_MODE=copy` silences it. It's cosmetic.
 
