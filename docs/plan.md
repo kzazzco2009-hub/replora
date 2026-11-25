@@ -185,7 +185,7 @@ Goal: a clean, secure, reproducible monorepo with CI that is green on empty skel
 - [ ] P0.8 Repo governance: protected `main`, required CI, 1 approving review by the other developer, CODEOWNERS, a PR template (summary, commit SHA, test commands and results, security impact).
 - [ ] P0.9 Local dev commands documented in `README.md` (`uv run uvicorn …`, `pnpm dev`, with a `/api` rewrite to the backend).
 - [x] P0.10 Owner answers decisions D1–D14. Record the answers in `session_log.md`.
-- [ ] P0.11 Observability from day one: structured JSON logs (backend), a correlation ID per request (`X-Request-ID`, returned in problem+json), PII scrubbing, and a frontend error boundary that reports the correlation ID.
+- [x] P0.11 Observability from day one: structured JSON logs (backend), a correlation ID per request (`X-Request-ID`, returned in problem+json), PII scrubbing, and a frontend error boundary that reports the correlation ID.
 - [ ] Tests T0.* pass · Security S‑01…S‑05 verified · **Gate G0**
 
 ### Phase 1 — Core contracts (M)

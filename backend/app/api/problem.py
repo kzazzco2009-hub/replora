@@ -1,5 +1,6 @@
 """RFC 9457 problem+json errors: the model, the exception, the handlers and the OpenAPI wiring."""
 
+import logging
 from http import HTTPStatus
 from typing import Any
 
@@ -9,8 +10,10 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
 from app.api.models import ApiModel
+from app.observability import REQUEST_ID_HEADER, request_id
 
 PROBLEM_MEDIA_TYPE = "application/problem+json"
+logger = logging.getLogger(__name__)
 
 # Pydantic error type → our stable 422 `code`. Explicit, so a library upgrade cannot rename a code.
 # Every value (and the fallback) is listed in contracts/error-codes.json → validation_codes.
@@ -128,8 +131,9 @@ async def _handle_http(_: Request, error: HTTPException) -> JSONResponse:
     return _problem_response(_status_problem(error.status_code), error.headers)
 
 
-async def _handle_unexpected(_: Request, __: Exception) -> JSONResponse:
-    """An unhandled error. Nothing about it is sent; the server still logs the traceback."""
+async def _handle_unexpected(_: Request, error: Exception) -> JSONResponse:
+    """An unhandled error. Nothing about it is sent; the traceback goes to the log (S‑17)."""
+    logger.error("unhandled error", exc_info=error)
     return _problem_response(_status_problem(500, code="INTERNAL_ERROR"))
 
 
@@ -146,7 +150,13 @@ def _status_problem(status: int, code: str | None = None) -> ProblemDetails:
 def _problem_response(
     problem: ProblemDetails, headers: dict[str, str] | None = None
 ) -> JSONResponse:
-    body = problem.model_dump(exclude_none=True)
+    """The body carries `correlation_id`, and the response its `X-Request-ID` header.
+
+    The header is set here too, because a 500 is sent from outside the request-ID middleware.
+    """
+    current = request_id.get()
+    body = problem.model_copy(update={"correlation_id": current}).model_dump(exclude_none=True)
+    headers = (headers or {}) | ({REQUEST_ID_HEADER: current} if current else {})
     return JSONResponse(
         body, status_code=problem.status, headers=headers, media_type=PROBLEM_MEDIA_TYPE
     )

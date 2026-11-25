@@ -59,6 +59,7 @@ def test_auth_stub_answers_501_problem_json(client, method, path, status, body):
         "title": "Not implemented",
         "status": 501,
         "code": "NOT_IMPLEMENTED",
+        "correlation_id": response.headers["x-request-id"],
     }
 
 
