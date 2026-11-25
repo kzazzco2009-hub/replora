@@ -35,7 +35,7 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 - [x] **S‑02:** settings come from the environment (`pydantic-settings`, `SecretStr`). With `APP_ENV=production`, `Settings` refuses to build when a secret in `PRODUCTION_SECRETS` is missing or `DEBUG` is on, so `uvicorn --factory` exits before serving. `hide_input_in_errors` keeps the refusal from echoing any value. Each phase adds the secrets it needs to `PRODUCTION_SECRETS`. 4 tests in `test_config.py` (Session 14).
 - [x] **S‑03:** `uv.lock` and `pnpm-lock.yaml` are committed. CI runs `uv sync --locked` and `pnpm install --frozen-lockfile`.
 - [x] **S‑04:** CI runs `uv run pip-audit` and `pnpm audit --audit-level=high`. Dependabot runs weekly for uv, npm and GitHub Actions.
-- [ ] **S‑05:** CODEOWNERS and the PR template are in. Protecting `main` needs GitHub Pro, a public repo or an organization (the owner's decision). Until then it's the manual rule in `decisions.md`.
+- [ ] **S‑05:** CODEOWNERS and the PR template are in. Protecting `main` needs GitHub Pro, a public repo or an organization (the owner's decision). Until then it's the manual rule in `decisions.md`. The protection is ready as code in `.github/rulesets/main.json` (apply and verify steps in its README). S‑05 is ticked once the admin has applied it and `gh api repos/kzazzco2009-hub/replora/rules/branches/main` shows its rules.
 
 ## Phase 1–3 — Core engine (secure by design)
 | ID | Control | Implementation | Verify |
