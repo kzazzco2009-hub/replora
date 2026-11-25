@@ -8,39 +8,37 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.5 in progress:** #6, #8, **#12**, **#14** (P0.6 backend part), the frontend's **#13**, **#17** and **#15** are merged and **#16** (`main` at **`38095c2`**). Open:
-- **#10** `feat/p0.5-workspace-stubs` (`ea4464a`, base `feat/p0.5-auth-stubs`) and **#11** `feat/p0.5-file-stubs` (code `76bbe42`): approved, not rebased yet.
+| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.6 is done on both sides** (#14 and the frontend's #19); its tick in `docs/plan.md` also goes in the next shared docs PR. **P0.5 in progress:** #6, #8, #12, #16 and the frontend's #13 and #17 are merged (`main` at **`6651beb`**). Open:
+- **#10** `feat/p0.5-workspace-stubs` (**`55f6a1a`, base `main`**, rebased, CI green). Its commits:
+  - `9ba8d55`, the approved code;
+  - `5efb957`, the invitation email reports `INVALID_EMAIL` (`Email` moved to `app/api/models.py`);
+  - `55f6a1a`, `gen:api`.
 
-Frontend **#18** (docs, `99574dd`) and **#19** (P0.6 prettier and typecheck hooks, `df40f54`): reviewed by us, nothing blocks them; the owner approves and merges. Merge order for ours: **#10 → #11**. **`feat/p0.5-file-stubs` holds the newest session log.** |
+  Waiting for the frontend's re-check.
+- **#22** `feat/p0.5-auth-error-codes` (`1f326bc`, base `main`): the 11 §2 codes, 400 documented on the 6 secret endpoints, the 401 vs 400 rule, register → 202, 2 `decisions.md` rows, and `schema.d.ts`. 135 passed locally.
+- **#11** `feat/p0.5-file-stubs` (code `76bbe42`): approved, not rebased yet.
+
+Merge order: **#10 → #22** (whichever is second gets rebased, with `openapi.json` and `schema.d.ts` regenerated), **then #11**. Frontend #20 and #21 are open; review them when they ask. **`feat/p0.5-file-stubs` holds the newest session log.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | **Frontend:**
-- #19: add `format:check` to CI (asked in our review), and fix the #13 SHA note in #18 (PR head `7955d6f`, merged as `14fd30b`).
+| Waiting on | **Frontend:** re-check and merge #10, review #22 (asked in #1, 7160558200).
 
-**Owner:** approve and merge #18 and #19.
+**Owner:** set a global git identity on this machine (see Session 13). |
+| Next step | 1) **When #10 merges:**
+   - Rebase #22: `git switch feat/p0.5-auth-error-codes; git rebase origin/main`. Then regenerate `openapi.json` (`uv run python -m app.export_openapi`) and `schema.d.ts` (`pnpm -C frontend run gen:api`), and commit them.
+   - Rerun the checks, `git push --force-with-lease` (the base is already `main`), and ask for a re-check.
+   - Then the small §3 PR: `PERSONAL_WORKSPACE_UNDELETABLE` in `error-codes.json`, and the `AuditEvent.action` / `target_type` enums with proposed values.
 
-Also: set a global git identity on this machine (see Session 13). |
-| Next step | 1) **Now (#16 is merged as `38095c2`):**
-   - `git switch feat/p0.5-workspace-stubs; git rebase --onto origin/main 50ccf31`.
-   - **Order:** retarget the PR base (`gh pr edit 10 --base main`) **before** `git push --force-with-lease`. Pushing first gives a false conflict against the old base, and no CI runs (see Session 13). Resolve the `NOT_FOUND_RESPONSE` conflict in `problem.py`: keep one constant with the generic "Not found, or not yours" text. Regenerate `openapi.json` and `schema.d.ts`, then retarget #10.
+2) **Rebase #11:**
+   - `git switch feat/p0.5-file-stubs`, then `git rebase --onto origin/main ea4464a`. It keeps the log commits.
+   - Add `FILE_TOO_LARGE` and `QUOTA_EXCEEDED` to `error-codes.json` and regenerate `schema.d.ts`.
+   - **Retarget before pushing:** `gh pr edit 11 --base main`, then `git push --force-with-lease`.
 
-2) **When #16 and #10 are in `main`:**
-   - Add the §3 problem code `PERSONAL_WORKSPACE_UNDELETABLE` to `error-codes.json`.
-   - Add the `AuditEvent.action` / `target_type` enums (the frontend asked for them before G5), with the proposed values, in a small PR.
-   - **§2 PR (confirmed by the frontend in #1, 7158585607; do now, #16 is merged):**
-     - the 11 §2 codes in `error-codes.json` with their status;
-     - `POST /auth/register` → 202 with no body (`api_contract.md` §2, the stub, `openapi.json`);
-     - the 400-vs-401 rule in §1;
-     - `gen:api`, committing only `schema.d.ts`.
-   - Record the `schema.d.ts` rule in `docs/decisions.md`: backend PRs regenerate only that file under `frontend/`.
+3) **P0.11 backend part** (T0.7, S‑87): `X-Request-ID` middleware, JSON logs, PII scrub, `correlation_id` in problem+json. Branch from `main`.
 
-3) **When #10 merges:** rebase #11 (`git rebase --onto origin/main ea4464a`), add `FILE_TOO_LARGE` and `QUOTA_EXCEEDED` to `error-codes.json`, regenerate `schema.d.ts`, then `gh pr edit 11 --base main`.
+4) **Part 4:** §5–§8 stubs.
 
-4) **P0.11 backend part** (T0.7, S‑87): `X-Request-ID` middleware, JSON logs, PII scrub, `correlation_id` in problem+json. Branch from `main` (#12 is merged).
-
-5) **Part 4:** §5–§8 stubs.
-
-6) **The P0.4 tick in `docs/plan.md`**, in the next shared docs PR. |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7158990094 }`; the reviews and comments on #10, #11, #18 and #19 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
+5) **The P0.4 and P0.6 ticks in `docs/plan.md`**, in the next shared docs PR. |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7160558200 }`; the reviews and comments on #10, #11, #20, #21 and #22 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -207,6 +205,25 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 **Our reviews:**
 - **#19** (`df40f54`): verified locally. `format:check` passes, fails on an unformatted line (exit 1), and passes after `gen:api` (`schema.d.ts` is in `.prettierignore`). **Asked for `format:check` in the CI `frontend` job**, since hooks can be skipped. Explained the local "uv not found": the ruff hooks only match `backend/`, so use `SKIP=ruff-check,ruff-format` or install uv.
 - **#18** (`99574dd`): ok. Noted that `7955d6f` is #13's PR head and `14fd30b` its squash commit, so neither is wrong. The `decisions.md` rows come in our §2 PR.
+
+**Continued: #18 and #19 merged, #10 rebased, §2 PR #22:**
+- The frontend merged #18 (`d836afe`) and #19 (`6651beb`). #19 added `format:check` to CI, as asked.
+- **#10 rebased:**
+  - `git rebase --onto origin/main 50ccf31` gave 2 conflicts. `problem.py`: kept the generic "Not found, or not yours". `openapi.json`: regenerated.
+  - **Found:** the invitation email (`InvitationRequest.email`, a plain `EmailStr`) still answered `INVALID`, not `INVALID_EMAIL`. #16's `Email` lived in `auth_models.py`, which imports `workspace_models`, so a direct import would be circular. **Fix:** moved `Email` to `app/api/models.py`. A test was red first (2 failed).
+  - `gen:api` → `schema.d.ts`.
+  - The base was retargeted to `main` **before** the push this time, and CI was green on `55f6a1a`.
+  - **Checks:** 161 passed, ruff clean, drift 0, frontend typecheck and `format:check` pass.
+- **#22** (`feat/p0.5-auth-error-codes`, from `main`):
+  - **TDD:** 18 new tests failed first (10 code pins, 6 "400 documented", 2 register).
+  - 10 new codes in `error-codes.json`.
+  - `WRONG_SECRET_RESPONSE` (400) on verify-email, password/reset, mfa/enroll/confirm, mfa/challenge, `DELETE /auth/mfa` and `DELETE /auth/me`.
+  - The 401, 403 and 429 descriptions name their codes.
+  - Register → 202 with no body. FastAPI documents every body-less 202 as `{"schema": {}}`, so the test asserts it equals `password/forgot`'s 202.
+  - `api_contract.md`: the §1 rule, the §2 row, a revision line. `decisions.md`: 2 rows.
+  - `schema.d.ts` regenerated.
+  - **Result:** 135 passed, ruff clean, drift 0, pip-audit clean, gitleaks clean, frontend typecheck, `format:check` and tests (5) pass.
+- Updated the #10 PR body, and replied in #1 (7160558200).
 
 **Reviews posted** (comment reviews; the owner approves from their account):
 - **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
