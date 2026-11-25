@@ -105,3 +105,13 @@ def test_operation_ids_name_the_resource(openapi):
     ids = {op["operationId"] for ops in openapi["paths"].values() for op in ops.values()}
 
     assert {"workspaces_list", "workspaces_delete", "workspaces_accept_invitation"} <= ids
+
+
+@pytest.mark.parametrize("email", ["x", 5])
+def test_invitation_email_error_is_invalid_email(client, email):
+    path = f"{WS}/invitations".format(**IDS)
+    response = client.post(path, json={"email": email, "role": "member"})
+
+    assert response.status_code == 422
+    expected = [{"path": "body.email", "code": "INVALID_EMAIL", "params": {}}]
+    assert response.json()["errors"] == expected

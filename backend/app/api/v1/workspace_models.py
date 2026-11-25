@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import EmailStr, Field
 
-from app.api.models import ApiModel, Page
+from app.api.models import ApiModel, Email, Page
 
 Role = Literal["owner", "admin", "member", "viewer"]
 GrantableRole = Literal["admin", "member", "viewer"]
@@ -47,7 +47,7 @@ class Invitation(ApiModel):
 
 
 class InvitationRequest(ApiModel):
-    email: EmailStr
+    email: Email
     role: GrantableRole
 
 
