@@ -213,8 +213,22 @@ VALIDATION_CASES = [
         "body.x",
         "EXTRA_FORBIDDEN",
     ),
-    ("post", "/api/v1/auth/password/forgot", {"json": {"email": "x"}}, "body.email", "VALUE_ERROR"),
-    ("post", "/api/v1/auth/password/forgot", {"json": {"email": 5}}, "body.email", "STRING_TYPE"),
+    (
+        "post",
+        "/api/v1/auth/password/forgot",
+        {"json": {"email": "x"}},
+        "body.email",
+        "INVALID_EMAIL",
+    ),
+    ("post", "/api/v1/auth/password/forgot", {"json": {"email": 5}}, "body.email", "INVALID_EMAIL"),
+    ("post", "/api/v1/auth/verify-email", {"json": {"token": 5}}, "body.token", "STRING_TYPE"),
+    (
+        "post",
+        "/api/v1/auth/mfa/challenge",
+        {"json": {}},
+        "body",
+        "MFA_CODE_OR_RECOVERY_REQUIRED",
+    ),
     ("post", "/api/v1/auth/password/forgot", {"json": [1]}, "body", "MODEL_ATTRIBUTES_TYPE"),
     (
         "post",
@@ -249,3 +263,37 @@ def test_validation_codes_are_explicit_and_stable(client, method, path, request_
 
     assert response.status_code == 422
     assert (field, code) in {(e["path"], e["code"]) for e in response.json()["errors"]}
+
+
+@pytest.mark.parametrize(
+    "body", [{}, {"code": "123456", "recovery_code": "abcd-efgh"}], ids=["neither", "both"]
+)
+def test_mfa_challenge_needs_exactly_one_of_code_or_recovery_code(client, body):
+    response = client.post("/api/v1/auth/mfa/challenge", json=body)
+
+    assert response.status_code == 422
+    assert response.json()["errors"] == [
+        {"path": "body", "code": "MFA_CODE_OR_RECOVERY_REQUIRED", "params": {}}
+    ]
+
+
+@pytest.mark.parametrize(
+    ("body", "field"),
+    [({"code": "12"}, "body.code"), ({"recovery_code": ""}, "body.recovery_code")],
+)
+def test_mfa_challenge_field_errors_use_form_field_paths(client, body, field):
+    response = client.post("/api/v1/auth/mfa/challenge", json=body)
+
+    assert [error["path"] for error in response.json()["errors"]] == [field]
+
+
+def test_mfa_challenge_accepts_a_recovery_code(client):
+    response = client.post("/api/v1/auth/mfa/challenge", json={"recovery_code": "abcd-efgh"})
+
+    assert response.status_code == 501
+
+
+def test_email_keeps_its_openapi_format(openapi):
+    email = openapi["components"]["schemas"]["EmailRequest"]["properties"]["email"]
+
+    assert email["format"] == "email"

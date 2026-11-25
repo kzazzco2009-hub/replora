@@ -45,7 +45,7 @@ This contract is what lets the two developers work at the same time. **Draft agr
 | POST | `/auth/password/reset` | `{token, password}` | 204 |
 | POST | `/auth/mfa/enroll` | — | 200 `{otpauth_uri, recovery_codes[]}` (shown once; MFA is not active yet) |
 | POST | `/auth/mfa/enroll/confirm` | `{code}` | 204 (activates MFA) |
-| POST | `/auth/mfa/challenge` | `{code}` **or** `{recovery_code}` (+ challenge cookie) | 200 `User` + session cookies; the challenge cookie is cleared · 401 `MFA_CHALLENGE_INVALID` |
+| POST | `/auth/mfa/challenge` | `{code}` **or** `{recovery_code}` (+ challenge cookie) | 200 `User` + session cookies; the challenge cookie is cleared · 401 `MFA_CHALLENGE_INVALID` · 422 `MFA_CODE_OR_RECOVERY_REQUIRED` (on `body`) when both or neither are sent |
 | DELETE | `/auth/mfa` | `{password, code}` | 204 |
 | POST | `/auth/me/export` | — | 202 `{export_id}`, then `GET /auth/me/export/{id}` returns `{status, url?}` |
 | DELETE | `/auth/me` | `{password}` | 202 (deletion scheduled after the grace period) |

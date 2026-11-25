@@ -466,6 +466,16 @@ export interface components {
             /** Memberships */
             memberships: components["schemas"]["Workspace"][];
         };
+        /**
+         * MfaChallengeRequest
+         * @description Exactly one of `code` (TOTP) or `recovery_code`.
+         */
+        MfaChallengeRequest: {
+            /** Code */
+            code?: string | null;
+            /** Recovery Code */
+            recovery_code?: string | null;
+        };
         /** MfaCodeRequest */
         MfaCodeRequest: {
             /** Code */
@@ -487,11 +497,6 @@ export interface components {
             otpauth_uri: string;
             /** Recovery Codes */
             recovery_codes: string[];
-        };
-        /** MfaRecoveryRequest */
-        MfaRecoveryRequest: {
-            /** Recovery Code */
-            recovery_code: string;
         };
         /**
          * MfaRequired
@@ -1696,7 +1701,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MfaCodeRequest"] | components["schemas"]["MfaRecoveryRequest"];
+                "application/json": components["schemas"]["MfaChallengeRequest"];
             };
         };
         responses: {

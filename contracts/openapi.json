@@ -1143,15 +1143,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/MfaCodeRequest"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MfaRecoveryRequest"
-                  }
-                ],
-                "title": "Body"
+                "$ref": "#/components/schemas/MfaChallengeRequest"
               }
             }
           },
@@ -1865,6 +1857,39 @@
         ],
         "title": "Me"
       },
+      "MfaChallengeRequest": {
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{6}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "recovery_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recovery Code"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "MfaChallengeRequest",
+        "description": "Exactly one of `code` (TOTP) or `recovery_code`."
+      },
       "MfaCodeRequest": {
         "properties": {
           "code": {
@@ -1924,20 +1949,6 @@
         ],
         "title": "MfaEnrollment",
         "description": "Shown once. MFA becomes active only after `/auth/mfa/enroll/confirm`."
-      },
-      "MfaRecoveryRequest": {
-        "properties": {
-          "recovery_code": {
-            "type": "string",
-            "title": "Recovery Code"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "recovery_code"
-        ],
-        "title": "MfaRecoveryRequest"
       },
       "MfaRequired": {
         "properties": {
