@@ -19,6 +19,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 - **#41** `feat/p0.5-outputs-stubs` → #40, `d138c28`: §7 outputs (list, preview, download, lineage).
 - **#42** `feat/p0.5-workflows-stubs` → #41, `ceedd01`: §8 workflows and replay, `BASE_VERSION_STALE`, plus the stub notes in `api_contract.md`.
 - **#44** `feat/b0-auth-fixtures` → `main`, `8052294`: **§2 auth fixtures** (B0 deliverable, api_contract.md §10). 19 files and 48 scenarios in `contracts/fixtures/auth/`, validated against `openapi.json` and `error-codes.json` by `test_auth_fixtures.py` (new dev dependency `jsonschema` 4.26.0). Also brings the B0 checklist in `backend_plan.md` up to date. Independent of the stack.
+- **#45** `docs/co-owners` → `main`, `a73b4e2`: **both developers are co-owners**. Owner decisions need both; in a disagreement each decides within their own track, and shared files change only when both agree. GitHub stays as it is. Needs the frontend's approval.
 - **this PR** `docs/session-14-final` → `main`: this log, plus `.gitignore` for `replora_env_setup.txt`. **The newest log is on this branch until it merges.**
 
 **After each merge in the stack:**
@@ -28,13 +29,16 @@ Append a new entry per session (newest at the top). For each step record: what w
 4. Check with `git range-diff` that the patch is unchanged. |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | **Frontend:**
+- review **#45** (co-owners) and answer its open point on self-merge after approval;
 - review #40, #41 and #42 in order (each has 3 proposals in its description), **#44** (the auth fixtures for MSW), and this PR (it touches the root `.gitignore`);
 - **make the repo public** and run `.github/rulesets/README.md` steps 1–5, then post on #1;
 - the 4 open questions from #25, especially **`openapi-fetch`** (it blocks the P0.5 tick).
 
-**Owner:**
-- merge #40, #41 and #42 in order, and #44 and this PR, after the frontend approves each one;
-- GitHub "Keep my email addresses private", plus the `noreply` git email; decide on a `LICENSE`. |
+**Developer A (backend):**
+- merge #40, #41 and #42 in order, and #44, #45 and this PR, after the frontend approves each one;
+- GitHub "Keep my email addresses private", plus the `noreply` git email.
+
+**Both owners:** decide on a `LICENSE`. |
 | Next step | 1) **Merge the stack** (#40 → #41 → #42), rebasing each one onto `main` after the one below it merges (see above).
 
 2) **When the ruleset is live:** `gh api repos/kzazzco2009-hub/replora/rules/branches/main` should list `deletion`, `non_fast_forward`, `pull_request` and `required_status_checks`. Then tick **P0.8** and **S‑05**, and add the "repo public" row to `decisions.md`.
@@ -55,8 +59,8 @@ Append a new entry per session (newest at the top). For each step record: what w
 - `gh` works from PowerShell only. `gh --jq` breaks in PowerShell 5.1, so pipe to `ConvertFrom-Json`.
 - If gitleaks isn't found, reload PATH (root `CLAUDE.md`).
 - **Both machines** have a root `.env` with `OPENROUTER_API_KEY`. So `APP_ENV=production` starts locally; to see the S‑02 refusal, also set `DEBUG=true`.
-- Approving PRs and deleting remote branches are blocked for Claude by the permission check; the owner runs those commands.
-- **Merge rule (restated on #1):** the owner merges, after the other developer's approval. |
+- Approving PRs and deleting remote branches are blocked for Claude by the permission check; Developer A runs those commands.
+- **Owners and merges:** both developers are co-owners (#45). A PR merges only after the other developer's approval. Whether the author may then merge it is the open point in #45. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). |
 
 ## Phase tracker
@@ -192,7 +196,7 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **#31:** the owner approved it. The first merge didn't take (still `OPEN`, `mergeStateStatus: CLEAN`), and the second did: `a536353`, CI green (run 45679116372).
 - **Frontend reviews:** all of #27, #32, #33, #34, #35 and #36 approved. #27, #33, #35 and #36 merged first, then #32.
 - **#32 rebased** on `08ea043`: `066160d`, range-diff `=`, 254 passed.
-- **The frontend's process note** said #31 was merged "before he said go". It assumed `khaledhagar` wasn't the owner. **Clarified on #1 (7172828609):** `khaledhagar` is the owner, and the rule is that the owner merges after the other developer's approval. The same comment gives the owner's go to make the repo public now (decided in Session 13, reconfirmed today).
+- **The frontend's process note** said #31 was merged "before he said go". It assumed `khaledhagar` wasn't the owner. **Clarified on #1 (7172828609):** `khaledhagar` is the owner, and the rule is that the owner merges after the other developer's approval. *(Superseded later the same day: the owner chose co-ownership, #45.)* The same comment gives the owner's go to make the repo public now (decided in Session 13, reconfirmed today).
 - **`replora_env_setup.txt` (untracked, repo root) was staged by `git add -A`** while committing #40. I unstaged it before the commit. `git log --all -- replora_env_setup.txt` shows 0 commits, and `gitleaks dir` finds no leaks. Since then every commit stages files by name. Waiting on the owner's decision (move it out, or ignore it).
 - **#40 §7 runs** (P0.5 4c): 6 endpoints, `Idempotency-Key` (required UUID header), `RunState` enum, and `DRAFT_INVALID`, `PLAN_HASH_MISMATCH`, `INVALID_STATE_TRANSITION` and `IDEMPOTENCY_KEY_MISMATCH`. TDD (27 red first). `openapi.json` showed −732 lines. It was proven to be only moves: a schema and path comparison found 11 schemas and 5 paths added, none removed, and no existing schema changed.
 - **#41 §7 outputs** (4d): list, preview (`limit` 1–100, `status`, `q` ≤ 200), download (`DownloadLink`) and lineage. TDD (17 red first). Only additions (6 schemas).
@@ -204,6 +208,12 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **Owner's decisions at the end:**
   - **`.gitignore`** now lists `replora_env_setup.txt`, on this PR's branch (`git check-ignore -v`: `.gitignore:51`).
   - **#34 merged** by the owner, squash, `ef49ab3`, with `main` CI green. The frontend had approved `b52afbe`; the merged `97724a6` has an identical patch (range-diff `=`).
+- **Co-ownership (#45, `a73b4e2`).** The owner asked whether the frontend could be owner, then decided: **both are owners. GitHub stays as it is, and in a disagreement each developer sticks to their own side of development.**
+  - The change is a new `decisions.md` row, plus forward-looking wording in `CLAUDE.md`, `plan.md` and `backend_plan.md` ("the owner" becomes "the gate approver", or "both owners" for P16.3 and P19.8).
+  - Historical lines are kept: D1–D14 and P0.10 were approved by the owner of the time.
+  - Not edited: `docs/frontend/plan.md` line 16 and `frontend/CLAUDE.md`, which are the frontend's own files; they're pointed out in #45.
+  - Open point raised in #45: "no self-merge" against practice (#30, #37, #38 and #34 were merged by their authors after approval).
+  - The #1 comment 7172828609 ("`khaledhagar` is the owner") got an update note pointing to #45.
 - **#44 §2 auth fixtures** (`8052294`). This was the only Phase 0 deliverable still missing: B0 "auth fixtures in B0/B1", agreed in Session 7.
   - **Design:** `contracts/fixtures/auth/<operationId>.json` = `{scenario: {status, body}}`, always with an `ok`. 19 files, 48 scenarios, written by a scratch script that wasn't committed.
   - **The test** validates them against the generated `openapi.json` with `jsonschema` (refs resolved by attaching `components`), rather than walking `app.routes`: on FastAPI 0.165 that gives 4 entries, with the routers wrapped in a lazy `_IncludedRouter`.
