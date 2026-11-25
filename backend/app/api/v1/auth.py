@@ -4,7 +4,12 @@ from uuid import UUID
 
 from fastapi import APIRouter
 
-from app.api.problem import ERROR_RESPONSES, NOT_FOUND_RESPONSE, not_implemented
+from app.api.problem import (
+    ERROR_RESPONSES,
+    NOT_FOUND_RESPONSE,
+    WRONG_SECRET_RESPONSE,
+    not_implemented,
+)
 from app.api.v1.auth_models import (
     EmailRequest,
     ExportAccepted,
@@ -34,9 +39,12 @@ def get_csrf() -> None:
     raise not_implemented()
 
 
-@router.post("/register", status_code=201)
-def register(body: RegisterRequest) -> User:
-    """Create an account and send the verification email."""
+@router.post("/register", status_code=202)
+def register(body: RegisterRequest) -> None:
+    """Always 202 with no body (no enumeration, S‑26).
+
+    A new address gets the verification email; an existing account gets a notice email instead.
+    """
     raise not_implemented()
 
 
@@ -70,13 +78,13 @@ def update_me(body: UpdateMeRequest) -> User:
     raise not_implemented()
 
 
-@router.delete("/me", status_code=202)
+@router.delete("/me", status_code=202, responses=WRONG_SECRET_RESPONSE)
 def delete_me(body: PasswordRequest) -> None:
     """Schedule account deletion after the grace period."""
     raise not_implemented()
 
 
-@router.post("/verify-email", status_code=204)
+@router.post("/verify-email", status_code=204, responses=WRONG_SECRET_RESPONSE)
 def verify_email(body: TokenRequest) -> None:
     """Confirm the email address with the emailed token."""
     raise not_implemented()
@@ -88,7 +96,7 @@ def forgot_password(body: EmailRequest) -> None:
     raise not_implemented()
 
 
-@router.post("/password/reset", status_code=204)
+@router.post("/password/reset", status_code=204, responses=WRONG_SECRET_RESPONSE)
 def reset_password(body: ResetPasswordRequest) -> None:
     """Set a new password with the emailed token."""
     raise not_implemented()
@@ -100,19 +108,19 @@ def enroll_mfa() -> MfaEnrollment:
     raise not_implemented()
 
 
-@router.post("/mfa/enroll/confirm", status_code=204)
+@router.post("/mfa/enroll/confirm", status_code=204, responses=WRONG_SECRET_RESPONSE)
 def confirm_mfa(body: MfaCodeRequest) -> None:
     """Activate MFA with a code from the authenticator app."""
     raise not_implemented()
 
 
-@router.post("/mfa/challenge")
+@router.post("/mfa/challenge", responses=WRONG_SECRET_RESPONSE)
 def mfa_challenge(body: MfaChallengeRequest) -> User:
     """Finish an MFA login with a TOTP code or a recovery code (uses the challenge cookie)."""
     raise not_implemented()
 
 
-@router.delete("/mfa", status_code=204)
+@router.delete("/mfa", status_code=204, responses=WRONG_SECRET_RESPONSE)
 def disable_mfa(body: MfaDisableRequest) -> None:
     """Turn MFA off (needs the password and a current code)."""
     raise not_implemented()
