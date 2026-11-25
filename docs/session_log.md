@@ -8,32 +8,39 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 8/11 done (P0.1, P0.2, P0.3, P0.4, P0.6, P0.7, P0.10); the P0.4, P0.6 and P0.7 ticks (and T0.2, T0.5 in `backend_plan.md`) are in **#25** (docs only), for the frontend to review. Open: P0.5 (§5–§8), P0.8 (branch protection), P0.9 (#20), P0.11. **P0.5 in progress:** #6, #8, #10, #12, #16 and the frontend's #13 and #17 are merged (`main` at **`7b2f66b`**). Open, both CI green and rebased on `7b2f66b`:
-- **#22** `feat/p0.5-auth-error-codes` (**`076ba16`**): the 11 §2 codes, 400 documented on the 6 secret endpoints, the 401 vs 400 rule, register → 202, 2 `decisions.md` rows, and `schema.d.ts`. 178 passed. Waiting for the frontend's review.
-- **#11** `feat/p0.5-file-stubs` (**`e4c707a`**, base `main`):
-  - `1198405` is the approved code (= `76bbe42`; per file the patches are identical, except one context line in `problem.py`);
-  - `be47429` adds `FILE_TOO_LARGE` and `QUOTA_EXCEEDED` and 5 explicit number codes;
-  - `e4c707a` is the generated files.
+| Current phase | **Phase 0 — Foundation (B0).** Steps **8/11** (P0.1, P0.2, P0.3, P0.4, P0.6, P0.7, P0.9, P0.10). The ticks for P0.4, P0.6, P0.7 and P0.9, the root `README.md` dev section, and T0.2 and T0.5 are in **#25** (`5eb32f4`, docs only, CI green), waiting for the frontend's review. Open: P0.5 (§5–§8 and `openapi-fetch`), P0.8 (branch protection, the owner's decision) and P0.11 (backend part). `main` is at **`6eef1fd`**; #10, #20, #21, #22, #23 and #24 are merged. Open:
+- **#11** `feat/p0.5-file-stubs` (**`8c55bd8`**, base `main`, CI green). Code commits:
+  - `3cb36af`: the approved `76bbe42`;
+  - `f2ce28f`: the §4 codes and the number codes;
+  - `c7faa05` and `8c55bd8`: generated only.
 
-  198 passed. Waiting for the frontend's re-check.
+  Rebased after #22 with `error-codes.json` and `test_error_codes.py` resolved (kept both sides). 215 passed. Waiting for the frontend's re-check.
+- **#25** (above).
 
-Merge order: #22 and #11 in either order; **whichever merges second gets rebased and regenerated** (both touch `error-codes.json`, `openapi.json` and `schema.d.ts`). Frontend #20 and #21: reviewed by us (comment reviews), nothing blocks them; the owner approves and merges. **`feat/p0.5-file-stubs` holds the newest session log; it is #11's branch, so a log commit moves #11's head.** |
+**`feat/p0.5-file-stubs` holds the newest session log; it is #11's branch, so a log commit moves #11's head.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | **Frontend:** review #22, re-check #11 (both asked in #1, 7160831011), and add the 5 new number codes to their translations.
+| Waiting on | **Frontend** (asked on #25, 7161950428, and in #1, 7161976673):
+- re-check #11 and review #25;
+- answer 5 questions:
+  1. add `openapi-fetch`, or drop it from P0.5;
+  2. tick their F0 "co-write `api_contract.md`";
+  3. tick their F0 tests (T0.2, T0.3, T0.5);
+  4. mark frontend S‑01, S‑03 and S‑04 verified;
+  5. log S‑05 / P0.8 as "manual rule, accepted for G0".
 
-**Owner:** approve and merge #20 and #21 when the frontend asks; set a global git identity on this machine (see Session 13). |
-| Next step | 1) **When the first of #22 and #11 merges, rebase the other:**
-   - `git rebase origin/main`. Resolve `error-codes.json` by keeping both sets of codes.
-   - Regenerate (`uv run python -m app.export_openapi`, then `pnpm -C frontend run gen:api`), commit, rerun the checks, `git push --force-with-lease`, and ask for a re-check.
+**Owner:**
+- decide on branch protection (GitHub Pro, a public repo, or an organization) for P0.8 / S‑05;
+- set a global git identity on this machine. |
+| Next step | 1) **When the frontend answers on #25:** apply the answers (in `plan.md`, plus their own files on their side), and do the backend half of S‑01…S‑05 in `security.md`, with evidence.
 
-2) **After #22 is in:** the small §3 PR: `PERSONAL_WORKSPACE_UNDELETABLE` in `error-codes.json` and the `AuditEvent.action` / `target_type` enums with proposed values. Consider `TOKEN_INVALID` (400) on `POST /invitations/accept`, and ask the frontend first.
+2) **Now (#22 is in):** the small §3 PR: `PERSONAL_WORKSPACE_UNDELETABLE` in `error-codes.json` and the `AuditEvent.action` / `target_type` enums with proposed values. Consider `TOKEN_INVALID` (400) on `POST /invitations/accept`, and ask the frontend first.
 
 3) **P0.11 backend part** (T0.7, S‑87): `X-Request-ID` middleware, JSON logs, PII scrub, `correlation_id` in every problem+json. The frontend's #20 error boundary shows it. Branch from `main`.
 
 4) **Part 4:** §5–§8 stubs.
 
 5) **Plan ticks:** tick each step in `docs/plan.md` in the PR that finishes it (not "later"). #25 catches up P0.4, P0.6 and P0.7. |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7160831011 }`; the reviews and comments on #11, #20, #21 and #22 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7161976673 }`; the reviews and comments on #11 and #25 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -231,6 +238,16 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **#20 and #21 reviewed** (comment reviews, no blockers):
   - #20: `correlation_id` arrives with our P0.11; the dev-only rewrite means no proxy under `next start`; `lang="en"` placeholder.
   - #21: light `--diff` on `--bg` is 4.11:1, so not for text; add `--surface-raised` pairs (all ≥ 5.4:1 today); theme `system` needs a pre-paint `data-theme` or a `prefers-color-scheme` block.
+
+**Plan ticks, #11 after #22, frontend questions:**
+- **Owner asked why nothing was ticked in `plan.md`.** Only P0.1, P0.2, P0.3 and P0.10 were ticked. I had deferred every tick to "the next shared docs PR" and never opened it.
+  - **#25** ticks P0.4, P0.6, P0.7 and P0.9 (with the root `README.md` local-dev section), plus `error-codes.json` v0, T0.2 and T0.5.
+  - **Count corrected:** 4 → 8 of 11 ticked. My first #25 text said 8 before P0.9, which was one too many.
+  - **New rule:** tick each step in the PR that finishes it.
+- **Frontend merged** #20, #21, #22, #23 (`/tokens-preview`) and #24 (their plan: P0.6, P0.9, P0.11 and P9.1 ticked). `main` is `6eef1fd`.
+- **#11 rebased again after #22.** There were conflicts in `error-codes.json` and `test_error_codes.py`, resolved by keeping both. `openapi.json` was stale (`--check` exit 1), so I regenerated it and `schema.d.ts` (`8c55bd8`). Result: 215 passed, CI green.
+- **Local vitest:** workers time out while starting ("Timeout waiting for worker to respond", 0 files, about 120 s). It passed here earlier today, and CI ran green on #11 and #25. It's the machine; no frontend config was changed.
+- **Asked the frontend 5 questions on #25** (`openapi-fetch`, the F0 contract box, the F0 tests line, frontend S‑01/03/04, S‑05 as a manual rule). Final state posted in #1 (7161976673).
 
 **Reviews posted** (comment reviews; the owner approves from their account):
 - **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
