@@ -18,6 +18,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 - **#40** `feat/p0.5-runs-stubs` → **`main`** (retargeted after #34), `6dcabef`: §7 runs lifecycle, `Idempotency-Key`, 4 new 409/422 codes.
 - **#41** `feat/p0.5-outputs-stubs` → #40, `d138c28`: §7 outputs (list, preview, download, lineage).
 - **#42** `feat/p0.5-workflows-stubs` → #41, `ceedd01`: §8 workflows and replay, `BASE_VERSION_STALE`, plus the stub notes in `api_contract.md`.
+- **#44** `feat/b0-auth-fixtures` → `main`, `8052294`: **§2 auth fixtures** (B0 deliverable, api_contract.md §10). 19 files and 48 scenarios in `contracts/fixtures/auth/`, validated against `openapi.json` and `error-codes.json` by `test_auth_fixtures.py` (new dev dependency `jsonschema` 4.26.0). Also brings the B0 checklist in `backend_plan.md` up to date. Independent of the stack.
 - **this PR** `docs/session-14-final` → `main`: this log, plus `.gitignore` for `replora_env_setup.txt`. **The newest log is on this branch until it merges.**
 
 **After each merge in the stack:**
@@ -27,12 +28,12 @@ Append a new entry per session (newest at the top). For each step record: what w
 4. Check with `git range-diff` that the patch is unchanged. |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | **Frontend:**
-- review #40, #41 and #42 in order (each has 3 proposals in its description), and this PR (it touches the root `.gitignore`);
+- review #40, #41 and #42 in order (each has 3 proposals in its description), **#44** (the auth fixtures for MSW), and this PR (it touches the root `.gitignore`);
 - **make the repo public** and run `.github/rulesets/README.md` steps 1–5, then post on #1;
 - the 4 open questions from #25, especially **`openapi-fetch`** (it blocks the P0.5 tick).
 
 **Owner:**
-- merge #40, #41 and #42 in order after the frontend approves each one;
+- merge #40, #41 and #42 in order, and #44 and this PR, after the frontend approves each one;
 - GitHub "Keep my email addresses private", plus the `noreply` git email; decide on a `LICENSE`. |
 | Next step | 1) **Merge the stack** (#40 → #41 → #42), rebasing each one onto `main` after the one below it merges (see above).
 
@@ -40,7 +41,9 @@ Append a new entry per session (newest at the top). For each step record: what w
 
 3) **When #42 is merged and `openapi-fetch` is decided:** tick **P0.5**, and align the P0.5 text in `plan.md` if `openapi-fetch` is dropped. Phase 0 is then 11/11.
 
-4) **G0 gate:** stop, report and ask **both** developers for approval before Phase 1. |
+4) **G0 gate:** stop, report and ask **both** developers for approval before Phase 1. **No Phase 1 work starts before that.** All remaining Phase 0 backend work is done or in review.
+
+5) **If a §2 schema changes:** update the matching file in `contracts/fixtures/auth/` in the same PR (`test_auth_fixtures.py` fails until you do). |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`):
 1. `git fetch --all --prune`
 2. **Newest log:** if the `docs/session-14-final` PR is merged, `git switch main; git pull --ff-only`. If not, `git switch docs/session-14-final; git pull --ff-only`.
@@ -201,6 +204,11 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **Owner's decisions at the end:**
   - **`.gitignore`** now lists `replora_env_setup.txt`, on this PR's branch (`git check-ignore -v`: `.gitignore:51`).
   - **#34 merged** by the owner, squash, `ef49ab3`, with `main` CI green. The frontend had approved `b52afbe`; the merged `97724a6` has an identical patch (range-diff `=`).
+- **#44 §2 auth fixtures** (`8052294`). This was the only Phase 0 deliverable still missing: B0 "auth fixtures in B0/B1", agreed in Session 7.
+  - **Design:** `contracts/fixtures/auth/<operationId>.json` = `{scenario: {status, body}}`, always with an `ok`. 19 files, 48 scenarios, written by a scratch script that wasn't committed.
+  - **The test** validates them against the generated `openapi.json` with `jsonschema` (refs resolved by attaching `components`), rather than walking `app.routes`: on FastAPI 0.165 that gives 4 entries, with the routers wrapped in a lazy `_IncludedRouter`.
+  - **TDD:** 2 red without fixtures. Then 3 deliberate mutations (a wrong status for a code, a missing `email`, an undocumented 418) gave exactly 3 failures. **331 passed**, and pip-audit found no known vulnerabilities.
+  - I amended the commit message once before opening the PR (47 → 48 scenarios); no PR existed yet.
 - **Stack after #34:** #40 was retargeted to `main` (`gh pr edit 40 --base main`), then `git rebase --onto origin/main 97724a6`, then #41 and #42 `--onto` the new heads. All three applied cleanly, regenerating changed nothing, and range-diff shows `=`. → `6dcabef` (308 passed), `d138c28` (325) and `ceedd01` (348).
 
 ## Session 13 — 2026-11-25 (other machine, `D:\Projects\replora`)
