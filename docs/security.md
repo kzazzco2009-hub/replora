@@ -30,6 +30,13 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 | S‑04 | Dependency vulnerability scanning | `uv run pip-audit`, `pnpm audit --audit-level=high` and Dependabot (weekly). CI fails on high or critical. | CI |
 | S‑05 | Repository protection | Protected `main`, required reviews from the other developer, required status checks, no force-push, signed commits recommended, CODEOWNERS. | manual check, logged |
 
+**Phase 0 status** (the evidence is in `session_log.md`, Session 13):
+- [x] **S‑01:** `.gitignore` before the first commit, gitleaks in pre-commit (#14, with the OpenRouter rule) and CI. T0.5 and T0.6 pass. The old OpenRouter key was deleted by the owner.
+- [ ] **S‑02:** settings come from the environment (`pydantic-settings`, `SecretStr`). **Missing:** the app does not yet refuse to start in production when a required secret is missing or `DEBUG` is on.
+- [x] **S‑03:** `uv.lock` and `pnpm-lock.yaml` are committed. CI runs `uv sync --locked` and `pnpm install --frozen-lockfile`.
+- [x] **S‑04:** CI runs `uv run pip-audit` and `pnpm audit --audit-level=high`. Dependabot runs weekly for uv, npm and GitHub Actions.
+- [ ] **S‑05:** CODEOWNERS and the PR template are in. Protecting `main` needs GitHub Pro, a public repo or an organization (the owner's decision). Until then it's the manual rule in `decisions.md`.
+
 ## Phase 1–3 — Core engine (secure by design)
 | ID | Control | Implementation | Verify |
 |---|---|---|---|

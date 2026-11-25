@@ -178,12 +178,12 @@ Goal: a clean, secure, reproducible monorepo with CI that is green on empty skel
 - [x] P0.1 Verify the latest stable versions (Python, uv, FastAPI, Pydantic, SQLAlchemy, Alembic, Next.js, React, Tailwind, next-intl, TanStack Query, Playwright, Vitest). Record them in session_log.
 - [x] P0.2 `git init`. Add a root `.gitignore` (`.env*`, `.data/`, `.venv/`, `node_modules/`, `.next/`, coverage) **before the first commit**. Add `.env.example` with key names only. Run a gitleaks scan.
 - [x] P0.3 Backend skeleton: `uv init backend`. Add FastAPI, pydantic-settings, ruff and pytest. `GET /api/v1/health` returns `{status:"ok", version}`.
-- [ ] P0.4 Frontend skeleton: create a Next.js app (TS, App Router, Tailwind v4, ESLint) with pnpm. It renders one page.
+- [x] P0.4 Frontend skeleton: create a Next.js app (TS, App Router, Tailwind v4, ESLint) with pnpm. It renders one page.
 - [ ] P0.5 `contracts/` folder: an OpenAPI export script (`uv run python -m app.export_openapi`). Generate the TS client with `openapi-typescript` and `openapi-fetch`.
-- [ ] P0.6 Pre-commit hooks: ruff (lint and format), the TS linter and prettier, and gitleaks.
-- [ ] P0.7 GitHub Actions CI: backend lint and test, frontend lint, typecheck and test, a contract drift check (the generated OpenAPI must match the committed file), gitleaks, and dependency audit (`uv run pip-audit` and `pnpm audit`).
+- [x] P0.6 Pre-commit hooks: ruff (lint and format), the TS linter and prettier, and gitleaks.
+- [x] P0.7 GitHub Actions CI: backend lint and test, frontend lint, typecheck and test, a contract drift check (the generated OpenAPI must match the committed file), gitleaks, and dependency audit (`uv run pip-audit` and `pnpm audit`).
 - [ ] P0.8 Repo governance: protected `main`, required CI, 1 approving review by the other developer, CODEOWNERS, a PR template (summary, commit SHA, test commands and results, security impact).
-- [ ] P0.9 Local dev commands documented in `README.md` (`uv run uvicorn …`, `pnpm dev`, with a `/api` rewrite to the backend).
+- [x] P0.9 Local dev commands documented in `README.md` (`uv run uvicorn …`, `pnpm dev`, with a `/api` rewrite to the backend).
 - [x] P0.10 Owner answers decisions D1–D14. Record the answers in `session_log.md`.
 - [x] P0.11 Observability from day one: structured JSON logs (backend), a correlation ID per request (`X-Request-ID`, returned in problem+json), PII scrubbing, and a frontend error boundary that reports the correlation ID.
 - [ ] Tests T0.* pass · Security S‑01…S‑05 verified · **Gate G0**
@@ -285,7 +285,7 @@ Goal: frozen domain models that both developers rely on.
 - [ ] Tests T8.* pass · Security S‑16, S‑17, S‑50…S‑53 verified · **Gate G8 (backend MVP complete + production path proven)**
 
 ### Phase 9 — Frontend foundation (M) *(runs in parallel with Phases 4–8, see frontend_plan.md)*
-- [ ] P9.1 Design tokens from `design.md` as CSS variables. Tailwind v4 `@theme`. Light and dark palettes.
+- [x] P9.1 Design tokens from `design.md` as CSS variables. Tailwind v4 `@theme`. Light and dark palettes.
 - [ ] P9.2 Theme: system default, a manual toggle that persists, and no flash on load (`next-themes`).
 - [ ] P9.3 i18n: `next-intl` with `/ar` and `/en` routes. `dir="rtl"` for Arabic. **Logical CSS properties only** (`ms-`, `pe-`, `start`, `end`). The Arabic and Latin fonts load via `next/font`.
 - [ ] P9.4 App shell, responsive at three sizes: sidebar (≥ 1024 px), collapsible rail (640–1023 px), bottom navigation (< 640 px).

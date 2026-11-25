@@ -44,7 +44,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 
 ## Phase 0 — Foundation
 - [x] T0.1 `GET /api/v1/health` returns 200 with `status: "ok"` (unit, TestClient).
-- [ ] T0.2 The frontend home page renders (Vitest smoke) and `pnpm build` succeeds.
+- [x] T0.2 The frontend home page renders (Vitest smoke) and `pnpm build` succeeds.
 - [x] T0.3 CI runs green on a no-op PR. CI fails on an intentional lint error (verify the gate works, then revert).
 - [x] T0.4 The contract drift check fails when the OpenAPI output differs from the committed file.
 - [x] T0.5 gitleaks blocks a commit containing a fake `OPENROUTER_API_KEY=sk-or-…` (pre-commit test in a scratch branch).
@@ -223,7 +223,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 ## Phase 11 — UX iteration and accessibility
 - [ ] T11.1 axe has zero serious or critical violations on all screens × 2 languages × 2 themes.
 - [ ] T11.2 Keyboard-only run of the full wizard. The focus order is logical in both LTR and RTL.
-- [ ] T11.3 Contrast is AA for all token pairs (an automated token contrast test in both themes).
+- [x] T11.3 Contrast is AA for all token pairs (an automated token contrast test in both themes).
 - [ ] T11.4 With reduced motion, no non-essential animation runs (Playwright `reducedMotion: 'reduce'`).
 - [ ] T11.5 Screen-reader smoke test (NVDA on Windows, VoiceOver on iOS) for the wizard and results.
 - [ ] T11.6 Visual regression baselines (Playwright screenshots) are committed for the matrix in P11.1.
