@@ -285,7 +285,7 @@ Goal: frozen domain models that both developers rely on.
 - [ ] Tests T8.* pass · Security S‑16, S‑17, S‑50…S‑53 verified · **Gate G8 (backend MVP complete + production path proven)**
 
 ### Phase 9 — Frontend foundation (M) *(runs in parallel with Phases 4–8, see frontend_plan.md)*
-- [ ] P9.1 Design tokens from `design.md` as CSS variables. Tailwind v4 `@theme`. Light and dark palettes.
+- [x] P9.1 Design tokens from `design.md` as CSS variables. Tailwind v4 `@theme`. Light and dark palettes.
 - [ ] P9.2 Theme: system default, a manual toggle that persists, and no flash on load (`next-themes`).
 - [ ] P9.3 i18n: `next-intl` with `/ar` and `/en` routes. `dir="rtl"` for Arabic. **Logical CSS properties only** (`ms-`, `pe-`, `start`, `end`). The Arabic and Latin fonts load via `next/font`.
 - [ ] P9.4 App shell, responsive at three sizes: sidebar (≥ 1024 px), collapsible rail (640–1023 px), bottom navigation (< 640 px).
