@@ -8,18 +8,17 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0), end of Session 14.** `main` is at **`308f2f9`**, CI green. Merged today: #27 (§3 codes), #30, #37, #38 (frontend P9.3), #31 (`allowBuilds`), **#32** (`rejection_codes`), **#33** (S‑02), **#35** (the ruleset as code) and #36 (log).
+| Current phase | **Phase 0 — Foundation (B0), end of Session 14.** `main` is at **`ef49ab3`**, CI green. Merged today: #27 (§3 codes), #30, #37, #38 (frontend P9.3), #31 (`allowBuilds`), **#32** (`rejection_codes`), **#33** (S‑02), **#34** (§6 drafts, merged by the owner), **#35** (the ruleset as code) and #36 (log).
 
 **Steps:** 9/11. **P0.5:** every contract section §2–§8 is now stubbed. The last four are in a stack of PRs; P0.5 is ticked when they merge and the `openapi-fetch` question is answered. **P0.8:** the files are in (#35); the admin applies them after the repo goes public (the owner's go is on #1, 7172828609).
 
 **Security:** 4/5 (S‑01 to S‑04). S‑05 waits on the ruleset being live.
 
-**Open backend PRs.** It's a stack, and each one is CI green and rebased on `308f2f9`:
-- **#34** `feat/p0.5-drafts-stubs` → `main`, `97724a6`: §6 templates and drafts. **Approved.** Rebuilt after #32: the 3 log commits were dropped (they netted to zero, and replaying them would have overwritten #36's log).
-- **#40** `feat/p0.5-runs-stubs` → #34, `1df0c55`: §7 runs lifecycle, `Idempotency-Key`, 4 new 409/422 codes.
-- **#41** `feat/p0.5-outputs-stubs` → #40, `131c035`: §7 outputs (list, preview, download, lineage).
-- **#42** `feat/p0.5-workflows-stubs` → #41, `d764eb1`: §8 workflows and replay, `BASE_VERSION_STALE`, plus the stub notes in `api_contract.md`.
-- **this PR** `docs/session-14-final` → `main`: this log only. **The newest log is on this branch until it merges.**
+**Open backend PRs.** It's a stack, and each one is CI green and rebased on `ef49ab3`:
+- **#40** `feat/p0.5-runs-stubs` → **`main`** (retargeted after #34), `6dcabef`: §7 runs lifecycle, `Idempotency-Key`, 4 new 409/422 codes.
+- **#41** `feat/p0.5-outputs-stubs` → #40, `d138c28`: §7 outputs (list, preview, download, lineage).
+- **#42** `feat/p0.5-workflows-stubs` → #41, `ceedd01`: §8 workflows and replay, `BASE_VERSION_STALE`, plus the stub notes in `api_contract.md`.
+- **this PR** `docs/session-14-final` → `main`: this log, plus `.gitignore` for `replora_env_setup.txt`. **The newest log is on this branch until it merges.**
 
 **After each merge in the stack:**
 1. Retarget the next PR to `main`: `gh pr edit <n> -R kzazzco2009-hub/replora --base main`.
@@ -28,15 +27,14 @@ Append a new entry per session (newest at the top). For each step record: what w
 4. Check with `git range-diff` that the patch is unchanged. |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | **Frontend:**
-- the owner merges #34, then the frontend reviews #40, #41 and #42 in order (each has 3 proposals in its description);
+- review #40, #41 and #42 in order (each has 3 proposals in its description), and this PR (it touches the root `.gitignore`);
 - **make the repo public** and run `.github/rulesets/README.md` steps 1–5, then post on #1;
 - the 4 open questions from #25, especially **`openapi-fetch`** (it blocks the P0.5 tick).
 
 **Owner:**
-- give the go on and merge #34, then the stack in order;
-- **decide on `replora_env_setup.txt`.** It sits untracked in the repo root, and gitleaks finds nothing in it. Move it out (`Move-Item D:\Projects\replora\replora_env_setup.txt D:\Projects\`) or add it to `.gitignore`. Until then, stage files by name, never `git add -A`;
+- merge #40, #41 and #42 in order after the frontend approves each one;
 - GitHub "Keep my email addresses private", plus the `noreply` git email; decide on a `LICENSE`. |
-| Next step | 1) **Merge the stack** (#34 → #40 → #41 → #42), rebasing each one onto `main` after the one below it merges (see above).
+| Next step | 1) **Merge the stack** (#40 → #41 → #42), rebasing each one onto `main` after the one below it merges (see above).
 
 2) **When the ruleset is live:** `gh api repos/kzazzco2009-hub/replora/rules/branches/main` should list `deletion`, `non_fast_forward`, `pull_request` and `required_status_checks`. Then tick **P0.8** and **S‑05**, and add the "repo public" row to `decisions.md`.
 
@@ -46,7 +44,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`):
 1. `git fetch --all --prune`
 2. **Newest log:** if the `docs/session-14-final` PR is merged, `git switch main; git pull --ff-only`. If not, `git switch docs/session-14-final; git pull --ff-only`.
-3. `git status` must be clean, except the untracked `replora_env_setup.txt` until the owner decides. For each open branch (`feat/p0.5-drafts-stubs`, `feat/p0.5-runs-stubs`, `feat/p0.5-outputs-stubs`, `feat/p0.5-workflows-stubs`): `git switch <branch>; git pull --ff-only`. If a pull refuses because the branch was rebased on the other machine, check that `git cherry` and the content diff show nothing local, then `git reset --hard origin/<branch>`.
+3. `git status` must be clean (`replora_env_setup.txt` is ignored once this PR merges; until then it shows as untracked on other branches). For each open branch (`feat/p0.5-runs-stubs`, `feat/p0.5-outputs-stubs`, `feat/p0.5-workflows-stubs`): `git switch <branch>; git pull --ff-only`. If a pull refuses because the branch was rebased on the other machine, check that `git cherry` and the content diff show nothing local, then `git reset --hard origin/<branch>`.
 4. `pnpm install --frozen-lockfile` from the repo root, then `cd backend; uv sync --locked`.
 5. `gh pr list -R kzazzco2009-hub/replora --state all --limit 15`, `gh repo view kzazzco2009-hub/replora --json visibility`, and the #1 comments after 7172828609: `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7172828609 }`. Also the reviews on #34, #40, #41 and #42.
 
@@ -200,6 +198,10 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
   - **#34:** `git rebase` would have replayed 3 log commits; the last one resets `session_log.md` to `f463fea` and would have overwritten #36. I aborted and checked that `git diff b52afbe ececfe7` is empty. Then I rebuilt the branch: `git reset --hard origin/main`, `git cherry-pick b52afbe`, and one conflict in `error-codes.json` with both sides kept. → `97724a6`, 281 passed.
   - **#40, #41, #42:** `git rebase --onto <new base> <old base head>`, applied cleanly. Regenerating changed nothing. → `1df0c55` (308 passed), `131c035` (325) and `d764eb1` (348).
   - `git range-diff` shows `=` for every code commit. CI is green on all four.
+- **Owner's decisions at the end:**
+  - **`.gitignore`** now lists `replora_env_setup.txt`, on this PR's branch (`git check-ignore -v`: `.gitignore:51`).
+  - **#34 merged** by the owner, squash, `ef49ab3`, with `main` CI green. The frontend had approved `b52afbe`; the merged `97724a6` has an identical patch (range-diff `=`).
+- **Stack after #34:** #40 was retargeted to `main` (`gh pr edit 40 --base main`), then `git rebase --onto origin/main 97724a6`, then #41 and #42 `--onto` the new heads. All three applied cleanly, regenerating changed nothing, and range-diff shows `=`. → `6dcabef` (308 passed), `d138c28` (325) and `ceedd01` (348).
 
 ## Session 13 — 2026-11-25 (other machine, `D:\Projects\replora`)
 **Goal:** check the state is aligned, then do the #8 review follow-ups.
