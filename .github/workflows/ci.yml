@@ -86,6 +86,7 @@ jobs:
           pnpm -C frontend run gen:api
           git diff --exit-code -- frontend/src/lib/api/schema.d.ts
       - run: pnpm -C frontend run lint
+      - run: pnpm -C frontend run format:check
       - run: pnpm -C frontend run typecheck
       - run: pnpm -C frontend run test
       - run: pnpm -C frontend run build
