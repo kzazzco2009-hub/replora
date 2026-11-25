@@ -81,7 +81,14 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Contract types drift check (schema.d.ts)
+        run: |
+          pnpm -C frontend run gen:api
+          git diff --exit-code -- frontend/src/lib/api/schema.d.ts
       - run: pnpm -C frontend run lint
       - run: pnpm -C frontend run typecheck
       - run: pnpm -C frontend run test
+      - run: pnpm -C frontend run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
       - run: pnpm audit --audit-level=high
