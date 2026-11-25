@@ -89,7 +89,7 @@ Resolved versions (P0.4 install):
 - Ran locally, all green: `pnpm typecheck` (tsc --noEmit), `pnpm lint` (eslint ., 0 errors despite the 3 peer warnings above), `pnpm test` (vitest, 1/1 passed — T0.2), `pnpm build` (next build / Turbopack, static page generated).
 - `next build` auto-adjusted `tsconfig.json`: `jsx` → `react-jsx` (Next requires the automatic JSX runtime) and added `.next/dev/types/**/*.ts` to `include`. Expected Next.js behavior, left as-is.
 
-- T0.3: added a deliberate `react-hooks/rules-of-hooks` violation to `src/app/page.tsx` (calling `useState` at module top level). `pnpm lint` failed as expected (`exit code 1`, 1 error). Reverted the file; `pnpm lint` passed again (`exit code 0`), confirmed clean. Done locally with the exact command CI runs (`pnpm -C frontend run lint`); the full CI-level proof (GitHub Actions run) still needs the branch pushed — that's stage (f), not done yet pending explicit "go".
+- T0.3: added a deliberate `react-hooks/rules-of-hooks` violation to `src/app/page.tsx` (calling `useState` at module top level). `pnpm lint` failed as expected (`exit code 1`, 1 error). Reverted the file; `pnpm lint` passed again (`exit code 0`), confirmed clean. Done locally with the exact command CI runs (`pnpm -C frontend run lint`). The CI-level proof followed later in this same session once pushed — see below (failed run `45491885639`, green run `45492118286`).
 
 - Replaced "owner" with "Developer B" in `frontend/CLAUDE.md` (4 occurrences).
 - `gitleaks git .`: no leaks found. Committed by name (`80aafbd`), pushed `feat/p0.4-frontend-skeleton`, opened PR #9.
@@ -124,3 +124,30 @@ Done:
   - Determinism: staged `schema.d.ts`, ran `pnpm gen:api` a second time — identical SHA-256 (`61b025a7...`), `git diff` on the file showed 0 lines.
 
 Next step: gitleaks, commit, push, open the PR (template-filled, SHA + test results + security/contract impact). Do **not** tick P0.5 in `docs/frontend/plan.md` until the PR is merged — `schema.d.ts` will need regenerating once #10/#11/#12 land.
+
+---
+
+## Session 4 — 2026-11-25
+Docs-only: tick P0.5 and P0.7 in `plan.md` now that their PRs are merged; fix the stale T0.3 note above.
+
+Merged since Session 3 (confirmed via `gh pr view` against `main`):
+- PR #13, "`pnpm gen:api` generates TS types from `contracts/openapi.json` (P0.5)" — merge commit `14fd30b19b3dd56eb861c8f20e2926a12d3ea096`. (Note: the merge SHA given verbally for this PR was `7955d6f`; `gh pr view 13` and `git log --oneline main` both show `14fd30b1` as the actual merge commit on `main` — used the verified value here.)
+- PR #17, "ci(frontend): contract types drift check + production build" — merge commit `73ef4b162cbb99c7e8d4d70b861e80fb67873f33`.
+- PR #14, "pre-commit hooks (P0.6 backend part, T0.5)" — merge commit `dbe95655b60ff3adf26f43bcdac4c5ad9e111a58`.
+- PR #15, "Frontend follow-ups from PR #9 review" — merge commit `75b8279a860875ee5d17d155bec9878c97705d2f` (current `main` tip).
+
+P0.5: ticked `[x]`. `schema.d.ts` generation (`pnpm gen:api`) and the Vitest contract-type test landed in #13; verified still current on `main` at `75b8279`.
+
+P0.7: ticked `[x]`. Read `.github/workflows/ci.yml` on `main` (added in #17): the `frontend` job runs, in order, the contract types drift check (`pnpm -C frontend run gen:api` + `git diff --exit-code` on `schema.d.ts`), `pnpm -C frontend run lint`, `pnpm -C frontend run typecheck`, `pnpm -C frontend run test`, `pnpm -C frontend run build`, and `pnpm audit --audit-level=high` — all six items P0.7 asks for are present.
+
+CI result on `main` at the current tip (`75b8279`): run `45587321752` (triggered by the #15 merge push) is green — `Detect project parts`, `Secret scan (gitleaks)`, `Backend (lint, test, audit)`, and `Frontend (lint, typecheck, test, audit)` all passed, including the schema drift check inside the frontend job. (The two runs triggered moments earlier by the #17 and #14 merges, `45587291208` and `45587260124`, were cancelled by the `ci-${{ github.ref }}` concurrency group, superseded by this one — expected behavior, not a failure.)
+
+T0.3 cross-reference: already logged above (Session 2) with both run links; this session only corrected the trailing "not done yet" clause that had gone stale once the CI-level proof landed later in that same session.
+
+Decisions recorded this session (not yet in `docs/decisions.md` — owner's call to log there):
+- Auto mode is allowed for Claude Code sessions on this track, with mandatory stops at the end of each stage and before every commit, push, PR, or merge.
+- Commit message footer is `Co-Authored-By` only — the earlier `Claude-Session` trailer is dropped.
+- Khaled agreed that any of his PRs changing `contracts/openapi.json` will also regenerate and commit **only** `frontend/src/lib/api/schema.d.ts` (no other generated or unrelated files) in the same PR.
+- Khaled proposed, and it was accepted, 11 `problem_codes` for §2 (auth) plus `register` returning `202` in every case (to avoid leaking whether an email is already registered); lands in Khaled's PR after #16.
+
+Next step: open the PR for this doc update (no code, no contract, no security impact), then resume §2 contract follow-ups per the decision above.
