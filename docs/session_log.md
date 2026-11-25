@@ -27,7 +27,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 
 **Owner:**
 - decide on branch protection (GitHub Pro, public repo, or organization) for P0.8 and S‑05;
-- set a global git identity on this machine (`git config --global user.name khaledhagar`, `git config --global user.email <your email>`). |
+- ~~set a global git identity on this machine~~: done (`khaledhagar`, 2026-11-25). |
 | Next step | 1) **Apply the frontend's answers:** the ticks into #25, #27's values, #28's questions.
 
 2) **Rebase whatever conflicts after each merge.** `git switch <branch>; git rebase origin/main`. Resolve `error-codes.json` by keeping both sides. Then `uv run python -m app.export_openapi` and `pnpm -C frontend run gen:api`, commit the generated files, rerun the checks, and `git push --force-with-lease`. For a PR whose base is not `main`, **retarget before pushing**.
@@ -54,7 +54,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 - `gh` works from PowerShell only. `gh --jq` breaks in PowerShell 5.1, so pipe to `ConvertFrom-Json`.
 - If gitleaks isn't found, reload PATH (root `CLAUDE.md`).
 - **This machine:** local `vitest` workers time out while starting. CI runs the frontend tests.
-- **This machine** has no global git identity. Commits used `git -c user.name=khaledhagar -c user.email=…`. |
+- **This machine:** the global git identity is set (`khaledhagar`, the same as the history). |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
