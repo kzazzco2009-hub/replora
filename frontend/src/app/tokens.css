@@ -1,0 +1,116 @@
+/*
+ * Design tokens from docs/design.md §3. Color pairs are checked for WCAG
+ * contrast by tests/unit/contrast.test.ts (T11.3); do not edit a hex value
+ * here without updating docs/design.md first (shared file).
+ */
+
+:root {
+  /* Radius: hierarchy, not one value for everything. */
+  --radius-control: 8px;
+  --radius-panel: 12px;
+  --radius-dialog: 16px;
+  --radius-chip: 9999px;
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-rail: 400ms;
+
+  /* Type scale: major third, 1.25. Line-heights depend on script, not size. */
+  --type-xs: 12px;
+  --type-sm: 14px;
+  --type-base: 16px;
+  --type-lg: 20px;
+  --type-xl: 25px;
+  --type-2xl: 31px;
+  --type-3xl: 39px;
+
+  --leading-body-latin: 1.5;
+  --leading-body-arabic: 1.7;
+  --leading-heading-en: 1.2;
+  --leading-heading-ar: 1.35;
+}
+
+:root,
+[data-theme="light"] {
+  --bg: #eef1ef;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --ink: #17232b;
+  --ink-muted: #4e5f66;
+  --line: #d3dbd8;
+  --petrol: #0e5e6f;
+  --petrol-contrast: #ffffff;
+  --saffron: #d99a0b;
+  --saffron-contrast: #1e1600;
+  --ok: #237a57;
+  --diff: #a86400;
+  --missing: #b3261e;
+  --review: #5b4bc4;
+  --focus-ring: var(--petrol);
+
+  --artifact-table: #0e5e6f;
+  --artifact-text: #6a5a3e;
+  --artifact-document: #7a3e6b;
+  --artifact-image: #2f6e2f;
+  --artifact-archive: #4e5f66;
+  --artifact-structured: #3d4da8;
+}
+
+[data-theme="dark"] {
+  --bg: #0d1b1f;
+  --surface: #13262b;
+  --surface-raised: #1a3137;
+  --ink: #e3ecea;
+  --ink-muted: #9db2b0;
+  --line: #28434a;
+  --petrol: #4fb0c0;
+  --petrol-contrast: #06171b;
+  --saffron: #f0b43a;
+  --saffron-contrast: #1e1600;
+  --ok: #5cc594;
+  --diff: #f2a64a;
+  --missing: #f2867e;
+  --review: #a99cf5;
+  --focus-ring: var(--petrol);
+
+  --artifact-table: #4fb0c0;
+  --artifact-text: #cdb98f;
+  --artifact-document: #d59ac6;
+  --artifact-image: #8fd08f;
+  --artifact-archive: #9db2b0;
+  --artifact-structured: #9aa6ee;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-petrol: var(--petrol);
+  --color-petrol-contrast: var(--petrol-contrast);
+  --color-saffron: var(--saffron);
+  --color-saffron-contrast: var(--saffron-contrast);
+  --color-ok: var(--ok);
+  --color-diff: var(--diff);
+  --color-missing: var(--missing);
+  --color-review: var(--review);
+  --color-focus-ring: var(--focus-ring);
+
+  --color-artifact-table: var(--artifact-table);
+  --color-artifact-text: var(--artifact-text);
+  --color-artifact-document: var(--artifact-document);
+  --color-artifact-image: var(--artifact-image);
+  --color-artifact-archive: var(--artifact-archive);
+  --color-artifact-structured: var(--artifact-structured);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 1ms;
+    --duration-base: 1ms;
+    --duration-rail: 1ms;
+  }
+}
