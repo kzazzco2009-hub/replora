@@ -8,7 +8,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.6 is done on both sides** (#14 and the frontend's #19); its tick in `docs/plan.md` also goes in the next shared docs PR. **P0.5 in progress:** #6, #8, #10, #12, #16 and the frontend's #13 and #17 are merged (`main` at **`7b2f66b`**). Open, both CI green and rebased on `7b2f66b`:
+| Current phase | **Phase 0 — Foundation (B0).** Steps 8/11 done (P0.1, P0.2, P0.3, P0.4, P0.6, P0.7, P0.10); the P0.4, P0.6 and P0.7 ticks (and T0.2, T0.5 in `backend_plan.md`) are in **#25** (docs only), for the frontend to review. Open: P0.5 (§5–§8), P0.8 (branch protection), P0.9 (#20), P0.11. **P0.5 in progress:** #6, #8, #10, #12, #16 and the frontend's #13 and #17 are merged (`main` at **`7b2f66b`**). Open, both CI green and rebased on `7b2f66b`:
 - **#22** `feat/p0.5-auth-error-codes` (**`076ba16`**): the 11 §2 codes, 400 documented on the 6 secret endpoints, the 401 vs 400 rule, register → 202, 2 `decisions.md` rows, and `schema.d.ts`. 178 passed. Waiting for the frontend's review.
 - **#11** `feat/p0.5-file-stubs` (**`e4c707a`**, base `main`):
   - `1198405` is the approved code (= `76bbe42`; per file the patches are identical, except one context line in `problem.py`);
@@ -32,14 +32,14 @@ Merge order: #22 and #11 in either order; **whichever merges second gets rebased
 
 4) **Part 4:** §5–§8 stubs.
 
-5) **The P0.4 and P0.6 ticks in `docs/plan.md`**, in the next shared docs PR. |
+5) **Plan ticks:** tick each step in `docs/plan.md` in the PR that finishes it (not "later"). #25 catches up P0.4, P0.6 and P0.7. |
 | Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7160831011 }`; the reviews and comments on #11, #20, #21 and #22 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 5/11 | 4/7 | 0/5 | ☐ |
+| 0 Foundation | 8/11 | 6/7 | 0/5 | ☐ |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
