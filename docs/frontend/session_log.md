@@ -10,7 +10,7 @@ Append a new entry per session (newest first). Record what was done, the command
 |---|---|
 | Current phase | Phase 0, frontend half (F0). P0.1, P0.4 done. P0.5 implemented on branch `feat/p0.5-gen-api`, PR open — not ticked until merged. |
 | Last gate passed | Planning approved. G0 agreement confirmed by both sides in issue #1. The formal G0 gate (end of Phase 0) is still open. |
-| Next step | Wait for CI and review on the P0.5 PR. The generated `schema.d.ts` will need a re-run of `pnpm gen:api` once PRs #10, #11, #12 merge (workspaces, files, auth follow-ups extend the contract). |
+| Next step | Wait for CI and review on PR #29 (P9.2, theme switching). Then P9.3 (`next-intl`, RTL). |
 | Blockers | none |
 
 ## Recorded versions (P0.1)
@@ -161,5 +161,26 @@ Docs-only: tick P0.6, P0.9, P0.11, P9.1 in `plan.md` (PRs merged to `main`, conf
 - PR #20, "feat(frontend): dev /api rewrite + global error boundary (P0.9, P0.11)" — merge commit `c19af0961f8f0b7eccea8e9fea9937304f9b1d35`. Dev-only `/api/:path*` rewrite to `BACKEND_ORIGIN` (default `http://localhost:8000`) in `next.config.ts`, documented in a new `frontend/README.md`; global error boundary (`src/app/error.tsx`, `global-error.tsx`, `ErrorView`) shows only the opaque `correlation_id`/`digest`, never raw `problem.detail`.
 - PR #21, "feat(frontend): design tokens from design.md §3 as CSS variables (P9.1)" — merge commit `e4fe0631718b2ccdacd905f10b83b5817e24fc54`. Color/radius/motion/type-scale/line-height tokens in `tokens.css`, `@theme inline` mapping to Tailwind utilities, `prefers-reduced-motion` override, T11.3 contrast tests (18/18 pairs pass both themes).
 - PR #23, "feat(frontend): dev-only /tokens-preview page (P9.1 follow-up)" — merge commit `17e7bbf9d70573cb8f0562243f2b0d5301f9d0b7`. Dev-only `/tokens-preview` reference page (404s in production); also fixes `--radius-control`/`--radius-panel`/`--radius-dialog`/`--radius-chip` having been declared in plain `:root` instead of `@theme`, so Tailwind never generated `rounded-control`/`rounded-panel`/`rounded-chip`.
+
+---
+
+## Session 6 — 2026-11-25
+P9.2 (theme switching), implemented and PR opened (not merged).
+
+Done:
+- Added `next-themes@0.4.6` (pinned exact; peer deps cover React 19.3.1). `ThemeProvider` wraps the app with `attribute="data-theme"`, `defaultTheme="system"`, `enableSystem`. `ThemeToggle` (Light/Dark/System, on Home for now, pending P9.4) guards its active-option display with a `useSyncExternalStore` mounted flag to avoid a hydration mismatch.
+- Cookie strategy: `ThemeCookieSync` mirrors an **explicit** light/dark pick into a `theme` cookie; "system" clears it instead of caching it (a stale cookie could disagree with a later OS-preference change). `layout.tsx` reads the cookie server-side and sets `data-theme` on `<html>` directly when present.
+- No-flash fix: `tokens.css` gained `@media (prefers-color-scheme: dark) { :root:not([data-theme]) {...} }`, a token-for-token copy of `[data-theme="dark"]`, so a first-ever visit (no cookie) resolves live from the OS preference in pure CSS before any JS runs. A new parity test (`tests/unit/tokens-parity.test.ts`) checks every token matches `[data-theme="dark"]`, so next-themes attaching the attribute afterwards never changes a painted color.
+- First draft used `resolvedTheme` and accepted a one-time flash on a cookie-less first visit; the owner rejected that and asked for the CSS-media-query fix above instead, in the same PR.
+- Evidence (commands and results, SHA `fe87cd1`):
+  - `pnpm lint` → 0 errors (one `react-hooks/set-state-in-effect` error from the first "mounted" draft, fixed by switching to `useSyncExternalStore`).
+  - `pnpm format:check` → clean.
+  - `pnpm typecheck` → clean.
+  - `pnpm test` → 100 passed (100), 8 files (was 76 before this change).
+  - `pnpm build` → compiled; `/` became server-rendered on demand (`ƒ`) because `layout.tsx` now reads `cookies()` — expected, not a regression.
+  - `gitleaks git .` → no leaks found (104 commits scanned).
+- PR #29 opened against `main` (not merged). Diff ≈ 300 lines, under the 400 cap.
+
+Next step: wait for CI and review on PR #29, then P9.3 (`next-intl`, `[locale]` routing, RTL).
 
 Next step: resume §2 contract follow-ups per the Session 4 decision (Khaled's 11 `problem_codes` PR after #16).
