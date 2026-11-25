@@ -17,7 +17,8 @@ Replora is a bilingual (Arabic RTL and English) SaaS app for repetitive file wor
 ## Process (mandatory)
 - Work incrementally in small steps, and validate each step before the next.
 - Mark a plan step `[x]` only after its tests pass and the evidence (command plus result) is in the session log.
-- **Phase gates:** a phase is done only when all its steps, tests (`testing.md`) and security items (`security.md`) are verified. Then stop, report, and **ask the gate approver for permission** before starting the next phase: Developer A (the owner) for backend gates, Developer B for frontend gates, and both for the shared gates (0, 17, 18, 19).
+- **Phase gates:** a phase is done only when all its steps, tests (`testing.md`) and security items (`security.md`) are verified. Then stop, report, and **ask the gate approver for permission** before starting the next phase: Developer A for backend gates, Developer B for frontend gates, and both for the shared gates (0, 17, 18, 19).
+- **Owners:** both developers are co-owners (`docs/decisions.md`, 2026-11-25). Owner decisions need both of them. In a disagreement, each developer decides within their own track, and a shared file changes only when both agree.
 - Check the production compatibility checklist (`docs/plan.md` §4) at every step.
 - End of session: update the session log, commit and push. Never leave uncommitted work, because the next session may be on another machine.
 
@@ -41,7 +42,7 @@ Replora is a bilingual (Arabic RTL and English) SaaS app for repetitive file wor
 - Coordinate with the other developer through GitHub Issues and PR comments, in English. Record final decisions in `docs/decisions.md`.
 
 ## Machines and tools (Windows)
-- The owner works from more than one machine. **If a tool is missing, give the owner the install commands instead of installing it yourself.**
+- Developer A works from more than one machine. **If a tool is missing, give the developer the install commands instead of installing it yourself.**
 - Pinned versions: `.python-version` (3.14), `.nvmrc` (26.13.1), `package.json` → `packageManager` (pnpm 12.23.0). The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth.
 - Keep the clone outside OneDrive (for example `D:\Projects\replora`).
 - `gh` works from PowerShell, not from Git Bash.

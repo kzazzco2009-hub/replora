@@ -3,7 +3,7 @@
 **Owns:** `backend/**`, DB schema and migrations, worker, storage, API security, and `contracts/openapi.json` generation.
 **Co-owns:** `contracts/**` (with Developer B), Phase 17 hardening, and Phase 18/19 production.
 **Stack:** Python 3.13+ · `uv` · FastAPI · Pydantic v2 · SQLAlchemy 2 · Alembic · pytest/hypothesis/schemathesis.
-**Rules:** all MANDATORY rules in `plan.md` §2 apply. The phase gates, tests (`testing.md`) and security items (`security.md`) apply unchanged. Each phase ends with a request for the owner's permission.
+**Rules:** all MANDATORY rules in `plan.md` §2 apply. The phase gates, tests (`testing.md`) and security items (`security.md`) apply unchanged. Each phase ends with a request for the gate approver's permission (Developer A for backend gates, both developers for the shared gates).
 
 ## Track timeline (parallel with frontend_plan.md)
 
