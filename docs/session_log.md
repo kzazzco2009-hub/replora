@@ -8,9 +8,11 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0), end of Session 14.** `main` is at **`ef49ab3`**, CI green. Merged today: #27 (§3 codes), #30, #37, #38 (frontend P9.3), #31 (`allowBuilds`), **#32** (`rejection_codes`), **#33** (S‑02), **#34** (§6 drafts, merged by the owner), **#35** (the ruleset as code) and #36 (log).
+| Current phase | **Phase 0 — Foundation (B0), end of Session 14.** `main` is at **`ef49ab3`**, CI green. Merged today: #27 (§3 codes), #30, #37, #38 (frontend P9.3), #31 (`allowBuilds`), **#32** (`rejection_codes`), **#33** (S‑02), **#34** (§6 drafts, merged by Developer A), **#35** (the ruleset as code) and #36 (log).
 
-**Steps:** 9/11. **P0.5:** every contract section §2–§8 is now stubbed. The last four are in a stack of PRs; P0.5 is ticked when they merge and the `openapi-fetch` question is answered. **P0.8:** the files are in (#35); the admin applies them after the repo goes public (the owner's go is on #1, 7172828609).
+**Steps:** 9/11. **P0.5:** every contract section §2–§8 is now stubbed. The last three are a stack of PRs; P0.5 is ticked when they merge and the `openapi-fetch` question is answered. **P0.8:** the files are in (#35); the admin applies them after the repo goes public (the go is on #1, 7172828609).
+
+**Ticked in this PR:** P9.2 (#29) and P9.3 (#30, #37, #38) in `plan.md`. The frontend had marked them done in their own plan (P9.2 on `main`, P9.3 in #39). The tracker also counts T11.3, which #25 already ticked. Owners: **both developers** (#45).
 
 **Security:** 4/5 (S‑01 to S‑04). S‑05 waits on the ruleset being live.
 
@@ -48,12 +50,23 @@ Append a new entry per session (newest at the top). For each step record: what w
 4) **G0 gate:** stop, report and ask **both** developers for approval before Phase 1. **No Phase 1 work starts before that.** All remaining Phase 0 backend work is done or in review.
 
 5) **If a §2 schema changes:** update the matching file in `contracts/fixtures/auth/` in the same PR (`test_auth_fixtures.py` fails until you do). |
-| Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`):
-1. `git fetch --all --prune`
-2. **Newest log:** if the `docs/session-14-final` PR is merged, `git switch main; git pull --ff-only`. If not, `git switch docs/session-14-final; git pull --ff-only`.
-3. `git status` must be clean (`replora_env_setup.txt` is ignored once this PR merges; until then it shows as untracked on other branches). For each open branch (`feat/p0.5-runs-stubs`, `feat/p0.5-outputs-stubs`, `feat/p0.5-workflows-stubs`): `git switch <branch>; git pull --ff-only`. If a pull refuses because the branch was rebased on the other machine, check that `git cherry` and the content diff show nothing local, then `git reset --hard origin/<branch>`.
-4. `pnpm install --frozen-lockfile` from the repo root, then `cd backend; uv sync --locked`.
-5. `gh pr list -R kzazzco2009-hub/replora --state all --limit 15`, `gh repo view kzazzco2009-hub/replora --json visibility`, and the #1 comments after 7172828609: `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7172828609 }`. Also the reviews on #34, #40, #41 and #42.
+| Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`). **Don't** start from `feat/p0.5-file-stubs` or any other old branch: those were merged and rebased, and they will diverge.
+1. Get the newest log. While #43 is open it's on `docs/session-14-final`; after it merges, it's on `main`:
+   `git fetch --all --prune; git switch docs/session-14-final; git pull --ff-only`
+   (or, if #43 is merged: `git switch main; git pull --ff-only`). Then read "Current status".
+2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`
+3. Check: `git status` is clean. Then `cd backend; uv run pytest -q; uv run python -m app.export_openapi --check; cd ..`. On `main` (`ef49ab3`): 281 passed, no drift.
+4. Open branches. For each, `git switch <branch>; git pull --ff-only`. A missing local branch is created from `origin`.
+   - `feat/p0.5-runs-stubs` (#40)
+   - `feat/p0.5-outputs-stubs` (#41)
+   - `feat/p0.5-workflows-stubs` (#42)
+   - `feat/b0-auth-fixtures` (#44)
+   - `docs/co-owners` (#45)
+
+   If a pull refuses (`diverged`), the branch was rebased on the other machine. Check that `git cherry origin/main <branch>` and a content diff show nothing that exists only locally, then `git reset --hard origin/<branch>`.
+5. **Old local branches** on the other machine (`feat/p0.5-file-stubs`, `feat/p0.5-auth-stubs`, `feat/p0.5-workspace-stubs`, `feat/p0.5-openapi-export`, `docs/original-plan`, `docs/phase0-ticks`, `feat/p0.5-workspace-codes`, `feat/p0.5-operations-stubs`, `feat/p0.5-rejection-codes`, `feat/s02-prod-config`, `feat/p0.5-drafts-stubs`, `chore/p0.8-ruleset`, `docs/session-14-state`) are all merged. Check each PR's `MERGED` state, then delete them with `git branch -D <name>`.
+6. GitHub: `gh pr list -R kzazzco2009-hub/replora --state all --limit 20`, `gh repo view kzazzco2009-hub/replora --json visibility`, the new #1 comments (`gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7174794670 }`), and the reviews on #40–#45 (`gh api repos/kzazzco2009-hub/replora/pulls/<n>/reviews`).
+7. The Claude Code memory on each machine is local and may be stale. **This log is the source of truth.**
 
 **Notes:**
 - `gh` works from PowerShell only. `gh --jq` breaks in PowerShell 5.1, so pipe to `ConvertFrom-Json`.
@@ -75,9 +88,9 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 6 Files | 0/7 | 0/10 | 0/8 | ☐ |
 | 7 First pipeline | 0/6 | 0/12 | 0/1 | ☐ |
 | 8 API + worker | 0/9 | 0/10 | 0/6 | ☐ |
-| 9 FE foundation | 0/8 | 0/9 | 0/5 | ☐ |
+| 9 FE foundation | 3/8 | 0/9 | 0/5 | ☐ |
 | 10 FE core flow | 0/10 | 0/11 | 0/2 | ☐ |
-| 11 UX + a11y | 0/5 | 0/7 | — | ☐ |
+| 11 UX + a11y | 0/5 | 1/7 | — | ☐ |
 | 12 AI planner | 0/5 | 0/6 | 0/5 | ☐ |
 | 13 Replay | 0/4 | 0/4 | — | ☐ |
 | 14 Formats A | 0/5 | 0/6 | 0/2 | ☐ |
