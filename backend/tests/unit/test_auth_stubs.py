@@ -13,7 +13,7 @@ AUTH_ENDPOINTS = [
     (
         "post",
         "/api/v1/auth/register",
-        201,
+        202,
         {"email": "a@example.com", "password": PASSWORD, "display_name": "A", "locale": "ar"},
     ),
     ("post", "/api/v1/auth/login", 200, {"email": "a@example.com", "password": PASSWORD}),
@@ -283,3 +283,31 @@ def test_email_keeps_its_openapi_format(openapi):
     email = openapi["components"]["schemas"]["EmailRequest"]["properties"]["email"]
 
     assert email["format"] == "email"
+
+
+def test_register_answers_like_forgot_password_so_it_never_reveals_an_account(openapi):
+    paths = openapi["paths"]
+    register = paths["/api/v1/auth/register"]["post"]["responses"]
+    forgot = paths["/api/v1/auth/password/forgot"]["post"]["responses"]
+
+    assert "201" not in register
+    assert register["202"] == forgot["202"]
+    assert register["202"]["content"]["application/json"]["schema"] == {}
+
+
+# Endpoints that check a secret answer 400 when it is wrong; 401 only means "no session".
+SECRET_CHECKS = [
+    ("post", "/api/v1/auth/verify-email"),
+    ("post", "/api/v1/auth/password/reset"),
+    ("post", "/api/v1/auth/mfa/enroll/confirm"),
+    ("post", "/api/v1/auth/mfa/challenge"),
+    ("delete", "/api/v1/auth/mfa"),
+    ("delete", "/api/v1/auth/me"),
+]
+
+
+@pytest.mark.parametrize(("method", "path"), SECRET_CHECKS)
+def test_a_wrong_secret_is_documented_as_400(openapi, method, path):
+    response = openapi["paths"][path][method]["responses"]["400"]
+
+    assert "ProblemDetails" in response["content"]["application/problem+json"]["schema"]["$ref"]

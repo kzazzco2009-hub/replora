@@ -6,6 +6,8 @@ This contract is what lets the two developers work at the same time. **Draft agr
 
 **Revision 2026-11-24 (G0 must-haves):** MFA login challenge (§2), sessions list and revoke (§2), `timezone` in `PATCH /auth/me` (§2), workspace deletion (§3), onboarding samples endpoint and the cross-origin upload note (§4), run state rules (§7). New error codes: `MFA_CHALLENGE_INVALID`, `PERSONAL_WORKSPACE_UNDELETABLE`, `DRAFT_INVALID`, `INVALID_STATE_TRANSITION`.
 
+**Revision 2026-11-25 (issue #1, §2 error codes):** the §2 `problem_codes` in `contracts/error-codes.json`; the 401 vs 400 rule (§1); `POST /auth/register` always returns 202 with no body (S‑26).
+
 ## 0. Freeze schedule
 - From B0, `contracts/openapi.json` is **generated from FastAPI route stubs** (real Pydantic request and response models, handlers return 501 `application/problem+json` with `code: "NOT_IMPLEMENTED"`). Request bodies reject unknown fields (422). §2 auth stubs: P0.5 part 2. `ExportStatus.status` is proposed as `pending | ready | failed` (confirm at G5). It is never hand-written, so the frontend can generate its client from day one.
 - The contract freezes **per section** when its backend phase passes its gate: auth (§2, §3) at G5, files (§4) at G6, operations, drafts, runs and outputs (§5–§7) at G8. The whole of v1 is frozen at P8.7.
@@ -28,13 +30,14 @@ This contract is what lets the two developers work at the same time. **Draft agr
   "errors": [{ "path": "nodes[2].inputs.left", "code": "PORT_TYPE_MISMATCH", "params": {"expected":"TabularArtifact","got":"TextDocumentArtifact"} }] }
 ```
   The frontend shows translated messages keyed by `code` (`contracts/error-codes.json`), never `detail`.
+- **401 vs 400:** 401 always means "no session (or it expired), go to sign-in": `UNAUTHENTICATED`, or `INVALID_CREDENTIALS` on login, `MFA_CHALLENGE_INVALID` on the challenge. A wrong secret while a session or a challenge exists is **400** (`MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`), and the user stays on the form.
 - **Status codes:** 200, 201, 202 (accepted async), 204, 304, 400, 401, 403 (CSRF or authenticated but not allowed in this workspace), 404 (missing **or not yours**), 409 (conflict or idempotency mismatch), 413, 415, 422, 429 (with `Retry-After`), 500.
 
 ## 2. Auth
 | Method | Path | Body | Response |
 |---|---|---|---|
 | GET | `/auth/csrf` | — | 204 + sets the `replora_csrf` cookie (no auth needed) |
-| POST | `/auth/register` | `{email, password, display_name, locale}` | 201 `User` (+ verification email) |
+| POST | `/auth/register` | `{email, password, display_name, locale}` | 202, no body, in every case (S‑26): a new address gets the verification email, an existing account gets a notice email. The client gets the `User` after the first login |
 | POST | `/auth/login` | `{email, password}` | 200 `User` + cookies, **or** 200 `{mfa_required: true}` + challenge cookie (see below) |
 | POST | `/auth/logout` | — | 204, clears cookies, revokes the session |
 | POST | `/auth/refresh` | — (refresh cookie) | 204 + rotated cookies |

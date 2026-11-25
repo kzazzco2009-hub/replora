@@ -72,12 +72,15 @@ def _documented(description: str) -> dict[str, Any]:
 
 
 ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
-    401: _documented("Not signed in, or the session expired"),
-    403: _documented("CSRF check failed, or not allowed in this workspace"),
+    401: _documented("`UNAUTHENTICATED` (no session, or it expired): go to sign-in"),
+    403: _documented("`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace"),
     409: _documented("Conflict with the current state"),
     422: _documented("Validation failed (`code: VALIDATION_FAILED`, details in `errors`)"),
-    429: _documented("Too many requests (see `Retry-After`)"),
+    429: _documented("`RATE_LIMITED` (see `Retry-After`)"),
     501: _documented("Not implemented yet (contract stub)"),
+}
+WRONG_SECRET_RESPONSE: dict[int | str, dict[str, Any]] = {
+    400: _documented("Wrong secret (`MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`)"),
 }
 NOT_FOUND_RESPONSE: dict[int | str, dict[str, Any]] = {
     404: _documented("Not found, or not yours"),

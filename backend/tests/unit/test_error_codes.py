@@ -40,7 +40,18 @@ def test_validation_codes_are_exactly_what_the_api_emits(error_codes):
         ("METHOD_NOT_ALLOWED", 405),
         ("INTERNAL_ERROR", 500),
         ("MFA_CHALLENGE_INVALID", 401),
+        # §2, agreed in issue #1: 401 only means "no session"; a wrong secret is 400.
+        ("UNAUTHENTICATED", 401),
+        ("INVALID_CREDENTIALS", 401),
+        ("MFA_CODE_INVALID", 400),
+        ("PASSWORD_INCORRECT", 400),
+        ("TOKEN_INVALID", 400),
+        ("CSRF_FAILED", 403),
+        ("EMAIL_NOT_VERIFIED", 403),
+        ("MFA_ALREADY_ENABLED", 409),
+        ("MFA_NOT_ENABLED", 409),
+        ("RATE_LIMITED", 429),
     ],
 )
-def test_problem_codes_sent_today_are_listed(error_codes, code, status):
+def test_agreed_problem_codes_are_listed(error_codes, code, status):
     assert error_codes["problem_codes"][code]["status"] == status

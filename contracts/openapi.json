@@ -40,7 +40,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -50,7 +50,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -80,7 +80,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -108,7 +108,7 @@
           "auth"
         ],
         "summary": "Register",
-        "description": "Create an account and send the verification email.",
+        "description": "Always 202 with no body (no enumeration, S‑26).\n\nA new address gets the verification email; an existing account gets a notice email instead.",
         "operationId": "auth_register",
         "requestBody": {
           "content": {
@@ -121,18 +121,16 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "202": {
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
+                "schema": {}
               }
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -142,7 +140,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -172,7 +170,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -232,7 +230,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -242,7 +240,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -272,7 +270,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -307,7 +305,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -317,7 +315,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -347,7 +345,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -382,7 +380,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -392,7 +390,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -422,7 +420,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -464,7 +462,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -474,7 +472,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -504,7 +502,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -552,7 +550,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -562,7 +560,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -592,7 +590,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -603,6 +601,16 @@
           },
           "501": {
             "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong secret (`MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -642,7 +650,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -652,7 +660,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -682,7 +690,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -727,7 +735,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -737,7 +745,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -767,7 +775,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -778,6 +786,16 @@
           },
           "501": {
             "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong secret (`MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -817,7 +835,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -827,7 +845,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -857,7 +875,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -902,7 +920,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -912,7 +930,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -942,7 +960,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -953,6 +971,16 @@
           },
           "501": {
             "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong secret (`MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -984,7 +1012,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -994,7 +1022,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1024,7 +1052,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1069,7 +1097,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1079,7 +1107,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1109,7 +1137,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1120,6 +1148,16 @@
           },
           "501": {
             "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong secret (`MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1161,7 +1199,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1171,7 +1209,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1201,7 +1239,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1212,6 +1250,16 @@
           },
           "501": {
             "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong secret (`MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1246,7 +1294,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1256,7 +1304,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1286,7 +1334,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1297,6 +1345,16 @@
           },
           "501": {
             "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong secret (`MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1328,7 +1386,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1338,7 +1396,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1368,7 +1426,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1422,7 +1480,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1432,7 +1490,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1462,7 +1520,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1518,7 +1576,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1528,7 +1586,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1558,7 +1616,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1605,7 +1663,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1615,7 +1673,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1645,7 +1703,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1701,7 +1759,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1711,7 +1769,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1741,7 +1799,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1791,7 +1849,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1801,7 +1859,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1831,7 +1889,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1883,7 +1941,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1893,7 +1951,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1923,7 +1981,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1970,7 +2028,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1980,7 +2038,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2010,7 +2068,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2078,7 +2136,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2088,7 +2146,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2118,7 +2176,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2202,7 +2260,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2212,7 +2270,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2242,7 +2300,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2307,7 +2365,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2317,7 +2375,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2347,7 +2405,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2421,7 +2479,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2431,7 +2489,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2461,7 +2519,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2527,7 +2585,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2537,7 +2595,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2567,7 +2625,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2634,7 +2692,7 @@
             "description": "Successful Response"
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2644,7 +2702,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2674,7 +2732,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2768,7 +2826,7 @@
             }
           },
           "401": {
-            "description": "Not signed in, or the session expired",
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2778,7 +2836,7 @@
             }
           },
           "403": {
-            "description": "CSRF check failed, or not allowed in this workspace",
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2808,7 +2866,7 @@
             }
           },
           "429": {
-            "description": "Too many requests (see `Retry-After`)",
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
             "content": {
               "application/problem+json": {
                 "schema": {

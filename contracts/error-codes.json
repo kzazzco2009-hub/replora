@@ -12,9 +12,49 @@
       "status": 405,
       "description": "The route exists but not with this HTTP method (see the Allow header)."
     },
+    "UNAUTHENTICATED": {
+      "status": 401,
+      "description": "No session, or it expired (including a refused refresh). Go to the sign-in form."
+    },
+    "INVALID_CREDENTIALS": {
+      "status": 401,
+      "description": "Login failed: wrong email or password. The same answer whether or not the account exists."
+    },
     "MFA_CHALLENGE_INVALID": {
       "status": 401,
       "description": "The MFA challenge is missing, expired or already used. Go back to the sign-in form."
+    },
+    "MFA_CODE_INVALID": {
+      "status": 400,
+      "description": "Wrong TOTP or recovery code. Stay on the form; it counts toward the login throttle."
+    },
+    "PASSWORD_INCORRECT": {
+      "status": 400,
+      "description": "The current password is wrong (disable MFA, delete account). Stay on the form."
+    },
+    "TOKEN_INVALID": {
+      "status": 400,
+      "description": "The verify-email or reset token is missing, expired or already used. The reason is not given."
+    },
+    "CSRF_FAILED": {
+      "status": 403,
+      "description": "Missing or wrong X-CSRF-Token, or a bad Origin. Fetch GET /auth/csrf again and retry once."
+    },
+    "EMAIL_NOT_VERIFIED": {
+      "status": 403,
+      "description": "The action needs a verified email address."
+    },
+    "MFA_ALREADY_ENABLED": {
+      "status": 409,
+      "description": "MFA enrollment was started while MFA is already active."
+    },
+    "MFA_NOT_ENABLED": {
+      "status": 409,
+      "description": "MFA was turned off while it is not active."
+    },
+    "RATE_LIMITED": {
+      "status": 429,
+      "description": "Too many requests. Wait for the Retry-After header (seconds) before trying again."
     },
     "INTERNAL_ERROR": {
       "status": 500,
