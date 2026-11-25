@@ -1,8 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeCookieSync } from "../../src/components/theme/theme-cookie-sync";
 import { ThemeProvider } from "../../src/components/theme/theme-provider";
 import { ThemeToggle } from "../../src/components/theme/theme-toggle";
+import messages from "../../messages/en.json";
 
 function mockSystemTheme(prefersDark: boolean) {
   window.matchMedia = vi.fn().mockImplementation((query: string) => ({
@@ -36,9 +38,11 @@ afterEach(() => {
 describe("ThemeToggle", () => {
   it("sets data-theme on the html element when a theme is picked", () => {
     render(
-      <ThemeProvider defaultTheme="system">
-        <ThemeToggle />
-      </ThemeProvider>,
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ThemeProvider defaultTheme="system">
+          <ThemeToggle />
+        </ThemeProvider>
+      </NextIntlClientProvider>,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Dark" }));
@@ -52,10 +56,12 @@ describe("ThemeToggle", () => {
     mockSystemTheme(true);
 
     render(
-      <ThemeProvider defaultTheme="system">
-        <ThemeCookieSync />
-        <ThemeToggle />
-      </ThemeProvider>,
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <ThemeProvider defaultTheme="system">
+          <ThemeCookieSync />
+          <ThemeToggle />
+        </ThemeProvider>
+      </NextIntlClientProvider>,
     );
 
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");

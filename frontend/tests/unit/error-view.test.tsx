@@ -3,6 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 import { ErrorView } from "../../src/components/error-view";
 import { ApiError, type Problem } from "../../src/lib/api/problem";
 
+const strings = {
+  heading: "Something went wrong",
+  body: "Please try again.",
+  retry: "Try again",
+  reference: "Reference",
+};
+
 function problem(overrides: Partial<Problem> = {}): Problem {
   return {
     type: "about:blank",
@@ -18,16 +25,23 @@ function problem(overrides: Partial<Problem> = {}): Problem {
 
 describe("ErrorView", () => {
   it("shows the correlation_id for an ApiError that has one", () => {
-    render(<ErrorView error={new ApiError(problem())} reset={() => {}} />);
+    render(
+      <ErrorView
+        error={new ApiError(problem())}
+        reset={() => {}}
+        strings={strings}
+      />,
+    );
     expect(screen.getByText("01J000000000000000000000")).toBeTruthy();
   });
 
-  it("shows no reference line for an ApiError without a correlation_id (ar)", () => {
+  it("shows no reference line for an ApiError without a correlation_id (rtl)", () => {
     render(
       <ErrorView
         error={new ApiError(problem({ correlation_id: null }))}
         reset={() => {}}
-        lang="ar"
+        dir="rtl"
+        strings={strings}
       />,
     );
     expect(screen.queryByTestId("error-reference")).toBeNull();
@@ -35,23 +49,35 @@ describe("ErrorView", () => {
 
   it("shows the digest for a plain Error that has one", () => {
     const error = Object.assign(new Error("boom"), { digest: "abc123" });
-    render(<ErrorView error={error} reset={() => {}} />);
+    render(<ErrorView error={error} reset={() => {}} strings={strings} />);
     expect(screen.getByText("abc123")).toBeTruthy();
   });
 
   it("never renders the problem detail or the raw error message", () => {
-    render(<ErrorView error={new ApiError(problem())} reset={() => {}} />);
+    render(
+      <ErrorView
+        error={new ApiError(problem())}
+        reset={() => {}}
+        strings={strings}
+      />,
+    );
     expect(screen.queryByText(/super secret stack detail/)).toBeNull();
 
     render(
-      <ErrorView error={new Error("do not show this")} reset={() => {}} />,
+      <ErrorView
+        error={new Error("do not show this")}
+        reset={() => {}}
+        strings={strings}
+      />,
     );
     expect(screen.queryByText(/do not show this/)).toBeNull();
   });
 
   it("calls reset when the retry button is clicked", () => {
     const reset = vi.fn();
-    render(<ErrorView error={new Error("boom")} reset={reset} />);
+    render(
+      <ErrorView error={new Error("boom")} reset={reset} strings={strings} />,
+    );
     fireEvent.click(screen.getByRole("button"));
     expect(reset).toHaveBeenCalledOnce();
   });

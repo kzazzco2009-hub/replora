@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import { Readex_Pro } from "next/font/google";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import "../globals.css";
@@ -13,6 +14,13 @@ export const metadata: Metadata = {
   title: "Replora",
   description: "Replora",
 };
+
+// design.md §3: one family for AR and EN together, self-hosted at build
+// time by next/font (no runtime request to Google, no font files to commit).
+const readexPro = Readex_Pro({
+  subsets: ["arabic", "latin"],
+  variable: "--font-readex-pro",
+});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -43,6 +51,7 @@ export default async function LocaleLayout({
       lang={locale}
       dir={localeDirection(locale)}
       data-theme={initialTheme}
+      className={readexPro.variable}
       suppressHydrationWarning
     >
       <body>
