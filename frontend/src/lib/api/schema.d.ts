@@ -734,10 +734,16 @@ export interface components {
              * @description `null` once the actor's account is deleted (S‑29)
              */
             actor_id: string | null;
-            /** Action */
-            action: string;
-            /** Target Type */
-            target_type: string;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "workspace.created" | "member.invited" | "member.invitation_revoked" | "member.joined" | "member.role_changed" | "member.removed" | "file.uploaded" | "file.downloaded" | "file.deleted" | "workflow.saved" | "workflow.deleted" | "run.created" | "run.approved" | "run.cancelled" | "output.downloaded" | "planner.called";
+            /**
+             * Target Type
+             * @enum {string}
+             */
+            target_type: "workspace" | "invitation" | "member" | "file" | "workflow" | "draft" | "run" | "output";
             /**
              * Target Id
              * Format: uuid

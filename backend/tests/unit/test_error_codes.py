@@ -40,6 +40,7 @@ def test_validation_codes_are_exactly_what_the_api_emits(error_codes):
         ("METHOD_NOT_ALLOWED", 405),
         ("INTERNAL_ERROR", 500),
         ("MFA_CHALLENGE_INVALID", 401),
+        ("PERSONAL_WORKSPACE_UNDELETABLE", 409),
         # §2, agreed in issue #1: 401 only means "no session"; a wrong secret is 400.
         ("UNAUTHENTICATED", 401),
         ("INVALID_CREDENTIALS", 401),

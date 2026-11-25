@@ -156,6 +156,8 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 - `OutputArtifact = {id, name, type, format, size, row_count?, created_at}`
 - `Lineage = {sources: [{file_id, member_path?, row, page?}], operations: [{id, version}]}`
 - `AuditEvent = {id, actor_id, action, target_type, target_id, created_at}` (§3)
+  - `action`: `workspace.created`, `member.invited`, `member.invitation_revoked`, `member.joined`, `member.role_changed`, `member.removed`, `file.uploaded`, `file.downloaded`, `file.deleted`, `workflow.saved`, `workflow.deleted`, `run.created`, `run.approved`, `run.cancelled`, `output.downloaded`, `planner.called`. Auth events (login, logout, reset) are audited too (P5.7) but have no workspace, so this endpoint never returns them.
+  - `target_type`: `workspace`, `invitation`, `member` (`target_id` is the user id), `file`, `workflow`, `draft`, `run`, `output`.
 
 `RunEvent = {seq, type: "state_changed"|"node_started"|"node_finished"|"warning", node_id?, payload, created_at}`
 

@@ -3860,10 +3860,38 @@
           },
           "action": {
             "type": "string",
+            "enum": [
+              "workspace.created",
+              "member.invited",
+              "member.invitation_revoked",
+              "member.joined",
+              "member.role_changed",
+              "member.removed",
+              "file.uploaded",
+              "file.downloaded",
+              "file.deleted",
+              "workflow.saved",
+              "workflow.deleted",
+              "run.created",
+              "run.approved",
+              "run.cancelled",
+              "output.downloaded",
+              "planner.called"
+            ],
             "title": "Action"
           },
           "target_type": {
             "type": "string",
+            "enum": [
+              "workspace",
+              "invitation",
+              "member",
+              "file",
+              "workflow",
+              "draft",
+              "run",
+              "output"
+            ],
             "title": "Target Type"
           },
           "target_id": {
