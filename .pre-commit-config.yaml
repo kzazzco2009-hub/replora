@@ -1,0 +1,29 @@
+# Pre-commit hooks (P0.6). Once per clone: `pre-commit install`.
+# Tools come from the lockfiles (uv.lock, pnpm-lock.yaml) and gitleaks from PATH,
+# so the hooks run the same versions as CI.
+repos:
+  - repo: local
+    hooks:
+      - id: gitleaks
+        name: gitleaks (staged changes)
+        entry: gitleaks git --pre-commit --staged --redact --verbose
+        language: system
+        pass_filenames: false
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --locked --project backend ruff check --fix
+        language: system
+        types: [python]
+        files: ^backend/
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --locked --project backend ruff format
+        language: system
+        types: [python]
+        files: ^backend/
+      - id: eslint
+        name: eslint (frontend)
+        entry: pnpm -C frontend run lint
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|mjs)$
+        pass_filenames: false

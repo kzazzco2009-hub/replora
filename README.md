@@ -16,6 +16,7 @@ Start with `docs/plan.md`, then `docs/session_log.md` for the current status.
 - Python 3.14 (`.python-version`) with [uv](https://docs.astral.sh/uv/): always `uv run …` and `uv add …`.
 - Node 26 LTS (`.nvmrc`) with pnpm 12.23.0 (pinned in `package.json` → `packageManager`).
 - Local setup: copy `.env.example` to `.env` and fill in the values. `.env` is git-ignored.
+- Git hooks: install [pre-commit](https://pre-commit.com) (`uv tool install pre-commit`) and gitleaks (on PATH), then run `pre-commit install` once per clone. On every commit the hooks run gitleaks, ruff (lint and format) and the frontend ESLint. `.gitleaks.toml` adds project rules (for example OpenRouter keys) on top of the gitleaks defaults, and CI uses it too.
 
 ### Backend (from `backend/`)
 ```
