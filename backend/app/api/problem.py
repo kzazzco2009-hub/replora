@@ -13,6 +13,8 @@ from app.api.models import ApiModel
 PROBLEM_MEDIA_TYPE = "application/problem+json"
 
 # Pydantic error type → our stable 422 `code`. Explicit, so a library upgrade cannot rename a code.
+# Every value (and the fallback) is listed in contracts/error-codes.json → validation_codes.
+FALLBACK_VALIDATION_CODE = "INVALID"
 VALIDATION_CODES = {
     name: name.upper()
     for name in (
@@ -26,7 +28,8 @@ VALIDATION_CODES = {
         "string_pattern_mismatch",
         "literal_error",
         "uuid_parsing",
-        "value_error",
+        "invalid_email",
+        "mfa_code_or_recovery_required",
     )
 }
 
@@ -129,7 +132,7 @@ async def _handle_unexpected(_: Request, __: Exception) -> JSONResponse:
 
 def validation_code(error_type: str) -> str:
     """The stable 422 `code` for a Pydantic error type; `INVALID` for one we have not listed."""
-    return VALIDATION_CODES.get(error_type, "INVALID")
+    return VALIDATION_CODES.get(error_type, FALLBACK_VALIDATION_CODE)
 
 
 def _status_problem(status: int, code: str | None = None) -> ProblemDetails:

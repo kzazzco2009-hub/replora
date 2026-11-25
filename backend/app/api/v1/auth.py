@@ -11,10 +11,10 @@ from app.api.v1.auth_models import (
     ExportStatus,
     LoginRequest,
     Me,
+    MfaChallengeRequest,
     MfaCodeRequest,
     MfaDisableRequest,
     MfaEnrollment,
-    MfaRecoveryRequest,
     MfaRequired,
     PasswordRequest,
     RegisterRequest,
@@ -107,7 +107,7 @@ def confirm_mfa(body: MfaCodeRequest) -> None:
 
 
 @router.post("/mfa/challenge")
-def mfa_challenge(body: MfaCodeRequest | MfaRecoveryRequest) -> User:
+def mfa_challenge(body: MfaChallengeRequest) -> User:
     """Finish an MFA login with a TOTP code or a recovery code (uses the challenge cookie)."""
     raise not_implemented()
 

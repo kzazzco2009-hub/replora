@@ -1,0 +1,46 @@
+"""contracts/error-codes.json lists every code the API sends; the frontend translates each one."""
+
+import json
+
+import pytest
+
+from app.api.problem import FALLBACK_VALIDATION_CODE, VALIDATION_CODES
+from app.config import REPO_ROOT
+
+
+@pytest.fixture(scope="module")
+def error_codes() -> dict:
+    return json.loads((REPO_ROOT / "contracts" / "error-codes.json").read_text(encoding="utf-8"))
+
+
+def test_has_the_two_agreed_sections(error_codes):
+    assert set(error_codes) == {"problem_codes", "validation_codes"}
+
+
+def test_problem_codes_have_a_status_and_a_description(error_codes):
+    for code, entry in error_codes["problem_codes"].items():
+        assert set(entry) == {"status", "description"}, code
+        assert 400 <= entry["status"] <= 599, code
+        assert entry["description"], code
+
+
+def test_validation_codes_are_exactly_what_the_api_emits(error_codes):
+    emitted = set(VALIDATION_CODES.values()) | {FALLBACK_VALIDATION_CODE}
+
+    assert set(error_codes["validation_codes"]) == emitted
+    assert all(entry["description"] for entry in error_codes["validation_codes"].values())
+
+
+@pytest.mark.parametrize(
+    ("code", "status"),
+    [
+        ("VALIDATION_FAILED", 422),
+        ("NOT_IMPLEMENTED", 501),
+        ("NOT_FOUND", 404),
+        ("METHOD_NOT_ALLOWED", 405),
+        ("INTERNAL_ERROR", 500),
+        ("MFA_CHALLENGE_INVALID", 401),
+    ],
+)
+def test_problem_codes_sent_today_are_listed(error_codes, code, status):
+    assert error_codes["problem_codes"][code]["status"] == status

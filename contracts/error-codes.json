@@ -1,0 +1,69 @@
+{
+  "problem_codes": {
+    "VALIDATION_FAILED": {
+      "status": 422,
+      "description": "The request failed validation. Field-level codes are in `errors` (see validation_codes)."
+    },
+    "NOT_FOUND": {
+      "status": 404,
+      "description": "The resource or route does not exist, or it is not yours."
+    },
+    "METHOD_NOT_ALLOWED": {
+      "status": 405,
+      "description": "The route exists but not with this HTTP method (see the Allow header)."
+    },
+    "MFA_CHALLENGE_INVALID": {
+      "status": 401,
+      "description": "The MFA challenge is missing, expired or already used. Go back to the sign-in form."
+    },
+    "INTERNAL_ERROR": {
+      "status": 500,
+      "description": "Unexpected server error. Show the correlation_id so support can find it."
+    },
+    "NOT_IMPLEMENTED": {
+      "status": 501,
+      "description": "Contract stub: the endpoint is documented but not implemented yet."
+    }
+  },
+  "validation_codes": {
+    "MISSING": {
+      "description": "A required field (or the whole body) is missing."
+    },
+    "EXTRA_FORBIDDEN": {
+      "description": "A field that the endpoint does not accept was sent."
+    },
+    "JSON_INVALID": {
+      "description": "The body is not valid JSON."
+    },
+    "MODEL_ATTRIBUTES_TYPE": {
+      "description": "The body must be a JSON object."
+    },
+    "STRING_TYPE": {
+      "description": "The value must be text."
+    },
+    "STRING_TOO_SHORT": {
+      "description": "The text is too short (minimum in params.min_length)."
+    },
+    "STRING_TOO_LONG": {
+      "description": "The text is too long (maximum in params.max_length)."
+    },
+    "STRING_PATTERN_MISMATCH": {
+      "description": "The text does not have the expected format (for example a 6-digit code)."
+    },
+    "LITERAL_ERROR": {
+      "description": "The value is not one of the allowed options (in params.expected)."
+    },
+    "UUID_PARSING": {
+      "description": "The id is not a valid UUID."
+    },
+    "INVALID_EMAIL": {
+      "description": "Not a valid email address."
+    },
+    "MFA_CODE_OR_RECOVERY_REQUIRED": {
+      "description": "Send exactly one of an authenticator code or a recovery code."
+    },
+    "INVALID": {
+      "description": "The value is invalid (fallback for a check without its own code)."
+    }
+  }
+}
