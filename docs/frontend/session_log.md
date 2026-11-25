@@ -8,9 +8,9 @@ Append a new entry per session (newest first). Record what was done, the command
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | Phase 0, frontend half (F0). P0.1 done. |
+| Current phase | Phase 0, frontend half (F0). P0.1, P0.4 done. P0.5 implemented on branch `feat/p0.5-gen-api`, PR open — not ticked until merged. |
 | Last gate passed | Planning approved. G0 agreement confirmed by both sides in issue #1. The formal G0 gate (end of Phase 0) is still open. |
-| Next step | Open the small docs PR (this log and `frontend/CLAUDE.md`), delete `frontend/setup`, branch F0 from `main`, then P0.4 onward. P0.5 waits for the backend's `contracts/openapi.json`. |
+| Next step | Wait for CI and review on the P0.5 PR. The generated `schema.d.ts` will need a re-run of `pnpm gen:api` once PRs #10, #11, #12 merge (workspaces, files, auth follow-ups extend the contract). |
 | Blockers | none |
 
 ## Recorded versions (P0.1)
@@ -103,3 +103,24 @@ T0.3 in real CI: pushed the deliberate `react-hooks/rules-of-hooks` violation (c
 Failed run: https://github.com/kzazzco2009-hub/replora/actions/runs/45491885639
 Reverted with `git revert` (no force-push), commit `4b1da81`. `Frontend` job green again.
 Green run: https://github.com/kzazzco2009-hub/replora/actions/runs/45492118286
+
+---
+
+## Session 3 — 2026-11-25
+P0.5 (`pnpm gen:api`), staged, in progress.
+
+Done:
+- Branched `feat/p0.5-gen-api` from `main` at `c4ea4a9` (confirms PR #8 merged: `contracts/openapi.json` has `/api/v1/auth/login`).
+- Version check before installing: `pnpm view openapi-typescript` → latest `7.13.0`, `peerDependencies: { typescript: "^5.x" }`, no `engines` field. Our pinned TypeScript `6.0.3` does not satisfy `^5.x` — same kind of unmet-peer gap already seen with `eslint-config-next`'s plugins in P0.4. No `.npmrc` strict-peer setting in the repo, so this is a warning, not an install failure. No pinned versions changed.
+- Installed `openapi-typescript@7.13.0` exact (devDependency only; no `openapi-fetch` — that's P9.6). `pnpm peers check` confirmed the predicted `unmet peer typescript` warning (wanted `^5.x`, installed `6.0.3`), plus the pre-existing ESLint peer warnings. No new dependency added for the type test — Vitest's built-in `expectTypeOf` was used.
+- Added script `"gen:api": "openapi-typescript ../contracts/openapi.json -o src/lib/api/schema.d.ts"`. Ran it: generated `frontend/src/lib/api/schema.d.ts` (2142 lines, 67,223 bytes), committed. The tool's own banner ("auto-generated... do not make direct changes") serves as the "generated, do not edit" header.
+- `eslint.config.mjs`: added `{ ignores: ["src/lib/api/schema.d.ts"] }` ahead of the Next config array. No prettier exists anywhere in this repo (checked), so there is nothing to add a prettier-ignore to.
+- Added the contract type check `tests/unit/api-schema.test.ts` (Vitest `expectTypeOf`, no network): proves `paths["/api/v1/auth/login"]["post"]` and `paths["/api/v1/health"]["get"]` exist, and that a `501` response on `/api/v1/auth/login` has a typed `application/problem+json` body.
+- Evidence (commands and results):
+  - `pnpm typecheck` → clean, no errors.
+  - `pnpm lint` → 0 errors, 0 warnings (fixed an incidental `import/no-anonymous-default-export` warning by naming the config array before exporting it).
+  - `pnpm test` → 3/3 passed (1 existing `home.test.tsx` + 2 new in `api-schema.test.ts`).
+  - `pnpm build` → compiled successfully, 3 static routes generated (Turbopack).
+  - Determinism: staged `schema.d.ts`, ran `pnpm gen:api` a second time — identical SHA-256 (`61b025a7...`), `git diff` on the file showed 0 lines.
+
+Next step: gitleaks, commit, push, open the PR (template-filled, SHA + test results + security/contract impact). Do **not** tick P0.5 in `docs/frontend/plan.md` until the PR is merged — `schema.d.ts` will need regenerating once #10/#11/#12 land.

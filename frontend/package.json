@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "gen:api": "openapi-typescript ../contracts/openapi.json -o src/lib/api/schema.d.ts"
   },
   "dependencies": {
     "next": "16.4.6",
@@ -27,6 +28,7 @@
     "eslint": "10.15.0",
     "eslint-config-next": "16.4.6",
     "jsdom": "31.0.1",
+    "openapi-typescript": "7.13.0",
     "postcss": "8.5.33",
     "tailwindcss": "4.3.5",
     "typescript": "6.0.3",
