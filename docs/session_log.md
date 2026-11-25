@@ -19,7 +19,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 
 **`feat/p0.5-file-stubs` holds the newest session log; it is #11's branch, so a log commit moves #11's head.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | **Frontend:** review #26 and #27. Also (asked on #25, 7161950428, and in #1, 7161976673, 7162100230: list every shared-plan item finished on their side, P9.1 and T11.3 so far):
+| Waiting on | **Frontend:** review #26, #27 and #28. Also (asked on #25, 7161950428, and in #1, 7161976673, 7162100230: list every shared-plan item finished on their side, P9.1 and T11.3 so far):
 - re-check #11 and review #25;
 - answer 5 questions:
   1. add `openapi-fetch`, or drop it from P0.5;
@@ -37,12 +37,14 @@ Append a new entry per session (newest at the top). For each step record: what w
 
 3) **#26** (P0.11 backend: `X-Request-ID`, JSON logs, PII scrub, `correlation_id`; ticks P0.11 and T0.7): wait for review. After it merges, Phase 0 is 9/11.
 
-4) **Part 4:** §5–§8 stubs, split into small PRs (§5 operations and limits, §6 drafts and workflows, §7 runs, §8 outputs). Start with §5 from `main`.
+4) **Part 4:** the §5–§8 stubs, as small PRs.
+   - §5 is **#28** (`c60e118`), waiting for review. Its questions: is `version` an integer, how should `title_key` be named, and is public OK for both.
+   - **Next: §6** (`GET /templates`, and drafts: POST, GET with `ETag`, PATCH with `If-Match`, 412/428), from `main`. `WorkflowDefinition` is Phase 1's JSON Schema, so §6 types it as an object for now. Then §7 runs, then §8 outputs.
 
 **Overlap:** #11, #27 and #26 all touch `main`; #11 and #27 both add to `error-codes.json`. Whichever merges later gets rebased and regenerated.
 
 5) **Plan ticks:** tick each step in `docs/plan.md` in the PR that finishes it (not "later"). #25 catches up P0.4, P0.6 and P0.7. |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7162100230 }`; the reviews and comments on #11, #25, #26 and #27 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7162100230 }`; the reviews and comments on #11, #25, #26, #27 and #28 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -263,6 +265,13 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
   - `PERSONAL_WORKSPACE_UNDELETABLE` (409).
   - `AuditAction` (16 values) and `AuditTargetType` (8) as `Literal`s, documented in `api_contract.md` §3. Auth events aren't included, because they have no workspace.
   - **Tests:** 2 red first, then 181 passed. `schema.d.ts` regenerated.
+
+**#28, §5 registry (P0.5 part 4a)**, from `main`:
+- **Routes:** `GET /operations` → `OperationContract[]`; `GET /limits` → `Limits` (4 integers).
+- **Public:** no 401, 403 or 404 documented; `Cache-Control: public, max-age=3600` documented on the 200. `api_contract.md` §5 says so.
+- **`ArtifactType`:** a `StrEnum` of the 11 kinds. The list comes from `docs/history/Replora_Complete_Project_Plan_AR.md` (`plan.md` P1.1 only says "all 11"). P1.1 will own it.
+- `params_schema` is `dict[str, Any]`, with the §5 subset in its description.
+- **Tests:** 10 red first (404 and `KeyError`), then 188 passed. Ruff clean, drift 0, pip-audit clean, `schema.d.ts` regenerated, typecheck and `format:check` pass.
 
 **Reviews posted** (comment reviews; the owner approves from their account):
 - **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
