@@ -19,7 +19,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 
 **`feat/p0.5-file-stubs` holds the newest session log; it is #11's branch, so a log commit moves #11's head.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | **Frontend** (asked on #25, 7161950428, and in #1, 7161976673):
+| Waiting on | **Frontend:** review #26 and #27. Also (asked on #25, 7161950428, and in #1, 7161976673, 7162100230: list every shared-plan item finished on their side, P9.1 and T11.3 so far):
 - re-check #11 and review #25;
 - answer 5 questions:
   1. add `openapi-fetch`, or drop it from P0.5;
@@ -33,14 +33,16 @@ Append a new entry per session (newest at the top). For each step record: what w
 - set a global git identity on this machine. |
 | Next step | 1) **When the frontend answers on #25:** apply the answers (in `plan.md`, plus their own files on their side), and do the backend half of S‑01…S‑05 in `security.md`, with evidence.
 
-2) **Now (#22 is in):** the small §3 PR: `PERSONAL_WORKSPACE_UNDELETABLE` in `error-codes.json` and the `AuditEvent.action` / `target_type` enums with proposed values. Consider `TOKEN_INVALID` (400) on `POST /invitations/accept`, and ask the frontend first.
+2) **#27** (§3: `PERSONAL_WORKSPACE_UNDELETABLE`, and the `AuditEvent.action` / `target_type` enums, proposed values): wait for the frontend's check of the values. If they change, update the `Literal`s, `api_contract.md` §3 and the test, then regenerate.
 
-3) **P0.11 backend part** (T0.7, S‑87): `X-Request-ID` middleware, JSON logs, PII scrub, `correlation_id` in every problem+json. The frontend's #20 error boundary shows it. Branch from `main`.
+3) **#26** (P0.11 backend: `X-Request-ID`, JSON logs, PII scrub, `correlation_id`; ticks P0.11 and T0.7): wait for review. After it merges, Phase 0 is 9/11.
 
-4) **Part 4:** §5–§8 stubs.
+4) **Part 4:** §5–§8 stubs, split into small PRs (§5 operations and limits, §6 drafts and workflows, §7 runs, §8 outputs). Start with §5 from `main`.
+
+**Overlap:** #11, #27 and #26 all touch `main`; #11 and #27 both add to `error-codes.json`. Whichever merges later gets rebased and regenerated.
 
 5) **Plan ticks:** tick each step in `docs/plan.md` in the PR that finishes it (not "later"). #25 catches up P0.4, P0.6 and P0.7. |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7161976673 }`; the reviews and comments on #11 and #25 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7162100230 }`; the reviews and comments on #11, #25, #26 and #27 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -248,6 +250,19 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **#11 rebased again after #22.** There were conflicts in `error-codes.json` and `test_error_codes.py`, resolved by keeping both. `openapi.json` was stale (`--check` exit 1), so I regenerated it and `schema.d.ts` (`8c55bd8`). Result: 215 passed, CI green.
 - **Local vitest:** workers time out while starting ("Timeout waiting for worker to respond", 0 files, about 120 s). It passed here earlier today, and CI ran green on #11 and #25. It's the machine; no frontend config was changed.
 - **Asked the frontend 5 questions on #25** (`openapi-fetch`, the F0 contract box, the F0 tests line, frontend S‑01/03/04, S‑05 as a manual rule). Final state posted in #1 (7161976673).
+
+**While waiting for the frontend:**
+- **Asked them in #1 (7162100230)** to list every shared-plan item finished on their side: P9.1 (#21, #23) and T11.3 (#21) so far. Their reply gets added to #25 in one commit.
+- **#26 (P0.11 backend, T0.7, S‑87)**, from `main`:
+  - `app/observability.py`: a pure ASGI `RequestIdMiddleware` (UUIDv7, or a kept incoming ID matching `[A-Za-z0-9._-]{1,64}`), `JsonFormatter` (key-based redaction and email masking) and `configure_logging` (uvicorn's access log off, because it records the IP).
+  - `_problem_response` adds `correlation_id` and `X-Request-ID`. The 500 is sent from outside the middleware, so the header is set there too. `_handle_unexpected` logs the traceback.
+  - **Tests:** 19 new. Middleware turned off: 18 fail. Scrubbing turned off: the formatter test fails. Result: 197 passed.
+  - **Manual uvicorn run:** every line is JSON, the header matches `correlation_id`, and there's no password or email in the log. Uvicorn's `color_message` field is dropped.
+  - Ticks P0.11 (with the frontend's #20) and T0.7.
+- **#27 (§3):**
+  - `PERSONAL_WORKSPACE_UNDELETABLE` (409).
+  - `AuditAction` (16 values) and `AuditTargetType` (8) as `Literal`s, documented in `api_contract.md` §3. Auth events aren't included, because they have no workspace.
+  - **Tests:** 2 red first, then 181 passed. `schema.d.ts` regenerated.
 
 **Reviews posted** (comment reviews; the owner approves from their account):
 - **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
