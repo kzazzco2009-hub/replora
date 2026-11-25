@@ -3,10 +3,6 @@
 import re
 
 import pytest
-from fastapi.testclient import TestClient
-
-from app.config import Settings
-from app.main import create_app
 
 SESSION_ID = "01937a5e-7f00-7000-8000-000000000001"
 PASSWORD = "correct horse battery staple"
@@ -38,16 +34,6 @@ AUTH_ENDPOINTS = [
     ("get", "/api/v1/auth/sessions", 200, None),
     ("delete", f"/api/v1/auth/sessions/{SESSION_ID}", 204, None),
 ]
-
-
-@pytest.fixture(scope="module")
-def client() -> TestClient:
-    return TestClient(create_app(Settings(_env_file=None)))
-
-
-@pytest.fixture(scope="module")
-def openapi(client: TestClient) -> dict:
-    return client.get("/openapi.json").json()
 
 
 def openapi_path(path: str) -> str:

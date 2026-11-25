@@ -1,34 +1,17 @@
 """Request and response bodies for §2 auth (docs/api_contract.md)."""
 
 from datetime import datetime
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Literal, Self
 from uuid import UUID
 
-from pydantic import (
-    EmailStr,
-    Field,
-    ValidationError,
-    ValidatorFunctionWrapHandler,
-    WrapValidator,
-    model_validator,
-)
+from pydantic import EmailStr, Field, model_validator
 from pydantic_core import PydanticCustomError
 
-from app.api.models import ApiModel
+from app.api.models import ApiModel, Email
 from app.api.v1.workspace_models import Workspace
-
-
-def _email(value: Any, handler: ValidatorFunctionWrapHandler) -> str:
-    """Report any bad email as one stable `invalid_email` type (not Pydantic's `value_error`)."""
-    try:
-        return handler(value)
-    except ValidationError as error:
-        raise PydanticCustomError("invalid_email", "Not a valid email address") from error
-
 
 Locale = Literal["ar", "en"]
 Theme = Literal["light", "dark", "system"]
-Email = Annotated[EmailStr, WrapValidator(_email)]
 Password = Annotated[str, Field(min_length=12, max_length=256)]
 CurrentPassword = Annotated[str, Field(min_length=1, max_length=256)]
 OtpCode = Annotated[str, Field(pattern=r"^\d{6}$")]
