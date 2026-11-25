@@ -28,6 +28,11 @@ VALIDATION_CODES = {
         "string_pattern_mismatch",
         "literal_error",
         "uuid_parsing",
+        "int_parsing",
+        "int_from_float",
+        "greater_than",
+        "greater_than_equal",
+        "less_than_equal",
         "invalid_email",
         "mfa_code_or_recovery_required",
     )
@@ -84,6 +89,9 @@ WRONG_SECRET_RESPONSE: dict[int | str, dict[str, Any]] = {
 }
 NOT_FOUND_RESPONSE: dict[int | str, dict[str, Any]] = {
     404: _documented("Not found, or not yours"),
+}
+TOO_LARGE_RESPONSE: dict[int | str, dict[str, Any]] = {
+    413: _documented("`FILE_TOO_LARGE`, or the workspace storage quota is full (`QUOTA_EXCEEDED`)"),
 }
 
 

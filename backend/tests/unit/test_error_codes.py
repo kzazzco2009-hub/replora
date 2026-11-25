@@ -51,6 +51,8 @@ def test_validation_codes_are_exactly_what_the_api_emits(error_codes):
         ("MFA_ALREADY_ENABLED", 409),
         ("MFA_NOT_ENABLED", 409),
         ("RATE_LIMITED", 429),
+        ("FILE_TOO_LARGE", 413),
+        ("QUOTA_EXCEEDED", 413),
     ],
 )
 def test_agreed_problem_codes_are_listed(error_codes, code, status):

@@ -56,6 +56,14 @@
       "status": 429,
       "description": "Too many requests. Wait for the Retry-After header (seconds) before trying again."
     },
+    "FILE_TOO_LARGE": {
+      "status": 413,
+      "description": "The file is larger than the per-file limit (see GET /limits)."
+    },
+    "QUOTA_EXCEEDED": {
+      "status": 413,
+      "description": "The workspace storage quota is full. Delete files or ask the owner to raise it."
+    },
     "INTERNAL_ERROR": {
       "status": 500,
       "description": "Unexpected server error. Show the correlation_id so support can find it."
@@ -101,6 +109,21 @@
     },
     "MFA_CODE_OR_RECOVERY_REQUIRED": {
       "description": "Send exactly one of an authenticator code or a recovery code."
+    },
+    "INT_PARSING": {
+      "description": "A whole number is required."
+    },
+    "INT_FROM_FLOAT": {
+      "description": "A whole number is required, not a fraction."
+    },
+    "GREATER_THAN": {
+      "description": "The number is too small (params.gt is the exclusive minimum)."
+    },
+    "GREATER_THAN_EQUAL": {
+      "description": "The number is too small (params.ge is the minimum)."
+    },
+    "LESS_THAN_EQUAL": {
+      "description": "The number is too large (params.le is the maximum)."
     },
     "INVALID": {
       "description": "The value is invalid (fallback for a check without its own code)."

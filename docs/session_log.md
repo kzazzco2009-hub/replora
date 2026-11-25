@@ -8,17 +8,59 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 4/11 done (P0.1, P0.2, P0.3, P0.10). **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth stubs, with the review feedback applied) is **PR #8** from `feat/p0.5-auth-stubs` (head `ed9999c`, CI green). `main` at `887892a`. **This branch holds the newest session log until it merges.** |
+| Current phase | **Phase 0 — Foundation (B0), end of Session 13.** `main` is at **`6eef1fd`**. Steps **8/11** once #25 merges (P0.1, P0.2, P0.3, P0.4, P0.6, P0.7, P0.9, P0.10), and **9/11** with #26 (P0.11). Still open: **P0.5** (§6–§8 stubs, and `openapi-fetch` to be decided) and **P0.8** (branch protection, the owner's decision).
+
+**Open PRs, all CI green, none blocked on us:**
+- **#11** `feat/p0.5-file-stubs` (§4 files). Code commits: `3cb36af` (= approved `76bbe42`), `f2ce28f` (§4 codes and number codes), and `c7faa05`/`8c55bd8` (generated). The rest are log commits; **this branch holds the session log**. Waiting for the frontend's re-check.
+- **#25** `docs/phase0-ticks` (`6d0a66c`): ticks P0.4, P0.6, P0.7, P0.9, P9.1, T0.2, T0.5 and T11.3, the root `README.md` dev section, and the `security.md` Phase 0 status (S‑01, S‑03, S‑04 verified; S‑02, S‑05 open). Waiting for review and the 5 questions.
+- **#26** `feat/p0.11-observability` (`3765b7d`): `X-Request-ID`, JSON logs, PII scrub and `correlation_id`. Ticks P0.11 and T0.7. Waiting for review.
+- **#27** `feat/p0.5-workspace-codes` (`85b9a4d`): `PERSONAL_WORKSPACE_UNDELETABLE`, and the `AuditEvent` action and target enums (proposed values). Waiting for the frontend's check of the values.
+- **#28** `feat/p0.5-operations-stubs` (`c60e118`): the §5 registry (`/operations`, `/limits`, public, `ArtifactType` with 11 kinds). Waiting for review and 3 questions.
+
+**Overlap:** #11 and #27 both add to `error-codes.json`; #11, #27 and #28 all regenerate `openapi.json` and `schema.d.ts`. Whichever merges later gets rebased and regenerated. |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend: review **PR #8** (§2 auth stubs), confirm `ExportStatus.status = pending | ready | failed`, tick P0.1 in `docs/frontend/plan.md`; F0 / P0.4 is in progress on their side. Owner: delete the old OpenRouter key on openrouter.ai, then retire the OneDrive `Replora/` folder and empty the OneDrive recycle bin; on the other machine, pull and create `.env`. |
-| Next step | 1) After the part 2 PR merges, tell the frontend on issue #1 that `pnpm gen:api` can start for auth. 2) P0.5 part 3: §3–§4 stubs (workspaces, members, invitations, audit, files). 3) Part 4: §5–§8. 4) Then P0.6 (pre-commit), P0.11 (observability). |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `gh pr view 8 -R kzazzco2009-hub/replora --comments`; `gh api repos/kzazzco2009-hub/replora/pulls/8/reviews`; `gh issue view 1 -R kzazzco2009-hub/replora --comments` (new comments after id 7144709728); `gh pr list -R kzazzco2009-hub/replora --state all`. If #8 is merged: `git switch main; git pull --ff-only`, then post the `pnpm gen:api` note on #1 and start P0.5 part 3 on a new branch from `main`. |
+| Waiting on | **Frontend** (final state in #1, comment 7162595499):
+- review #11, #25, #26, #27 and #28;
+- list the shared-plan items finished on their side (#1, 7162100230);
+- answer the 5 questions on #25 (7161950428): `openapi-fetch`, their F0 contract box, their F0 tests line, frontend S‑01/03/04, and S‑05 as a manual rule;
+- answer #27's audit values and #28's 3 questions.
+
+**Owner:**
+- decide on branch protection (GitHub Pro, public repo, or organization) for P0.8 and S‑05;
+- ~~set a global git identity on this machine~~: done (`khaledhagar`, 2026-11-25). |
+| Next step | 1) **Apply the frontend's answers:** the ticks into #25, #27's values, #28's questions.
+
+2) **Rebase whatever conflicts after each merge.** `git switch <branch>; git rebase origin/main`. Resolve `error-codes.json` by keeping both sides. Then `uv run python -m app.export_openapi` and `pnpm -C frontend run gen:api`, commit the generated files, rerun the checks, and `git push --force-with-lease`. For a PR whose base is not `main`, **retarget before pushing**.
+
+3) **S‑02 (backend, small):** refuse to start when `app_env == "production"` and a required secret is missing (or debug is on). Add a unit test, then tick S‑02 in `security.md`.
+
+4) **§6 drafts** (P0.5 part 4b), from `main`:
+   - `GET /templates`;
+   - `POST`, `GET` (with `ETag`) and `PATCH` (with `If-Match`; 412 when stale, 428 when missing) on `/workspaces/{ws_id}/drafts`;
+   - `Draft`, `Explanation`, `ValidationReport` and `Issue`;
+   - `WorkflowDefinition` as an object until the Phase 1 JSON Schema.
+
+   Then **§7 runs** and **§8 outputs**, each as its own small PR.
+
+5) **Tick each plan, testing or security item in the PR that finishes it.** |
+| Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`):
+1. `git fetch --all --prune`
+2. `git switch feat/p0.5-file-stubs; git pull --ff-only`. This branch has the newest session log. Read "Current status" first.
+3. `git status` must be clean. Every branch from Session 13 is pushed: `feat/p0.5-file-stubs`, `docs/phase0-ticks`, `feat/p0.11-observability`, `feat/p0.5-workspace-codes` and `feat/p0.5-operations-stubs`. For each one you work on: `git switch <branch>; git pull --ff-only`. If a branch is missing locally, `git switch <branch>` creates it from `origin`.
+4. `pnpm install --frozen-lockfile` from the repo root (the branches from `main` have `frontend/`). Then `cd backend; uv sync --locked`.
+5. `gh pr list -R kzazzco2009-hub/replora --state all --limit 15`, then the new #1 comments: `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7162595499 }`. Also the reviews and comments on #11 and #25–#28.
+
+**Notes:**
+- `gh` works from PowerShell only. `gh --jq` breaks in PowerShell 5.1, so pipe to `ConvertFrom-Json`.
+- If gitleaks isn't found, reload PATH (root `CLAUDE.md`).
+- **This machine:** local `vitest` workers time out while starting. CI runs the frontend tests.
+- **This machine:** the global git identity is set (`khaledhagar`, the same as the history). |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 4/11 | 4/7 | 0/5 | ☐ |
+| 0 Foundation | 8/11 (#25), 9/11 with #26 | 6/7, 7/7 with #26 | 3/5 (#25) | ☐ |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -94,6 +136,228 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 **Second dev machine (Developer A), checked 2026-11-24 in Session 8:** git 2.49.0 · gh 2.102.0 · uv 0.11.6 · Node 22.16.0 · npm 10.9.2 · Docker 29.5.2 · Python 3.13.3 and 3.12 only. Missing at first: gitleaks, pnpm, pre-commit, Python 3.14. `D:\Projects\replora` did not exist and was cloned again.
 **After the owner's installs (same session):** gitleaks 8.30.1 · pnpm 12.23.0 · Node 26.13.1 · uv 0.13.9 · Python 3.14 (uv-managed) · pre-commit 4.7.0. git 2.49 and gh 2.102 kept as they are.
+
+---
+
+## Session 13 — 2026-11-25 (other machine, `D:\Projects\replora`)
+**Goal:** check the state is aligned, then do the #8 review follow-ups.
+
+**Alignment check:**
+- `git fetch --all --prune`: every local branch equals its remote (`feat/p0.5-file-stubs` `3e9c06f`, #10 `ea4464a`, #8 `50ccf31`, `main` `c6f6e92`).
+- There was no new GitHub activity since Session 12. The last #1 comment is ours (7145400523). #10 and #11 have no reviews, and #8 is still unmerged.
+- `.env` is present here, and git ignores it.
+- **Deleted an untracked root `pnpm-lock.yaml`.** It was 9 lines with empty importers (`.: {}`), made on this machine at 08:55 by a pnpm run on this pre-#9 branch. It would have blocked the rebase onto `main`, which has the real 5,075-line lockfile.
+- Found the log out of date in two places, now fixed:
+  - P0.4 (#9) was done but not counted (now 5/11);
+  - `ExportStatus.status` was still listed as waiting, though the #8 review had confirmed it.
+- **Owner:** deleted the old OpenRouter key and the OneDrive `Replora/` folder.
+- This machine has **no global git identity**. The commit used `git -c user.name=khaledhagar -c user.email=…` (the same identity as the history). Owner: run `git config --global user.name khaledhagar` and `git config --global user.email <your email>`.
+
+**#8 follow-ups → PR #12** (`fix/p0.5-auth-followups`, `9f288cc`, stacked on #8 because the code exists only there):
+1. 404 is documented on `GET /auth/me/export/{export_id}` and `DELETE /auth/sessions/{session_id}` (`NOT_FOUND_RESPONSE`).
+2. `HTTPException` (routing 404/405) and unhandled exceptions now answer problem+json.
+   - `code` = the HTTP status name, or `INTERNAL_ERROR` for an unhandled error.
+   - `detail` and exception text are never sent.
+   - Headers such as `Allow` are kept.
+3. `PasswordRequest` and `MfaDisableRequest` passwords are bounded `1..256` (`CurrentPassword`). Before this, an empty password was also accepted.
+4. The 422 codes come from the explicit `VALIDATION_CODES` (11 types, the same names as before); an unlisted type maps to `INVALID`. The 11 types were found by probing every model with bad input. Each is pinned by a request test.
+
+**Proof:**
+- TDD: the new tests were red first.
+- With only the 2 new handlers disabled, 4/5 of `test_problem.py` failed (404, 405, HTTPException, 500).
+- Restored: **101 passed** (79 on #8 + 22) · ruff check and format clean · drift check exit 0 · `uv sync --locked` · pip-audit "No known vulnerabilities found" · gitleaks no leaks.
+
+**Found while probing, asked on #12:**
+- `VALUE_ERROR` (meaning an invalid email) is vague: rename it to `INVALID_EMAIL`?
+- The `/auth/mfa/challenge` union puts model names into `errors[].path` (`body.MfaCodeRequest.code`). I lean to one model with an exactly-one check at G5.
+- The `error-codes.json` shape.
+
+**P0.6 → PR #14** (`chore/p0.6-pre-commit`, `7800507`, from `main`; approved by the frontend):
+- **Hooks:** `.pre-commit-config.yaml` has 4 local hooks: gitleaks (staged), ruff check `--fix`, ruff format, and frontend ESLint. They run the tools from the lockfiles, so the versions match CI.
+- **A gap found while proving T0.5:** the default gitleaks rules catch `OPENROUTER_API_KEY=sk-or-…` only through `generic-api-key`, and **miss a bare key in code** (`Client("sk-or-v1-…")` → exit 0). Added `.gitleaks.toml` (the defaults plus `openrouter-api-key`); after it, both cases are caught. The full history scan with the new config: no leaks.
+- **T0.5 proof:** in a scratch clone, `pre-commit install`, then committing a fake key gave `Failed`, `RuleID: openrouter-api-key`, commit exit 1. T0.5 is ticked in `testing.md`. P0.6 in `plan.md` stays open for the frontend's prettier and typecheck hooks.
+- **Root cause of a slow hook:** `frontend/node_modules` was missing on this machine, so pnpm 12 (`verifyDepsBeforeRun`) auto-installed before `pnpm run`, against a slow registry (10–30 s per request). Fixed by running `pnpm install --frozen-lockfile` once. After that, ESLint takes about 10–25 s here.
+- **Incident, fixed:** my first T0.5 script failed to clone (no local `main` branch), and the following commands ran in the real repo. They made a local branch `scratch/t0.5` with one commit, installed the hook in the real repo and staged two fake-key files (the commit was blocked). Nothing was pushed. All of it was reverted (`git rm --cached`, `reset --soft`, `branch -D`, `pre-commit uninstall`). The rerun used `$ErrorActionPreference='Stop'` and `git -C <scratch>`.
+
+**Frontend activity (issue #1):**
+- #8 was squash-merged (`c4ea4a9`), and #12, #10 and #11 were approved.
+- They answered the #12 points: `INVALID_EMAIL`, MFA option (b), and the `error-codes.json` shape `problem_codes {status, description}` + `validation_codes {description}`.
+- They accepted the four #10/#11 points. `detected_type` stays an enum.
+- New request before G5: fixed lists for `AuditEvent.action` and `target_type`.
+
+**#12 rebased** onto `main` (`78a2a0f`): `git diff 9f288cc 78a2a0f -- backend contracts` is empty. 101 passed, the checks are clean, it's retargeted to `main`, CI is green and the frontend job now runs.
+
+**#16** (`feat/p0.5-error-codes`, `fc31d4b`, stacked on #12):
+- `contracts/error-codes.json` v0: 6 problem codes, and 12 validation codes plus `INVALID`.
+- `Email` = `EmailStr` + `WrapValidator`, which raises `invalid_email`. `value_error` is no longer mapped.
+- `MfaChallengeRequest {code?, recovery_code?}` with an exactly-one check (`MFA_CODE_OR_RECOVERY_REQUIRED` on `body`), and `recovery_code` bounded to `1..64`.
+- **Proof:** TDD red first (7 failed). With the JSON removed, the 9 tests error; with one code misspelled, the parity test fails. Result: **118 passed**, ruff clean, no drift, pip-audit clean, gitleaks clean, CI green.
+
+**Frontend reply (issue #1, 7156875222), and our answers:**
+- They merged #12 (head `78a2a0f`) and #13. They accepted that backend PRs regenerate `schema.d.ts`, on one condition: no other file under `frontend/`, and it still goes through CODEOWNERS.
+- They approved **#16**, with two non-blocking requests: the full §2 `problem_codes` before G5, and a regenerated `schema.d.ts` after #17.
+- They opened **#17** (`ci.yml`: the `schema.d.ts` drift check, `next build`, and the regenerated stale types from #12). They pushed **`ec2ccca` on #15**, which fixes all three of our notes.
+- **Checking #17:** `pnpm dlx openapi-typescript@7.13.0` on `main`'s `openapi.json` gives exactly their `schema.d.ts`. The only differences were BOM and `§` artifacts from PowerShell `Out-File` on our side. Comment review posted: no blockers.
+- **#15 re-check:** posted; all resolved.
+- **#16 reply:** posted. The §2 codes come in a separate PR after #16, so the approval stays valid.
+- **Issue #1, 7158357090:** proposed 11 §2 codes (`UNAUTHENTICATED`, `INVALID_CREDENTIALS`, `MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`, `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, `MFA_ALREADY_ENABLED`, `MFA_NOT_ENABLED`, `RATE_LIMITED`, plus the existing `MFA_CHALLENGE_INVALID`).
+  - **Rule:** 401 only means "no session". A wrong secret is 400, so the client does not log the user out.
+  - **No "email taken" code (S‑26):** register returns 202 with no body in every case, and an existing account gets a notice email. This waits for their confirmation.
+- **Note:** this branch has no `frontend/` and no root `pnpm-lock.yaml` (it predates #9). So a `pnpm` run here makes an untracked root lockfile, which was deleted again. That was also the cause of the one found at the start of Session 13.
+
+**Frontend reply (issue #1, 7158585607): all three §2 points confirmed** (the 11 codes, the 400-vs-401 rule, register → 202). The §2 PR comes right after #16. They merged #17 (`73ef4b1`), #14 (`dbe9565`) and #15 (`75b8279`).
+
+**#16 rebased:**
+- `git rebase --onto origin/main 78a2a0f` → `c6da1d1`, no conflict.
+- `pnpm install --frozen-lockfile`, then `gen:api` → `72813b9`, which touches only `schema.d.ts`: `MfaChallengeRequest` added, `MfaRecoveryRequest` removed, and the challenge body.
+- **Checks:** 118 passed, ruff clean, drift exit 0, frontend typecheck passes, 5 frontend tests pass, gitleaks clean.
+- **Pitfall:** I pushed before retargeting the base, so GitHub showed `CONFLICTING` against the old base and no CI ran. Retargeting does not trigger CI. Local `merge-tree` against `main` was clean. **Fix:** `gh pr close 16; gh pr reopen 16` → `MERGEABLE CLEAN`, and CI succeeded on `72813b9`.
+- Retargeted to `main`, PR body updated, and replied in #1 (7158806753) with the next steps.
+
+**Frontend replies (#1, 7158635728 and 7158990094):**
+- #16 was merged at `72813b9` (`main` is `38095c2`, CI green). They checked that `c6da1d1` has the same patches as the approved `fc31d4b`.
+- Our order is accepted: #10, then the §2 PR. They asked for reviews of #18 and #19.
+
+**Our reviews:**
+- **#19** (`df40f54`): verified locally. `format:check` passes, fails on an unformatted line (exit 1), and passes after `gen:api` (`schema.d.ts` is in `.prettierignore`). **Asked for `format:check` in the CI `frontend` job**, since hooks can be skipped. Explained the local "uv not found": the ruff hooks only match `backend/`, so use `SKIP=ruff-check,ruff-format` or install uv.
+- **#18** (`99574dd`): ok. Noted that `7955d6f` is #13's PR head and `14fd30b` its squash commit, so neither is wrong. The `decisions.md` rows come in our §2 PR.
+
+**Continued: #18 and #19 merged, #10 rebased, §2 PR #22:**
+- The frontend merged #18 (`d836afe`) and #19 (`6651beb`). #19 added `format:check` to CI, as asked.
+- **#10 rebased:**
+  - `git rebase --onto origin/main 50ccf31` gave 2 conflicts. `problem.py`: kept the generic "Not found, or not yours". `openapi.json`: regenerated.
+  - **Found:** the invitation email (`InvitationRequest.email`, a plain `EmailStr`) still answered `INVALID`, not `INVALID_EMAIL`. #16's `Email` lived in `auth_models.py`, which imports `workspace_models`, so a direct import would be circular. **Fix:** moved `Email` to `app/api/models.py`. A test was red first (2 failed).
+  - `gen:api` → `schema.d.ts`.
+  - The base was retargeted to `main` **before** the push this time, and CI was green on `55f6a1a`.
+  - **Checks:** 161 passed, ruff clean, drift 0, frontend typecheck and `format:check` pass.
+- **#22** (`feat/p0.5-auth-error-codes`, from `main`):
+  - **TDD:** 18 new tests failed first (10 code pins, 6 "400 documented", 2 register).
+  - 10 new codes in `error-codes.json`.
+  - `WRONG_SECRET_RESPONSE` (400) on verify-email, password/reset, mfa/enroll/confirm, mfa/challenge, `DELETE /auth/mfa` and `DELETE /auth/me`.
+  - The 401, 403 and 429 descriptions name their codes.
+  - Register → 202 with no body. FastAPI documents every body-less 202 as `{"schema": {}}`, so the test asserts it equals `password/forgot`'s 202.
+  - `api_contract.md`: the §1 rule, the §2 row, a revision line. `decisions.md`: 2 rows.
+  - `schema.d.ts` regenerated.
+  - **Result:** 135 passed, ruff clean, drift 0, pip-audit clean, gitleaks clean, frontend typecheck, `format:check` and tests (5) pass.
+- Updated the #10 PR body, and replied in #1 (7160558200).
+
+**Continued: #10 merged, #22 rebased, #11 rebased, #20 and #21 reviewed:**
+- The frontend merged **#10** at `55f6a1a` (`main` is `7b2f66b`), one minute before our #1 comment asking them to re-check it. Corrected in #1 (7160831011).
+- **#22's first CI run failed the drift check.** The cause: CI tests the PR merged into the new `main`, and #10's 11 §3 routes still had the old 401, 403 and 429 texts. Reproduced locally after `git rebase origin/main`: `--check` exit 1, and exit 0 after regenerating. Commit `076ba16` holds the generated files only. Result: 178 passed, CI green.
+- **#11 rebased:**
+  - `git rebase --onto origin/main ea4464a` replayed 11 commits with no conflict, because `main`'s log is unchanged since `ea4464a`.
+  - **Patch check:** `git patch-id` per file. Every file is identical to the approved `76bbe42`, except `problem.py`: one context line differs (the 404 text) and the added lines are the same.
+  - **Gap found by probing:** number errors (`size`, `limit`) fell back to `INVALID`. Added `int_parsing`, `int_from_float`, `greater_than`, `greater_than_equal` and `less_than_equal` to `VALIDATION_CODES` and `error-codes.json`, plus `FILE_TOO_LARGE` and `QUOTA_EXCEEDED`. 7 tests were red first. Result: 198 passed.
+  - Retargeted before the push. CI green on `e4c707a`.
+- **#20 and #21 reviewed** (comment reviews, no blockers):
+  - #20: `correlation_id` arrives with our P0.11; the dev-only rewrite means no proxy under `next start`; `lang="en"` placeholder.
+  - #21: light `--diff` on `--bg` is 4.11:1, so not for text; add `--surface-raised` pairs (all ≥ 5.4:1 today); theme `system` needs a pre-paint `data-theme` or a `prefers-color-scheme` block.
+
+**Plan ticks, #11 after #22, frontend questions:**
+- **Owner asked why nothing was ticked in `plan.md`.** Only P0.1, P0.2, P0.3 and P0.10 were ticked. I had deferred every tick to "the next shared docs PR" and never opened it.
+  - **#25** ticks P0.4, P0.6, P0.7 and P0.9 (with the root `README.md` local-dev section), plus `error-codes.json` v0, T0.2 and T0.5.
+  - **Count corrected:** 4 → 8 of 11 ticked. My first #25 text said 8 before P0.9, which was one too many.
+  - **New rule:** tick each step in the PR that finishes it.
+- **Frontend merged** #20, #21, #22, #23 (`/tokens-preview`) and #24 (their plan: P0.6, P0.9, P0.11 and P9.1 ticked). `main` is `6eef1fd`.
+- **#11 rebased again after #22.** There were conflicts in `error-codes.json` and `test_error_codes.py`, resolved by keeping both. `openapi.json` was stale (`--check` exit 1), so I regenerated it and `schema.d.ts` (`8c55bd8`). Result: 215 passed, CI green.
+- **Local vitest:** workers time out while starting ("Timeout waiting for worker to respond", 0 files, about 120 s). It passed here earlier today, and CI ran green on #11 and #25. It's the machine; no frontend config was changed.
+- **Asked the frontend 5 questions on #25** (`openapi-fetch`, the F0 contract box, the F0 tests line, frontend S‑01/03/04, S‑05 as a manual rule). Final state posted in #1 (7161976673).
+
+**While waiting for the frontend:**
+- **Asked them in #1 (7162100230)** to list every shared-plan item finished on their side: P9.1 (#21, #23) and T11.3 (#21) so far. Their reply gets added to #25 in one commit.
+- **#26 (P0.11 backend, T0.7, S‑87)**, from `main`:
+  - `app/observability.py`: a pure ASGI `RequestIdMiddleware` (UUIDv7, or a kept incoming ID matching `[A-Za-z0-9._-]{1,64}`), `JsonFormatter` (key-based redaction and email masking) and `configure_logging` (uvicorn's access log off, because it records the IP).
+  - `_problem_response` adds `correlation_id` and `X-Request-ID`. The 500 is sent from outside the middleware, so the header is set there too. `_handle_unexpected` logs the traceback.
+  - **Tests:** 19 new. Middleware turned off: 18 fail. Scrubbing turned off: the formatter test fails. Result: 197 passed.
+  - **Manual uvicorn run:** every line is JSON, the header matches `correlation_id`, and there's no password or email in the log. Uvicorn's `color_message` field is dropped.
+  - Ticks P0.11 (with the frontend's #20) and T0.7.
+- **#27 (§3):**
+  - `PERSONAL_WORKSPACE_UNDELETABLE` (409).
+  - `AuditAction` (16 values) and `AuditTargetType` (8) as `Literal`s, documented in `api_contract.md` §3. Auth events aren't included, because they have no workspace.
+  - **Tests:** 2 red first, then 181 passed. `schema.d.ts` regenerated.
+
+**#28, §5 registry (P0.5 part 4a)**, from `main`:
+- **Routes:** `GET /operations` → `OperationContract[]`; `GET /limits` → `Limits` (4 integers).
+- **Public:** no 401, 403 or 404 documented; `Cache-Control: public, max-age=3600` documented on the 200. `api_contract.md` §5 says so.
+- **`ArtifactType`:** a `StrEnum` of the 11 kinds. The list comes from `docs/history/Replora_Complete_Project_Plan_AR.md` (`plan.md` P1.1 only says "all 11"). P1.1 will own it.
+- `params_schema` is `dict[str, Any]`, with the §5 subset in its description.
+- **Tests:** 10 red first (404 and `KeyError`), then 188 passed. Ruff clean, drift 0, pip-audit clean, `schema.d.ts` regenerated, typecheck and `format:check` pass.
+
+**End of Session 13: ticks and final state:**
+- **#28 CI green** (`c60e118`).
+- **#25 rebased onto `6eef1fd`**, now `6d0a66c`. It also ticks **P9.1** (#21, #23) and **T11.3** (contrast test, #21), and adds a **Phase 0 status list in `security.md`**:
+  - S‑01 [x]: gitleaks in pre-commit and CI, T0.5/T0.6, the old key deleted;
+  - S‑02 [ ]: no production start-up check yet;
+  - S‑03 [x]: locked installs in CI;
+  - S‑04 [x]: pip-audit, pnpm audit, Dependabot for uv, npm and Actions;
+  - S‑05 [ ]: branch protection, the owner's decision.
+- **Not ticked anywhere yet:** P0.11 and T0.7. They're ticked in #26 and count once it merges.
+- Claude Code memory updated (project state and the resume rule). Every branch pushed. Final state posted in #1.
+
+**Reviews posted** (comment reviews; the owner approves from their account):
+- **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
+- **#15:** nothing blocks it. Flagged the `Claude-Session:` URL trailer, which writes a private link into permanent history, and the tautological `textContent` assertion.
+
+---
+
+## Session 12 — 2026-11-24 (first session in `D:\Projects\replora`)
+**Goal:** review frontend PR #9 (P0.4) and do P0.5 part 3 (§3–§4 stubs) while #8 waits.
+
+Before starting: `git fetch --all --prune`. PR #8 is **approved** by the frontend but not merged. New PR #9 from the frontend: P0.4 Next.js skeleton, CI green.
+
+**PR #9 review:**
+- Manual review plus `/code-review`. Nothing blocks the merge. The skeleton is minimal and its versions match the agreement. `.gitignore` covers `.next/`, `next-env.d.ts` and `*.tsbuildinfo`, and none of them are tracked. The tested SHA `80aafbd` ≠ head `6150624`, but the only difference is 4 lines in their session log.
+- Posted 6 follow-ups on #9 ([comment 7145011476](https://github.com/kzazzco2009-hub/replora/pull/9#issuecomment-7145011476)):
+  1. Testing Library cleanup is not wired (no `globals` and no setup file).
+  2. Record the ESLint 10 vs plugin-peer (^9) risk in `decisions.md`.
+  3. The `toBeDefined()` after `getByRole` is redundant.
+  4. Stale T0.3 note in their log.
+  5. `next build` in CI goes in a separate `ci.yml` PR.
+  6. Tick §4 in the PR body.
+- Not kept: the hardcoded `lang="en"`, because locale routing is planned work (D10, Phase 9).
+- The approval must come from the owner's account (the permission check blocks `gh pr review --approve` for me): `gh pr review 9 -R kzazzco2009-hub/replora --approve -b LGTM`.
+
+**P0.5 part 3**, split in two because the hand-written diff was 479 lines (> 400). §3 freezes at G5 and §4 at G6:
+- **3a `feat/p0.5-workspace-stubs` (`ea4464a`, stacked on #8), 291 lines:**
+  - 11 routes (workspaces, members, invitations + `/invitations/accept`, audit).
+  - Generic `Page[T]` (`items`, `next_cursor`) with `Cursor`/`Limit` (1..100) query types.
+  - `GrantableRole` (no `owner` by invitation or role change; S‑23, S‑29).
+  - `AuditEvent.actor_id` is nullable (anonymized on deletion, S‑29).
+  - Shared `client`/`openapi`/`schemas` fixtures moved to `tests/conftest.py`.
+  - Finding: FastAPI **merges** route-level `responses` into the router-level ones, so a per-route override cannot remove the 404. Fixed with a nested `scoped` router for `/workspaces/{ws_id}`. Proven: with 404 back on the main router, `test_unscoped_routes_document_no_404` failed 3 times; after the fix it passed.
+- **3b `feat/p0.5-file-stubs` (stacked on 3a), 260 lines:**
+  - 7 routes. The raw `PUT upload.url` is a storage URL, so it is not in the contract.
+  - upload-intent: no client `sha256` (422), `size > 0`, 413 on this route only.
+  - `FilePage` with a `type` filter.
+  - `DetectedType = csv | zip`, the MVP set; Phases 14–16 add values.
+  - `sha256` and `detected_type` are null until `complete`.
+  - **To confirm with the frontend in the PR:** the `detected_type` set, the nullable fields, and `ws_id`/`file_id`/`user_id`/`invitation_id` as path-parameter names.
+- TDD: 41 + 30 tests, all red first (404 or `KeyError` on missing paths and schemas), then green.
+- Checks on 3b: **150 passed** · ruff clean · 22 files formatted · drift check exit 0 · `uv sync --locked` · pip-audit "No known vulnerabilities found" · `gitleaks git --pre-commit --staged` no leaks (PATH reloaded first: gitleaks was not on this session's PATH).
+- No PRs opened yet: stacked parts open after their base merges (same as part 2).
+
+**Frontend reply on issue #1** (comment 7145138629, 21:35 UTC):
+- They approved #8 and run `pnpm gen:api` once it is merged.
+- They asked us to squash-merge #9.
+- T0.3 proven in real CI. I verified both runs with `gh run view`:
+  - 45491885639 (`0e592cc`) failed in the Frontend job at `pnpm -C frontend run lint`;
+  - the revert 45492118286 (`4b1da81`) made every job green again.
+- `git diff 6150624 5756b20` shows only docs changed since my review.
+- They ticked P0.1 and P0.4 in `docs/frontend/plan.md`, which closes my #8 request.
+- Their reply came before my #9 comment, so it does not answer the follow-ups.
+
+**Reply posted** ([comment 7145266627](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145266627)):
+- T0.3 runs verified; the owner approves and squash-merges #9.
+- The #9 follow-ups are non-blocking and fine in a later PR.
+- **Please squash-merge #8 yourselves**: under no-self-merge we cannot merge our own PR. This settles who merges what: the reviewer merges the other side's PR.
+- Part 3 is ready on two stacked branches, with the 4 points to confirm.
+
+- **#9 merged** by the owner (approved, squash `c6f6e92`, branch deleted). CI on `main` passed (lint, typecheck, test, audit). #8 is still `MERGEABLE`/`CLEAN` on the new `main` (`git merge-tree` exit 0; #9 touched only `frontend/`, `docs/frontend/` and `pnpm-lock.yaml`).
+
+- **Opened #10 (3a) and #11 (3b)** as stacked PRs with reviewer `kzazzco2009-hub`, so the frontend can review all of P0.5 part 3 now. CI: backend and gitleaks pass on both; the frontend job is skipped because these branches predate #9, and it runs after the rebase. Posted the merge order and the points to confirm on #1 ([comment 7145400523](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145400523)).
+- Wrote `D:\Projects\replora_env_setup.txt` (outside the repo, never committed) with the steps to create `.env` on the other machine: clone or pull, `Copy-Item .env.example .env`, `APP_ENV` plus `OPENROUTER_API_KEY`, and checks (`git check-ignore`, a `Settings()` load that prints only the key length, 150 tests). **It holds no secret.** The key goes through a password manager, or a new per-machine key is made on openrouter.ai.
+
+**End of session:** everything is committed and pushed on `feat/p0.5-file-stubs`, which holds the newest log. `feat/p0.5-workspace-stubs` and `feat/p0.5-auth-stubs` (#8) are pushed. No uncommitted work.
 
 ---
 
