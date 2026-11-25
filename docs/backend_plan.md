@@ -33,13 +33,14 @@
 - [x] P0.1 versions (backend libraries)
 - [x] P0.2 git and `.gitignore`
 - [x] P0.3 FastAPI health
-- [ ] P0.5 OpenAPI export *(in progress: export and drift check #6; §2 #8; §3 #10; §4 #11; §5 in #28; §6–§8 next)*
+- [ ] P0.5 OpenAPI export *(in progress: export and drift check #6; §2 #8; §3 #10; §4 #11; §5 #28; §6 #34; §7 #40 and #41; §8 #42; then the `openapi-fetch` answer)*
 - [x] P0.6 pre-commit (ruff, gitleaks) *(#14; the frontend hooks in #19)*
 - [x] P0.7 backend CI jobs (SQLite now, Postgres job added in B4) *(backend job, `openapi.json` drift check, pip-audit, gitleaks)*
 - [x] Write the **api_contract.md draft** together with Developer B *(agreed at G0 in issue #1; `docs/api_contract.md`)*
 - [x] Commit `contracts/error-codes.json` v0 *(#16)*
-- [ ] Tests: [x] T0.1 · [x] T0.3 (backend job) · [x] T0.4 · [x] T0.5 · [x] T0.6
-- [ ] Security S‑01…S‑05 verified *(S‑02 partly; see `testing.md` and `security.md`)*
+- [x] §2 auth fixtures in `contracts/fixtures/auth/`, validated against `openapi.json` and `error-codes.json` *(this PR; agreed in issue #1, api_contract.md §10)*
+- [x] Tests: [x] T0.1 · [x] T0.3 (backend job) · [x] T0.4 · [x] T0.5 · [x] T0.6
+- [ ] Security S‑01…S‑05 verified *(S‑01 to S‑04 done, S‑02 in #33; S‑05 waits on the ruleset going live)*
 - [ ] **Gate G0** (shared: both tracks green)
 
 ### B1 — Core contracts → Phase 1 (P1.1–P1.7) · T1.* · S‑10, S‑11 · **Gate G1**

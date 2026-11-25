@@ -1,0 +1,33 @@
+{
+  "ok": {
+    "status": 200,
+    "body": {
+      "status": "ready",
+      "url": "https://storage.example.com/exports/0001.zip?token=signed"
+    }
+  },
+  "pending": {
+    "status": 200,
+    "body": {
+      "status": "pending",
+      "url": null
+    }
+  },
+  "failed": {
+    "status": 200,
+    "body": {
+      "status": "failed",
+      "url": null
+    }
+  },
+  "not_found": {
+    "status": 404,
+    "body": {
+      "type": "about:blank",
+      "title": "Not Found",
+      "status": 404,
+      "code": "NOT_FOUND",
+      "correlation_id": "01937a5e-7f00-7000-8000-00000000c0de"
+    }
+  }
+}
