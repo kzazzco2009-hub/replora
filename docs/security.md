@@ -32,7 +32,7 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 
 **Phase 0 status** (the evidence is in `session_log.md`, Session 13):
 - [x] **S‑01:** `.gitignore` before the first commit, gitleaks in pre-commit (#14, with the OpenRouter rule) and CI. T0.5 and T0.6 pass. The old OpenRouter key was deleted by the owner.
-- [ ] **S‑02:** settings come from the environment (`pydantic-settings`, `SecretStr`). **Missing:** the app does not yet refuse to start in production when a required secret is missing or `DEBUG` is on.
+- [x] **S‑02:** settings come from the environment (`pydantic-settings`, `SecretStr`). With `APP_ENV=production`, `Settings` refuses to build when a secret in `PRODUCTION_SECRETS` is missing or `DEBUG` is on, so `uvicorn --factory` exits before serving. `hide_input_in_errors` keeps the refusal from echoing any value. Each phase adds the secrets it needs to `PRODUCTION_SECRETS`. 4 tests in `test_config.py` (Session 14).
 - [x] **S‑03:** `uv.lock` and `pnpm-lock.yaml` are committed. CI runs `uv sync --locked` and `pnpm install --frozen-lockfile`.
 - [x] **S‑04:** CI runs `uv run pip-audit` and `pnpm audit --audit-level=high`. Dependabot runs weekly for uv, npm and GitHub Actions.
 - [ ] **S‑05:** CODEOWNERS and the PR template are in. Protecting `main` needs GitHub Pro, a public repo or an organization (the owner's decision). Until then it's the manual rule in `decisions.md`.

@@ -44,8 +44,35 @@ def test_blank_value_from_env_example_falls_back_to_default(monkeypatch):
     assert make_settings().app_env == "development"
 
 
+def test_production_refuses_to_start_without_its_secrets():
+    with pytest.raises(ValidationError, match="openrouter_api_key"):
+        make_settings(app_env="production")
+
+
+def test_production_refuses_to_start_with_debug_on():
+    with pytest.raises(ValidationError, match="debug"):
+        make_settings(app_env="production", openrouter_api_key=FAKE_KEY, debug="true")
+
+
+def test_refusal_never_echoes_a_secret():
+    with pytest.raises(ValidationError) as excinfo:
+        make_settings(app_env="production", openrouter_api_key=FAKE_KEY, debug="true")
+
+    assert "input_value" not in str(excinfo.value)
+    assert FAKE_KEY[:4] not in str(excinfo.value)
+
+
+def test_development_needs_no_secrets_and_may_debug():
+    settings = make_settings(app_env="development", debug="true")
+
+    assert settings.debug is True
+    assert create_app(settings).debug is True
+
+
 def test_api_docs_are_disabled_in_production():
-    client = TestClient(create_app(make_settings(app_env="production")))
+    client = TestClient(
+        create_app(make_settings(app_env="production", openrouter_api_key=FAKE_KEY))
+    )
 
     assert client.get("/docs").status_code == 404
     assert client.get("/openapi.json").status_code == 404
