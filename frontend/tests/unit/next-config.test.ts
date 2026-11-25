@@ -4,7 +4,10 @@ import { apiRewrites } from "../../next.config";
 describe("apiRewrites", () => {
   it("proxies /api/* to the default backend origin in development", () => {
     expect(apiRewrites("development", undefined)).toEqual([
-      { source: "/api/:path*", destination: "http://localhost:8000/api/:path*" },
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:8000/api/:path*",
+      },
     ]);
   });
 

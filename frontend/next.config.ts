@@ -4,7 +4,10 @@ import type { NextConfig } from "next";
  * Dev-only proxy so same-origin cookies/CSRF work without CORS.
  * The production rewrite is P19.1 (Vercel).
  */
-export function apiRewrites(nodeEnv: string | undefined, backendOrigin: string | undefined) {
+export function apiRewrites(
+  nodeEnv: string | undefined,
+  backendOrigin: string | undefined,
+) {
   if (nodeEnv !== "development") {
     return [];
   }

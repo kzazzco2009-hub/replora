@@ -43,7 +43,9 @@ describe("ErrorView", () => {
     render(<ErrorView error={new ApiError(problem())} reset={() => {}} />);
     expect(screen.queryByText(/super secret stack detail/)).toBeNull();
 
-    render(<ErrorView error={new Error("do not show this")} reset={() => {}} />);
+    render(
+      <ErrorView error={new Error("do not show this")} reset={() => {}} />,
+    );
     expect(screen.queryByText(/do not show this/)).toBeNull();
   });
 

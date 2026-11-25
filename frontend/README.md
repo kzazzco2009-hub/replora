@@ -17,13 +17,13 @@ In development, `next.config.ts` rewrites `/api/:path*` to `${BACKEND_ORIGIN ?? 
 
 ## Commands
 
-| Command | Does |
-|---|---|
-| `pnpm dev` | Start the dev server |
-| `pnpm build` | Production build |
-| `pnpm lint` | ESLint |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm test` | Vitest |
-| `pnpm format` | Prettier, write |
-| `pnpm format:check` | Prettier, check only |
-| `pnpm gen:api` | Regenerate `src/lib/api/schema.d.ts` from `../contracts/openapi.json` |
+| Command             | Does                                                                  |
+| ------------------- | --------------------------------------------------------------------- |
+| `pnpm dev`          | Start the dev server                                                  |
+| `pnpm build`        | Production build                                                      |
+| `pnpm lint`         | ESLint                                                                |
+| `pnpm typecheck`    | `tsc --noEmit`                                                        |
+| `pnpm test`         | Vitest                                                                |
+| `pnpm format`       | Prettier, write                                                       |
+| `pnpm format:check` | Prettier, check only                                                  |
+| `pnpm gen:api`      | Regenerate `src/lib/api/schema.d.ts` from `../contracts/openapi.json` |

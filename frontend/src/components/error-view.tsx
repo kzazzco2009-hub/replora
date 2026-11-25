@@ -6,7 +6,10 @@ type NextError = Error & { digest?: string };
 type Lang = "en" | "ar";
 
 // Placeholder i18n: next-intl replaces this at P9.3.
-const strings: Record<Lang, { heading: string; body: string; retry: string; reference: string }> = {
+const strings: Record<
+  Lang,
+  { heading: string; body: string; retry: string; reference: string }
+> = {
   en: {
     heading: "Something went wrong",
     body: "Please try again. If this keeps happening, contact support with the reference below.",
@@ -31,7 +34,9 @@ export function ErrorView({
   lang?: Lang;
 }) {
   const t = strings[lang];
-  const reference = isApiError(error) ? error.problem.correlation_id : error.digest;
+  const reference = isApiError(error)
+    ? error.problem.correlation_id
+    : error.digest;
 
   return (
     <div
@@ -40,7 +45,11 @@ export function ErrorView({
     >
       <h1 className="text-xl font-semibold">{t.heading}</h1>
       <p>{t.body}</p>
-      <button type="button" onClick={reset} className="rounded border px-4 py-2">
+      <button
+        type="button"
+        onClick={reset}
+        className="rounded border px-4 py-2"
+      >
         {t.retry}
       </button>
       {reference ? (
