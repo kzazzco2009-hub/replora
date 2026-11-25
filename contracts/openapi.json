@@ -1488,6 +1488,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Not found, or not yours",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       }
@@ -1654,6 +1664,16 @@
           },
           "501": {
             "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not yours",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1864,6 +1884,8 @@
         "properties": {
           "password": {
             "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
             "title": "Password"
           },
           "code": {
@@ -1937,6 +1959,8 @@
         "properties": {
           "password": {
             "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
             "title": "Password"
           }
         },
