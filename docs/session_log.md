@@ -196,7 +196,7 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **#31:** the owner approved it. The first merge didn't take (still `OPEN`, `mergeStateStatus: CLEAN`), and the second did: `a536353`, CI green (run 45679116372).
 - **Frontend reviews:** all of #27, #32, #33, #34, #35 and #36 approved. #27, #33, #35 and #36 merged first, then #32.
 - **#32 rebased** on `08ea043`: `066160d`, range-diff `=`, 254 passed.
-- **The frontend's process note** said #31 was merged "before he said go". It assumed `khaledhagar` wasn't the owner. **Clarified on #1 (7172828609):** `khaledhagar` is the owner, and the rule is that the owner merges after the other developer's approval. *(Superseded later the same day: the owner chose co-ownership, #45.)* The same comment gives the owner's go to make the repo public now (decided in Session 13, reconfirmed today).
+- **The frontend's process note** said #31 was merged "before he said go". **Answered on #1 (7172828609):** #31 was merged from Developer A's account after its approval, and a PR merges only after the other developer's approval. The comment was later edited to say that **both developers are owners** (#45). The same comment gives the go to make the repo public now (decided in Session 13, reconfirmed today).
 - **`replora_env_setup.txt` (untracked, repo root) was staged by `git add -A`** while committing #40. I unstaged it before the commit. `git log --all -- replora_env_setup.txt` shows 0 commits, and `gitleaks dir` finds no leaks. Since then every commit stages files by name. Waiting on the owner's decision (move it out, or ignore it).
 - **#40 §7 runs** (P0.5 4c): 6 endpoints, `Idempotency-Key` (required UUID header), `RunState` enum, and `DRAFT_INVALID`, `PLAN_HASH_MISMATCH`, `INVALID_STATE_TRANSITION` and `IDEMPOTENCY_KEY_MISMATCH`. TDD (27 red first). `openapi.json` showed −732 lines. It was proven to be only moves: a schema and path comparison found 11 schemas and 5 paths added, none removed, and no existing schema changed.
 - **#41 §7 outputs** (4d): list, preview (`limit` 1–100, `status`, `q` ≤ 200), download (`DownloadLink`) and lineage. TDD (17 red first). Only additions (6 schemas).
@@ -213,7 +213,7 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
   - Historical lines are kept: D1–D14 and P0.10 were approved by the owner of the time.
   - Not edited: `docs/frontend/plan.md` line 16 and `frontend/CLAUDE.md`, which are the frontend's own files; they're pointed out in #45.
   - Open point raised in #45: "no self-merge" against practice (#30, #37, #38 and #34 were merged by their authors after approval).
-  - The #1 comment 7172828609 ("`khaledhagar` is the owner") got an update note pointing to #45.
+  - At Developer A's request, the #1 comments 7172828609 and 7174794670 were edited so they state co-ownership (#45) instead of a single owner.
 - **#44 §2 auth fixtures** (`8052294`). This was the only Phase 0 deliverable still missing: B0 "auth fixtures in B0/B1", agreed in Session 7.
   - **Design:** `contracts/fixtures/auth/<operationId>.json` = `{scenario: {status, body}}`, always with an `ok`. 19 files, 48 scenarios, written by a scratch script that wasn't committed.
   - **The test** validates them against the generated `openapi.json` with `jsonschema` (refs resolved by attaching `components`), rather than walking `app.routes`: on FastAPI 0.165 that gives 4 entries, with the routers wrapped in a lazy `_IncludedRouter`.
