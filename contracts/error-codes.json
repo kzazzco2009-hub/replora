@@ -132,5 +132,43 @@
     "INVALID": {
       "description": "The value is invalid (fallback for a check without its own code)."
     }
+  },
+  "rejection_codes": {
+    "FILE_EMPTY": {
+      "description": "The uploaded file has no content."
+    },
+    "FILE_SIZE_MISMATCH": {
+      "description": "The stored size differs from the size given at upload-intent."
+    },
+    "FILE_TYPE_UNSUPPORTED": {
+      "description": "The content is not a supported type, whatever the file extension says (checked by magic bytes)."
+    },
+    "FILE_CORRUPT": {
+      "description": "The file is damaged and cannot be read."
+    },
+    "ZIP_ENCRYPTED": {
+      "description": "The ZIP is password-protected."
+    },
+    "ZIP_TOO_MANY_MEMBERS": {
+      "description": "The ZIP has more files than allowed (25)."
+    },
+    "ZIP_TOO_LARGE": {
+      "description": "The ZIP's uncompressed size is over the limit (200 MiB)."
+    },
+    "ZIP_RATIO_EXCEEDED": {
+      "description": "The ZIP compresses more than 100:1 (zip bomb guard)."
+    },
+    "ZIP_NESTED": {
+      "description": "The ZIP contains another archive."
+    },
+    "ZIP_UNSAFE_PATH": {
+      "description": "A file inside the ZIP has an absolute path or a '..' segment."
+    },
+    "ZIP_SYMLINK": {
+      "description": "The ZIP contains a symbolic link."
+    },
+    "ZIP_MEMBER_UNSUPPORTED": {
+      "description": "A file inside the ZIP is not a supported type."
+    }
   }
 }

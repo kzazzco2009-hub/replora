@@ -91,6 +91,8 @@ This contract is what lets the two developers work at the same time. **Draft agr
 
 `File = {id, display_name, detected_type: "csv"|"xlsx"|…|"zip", size, sha256, status: "pending"|"ready"|"rejected", rejection_code?, members?: [{path, detected_type, size}], uploaded_by, created_at, expires_at}`
 
+`rejection_code` is one of `rejection_codes` in `contracts/error-codes.json` (an enum in `openapi.json`). The frontend translates each one.
+
 **Integrity:** the server computes `sha256` on `complete`, because it reads the file there anyway for magic-byte detection, and a client-supplied hash cannot be trusted. The browser does not hash files. `size` declared at intent must match the stored size.
 
 **Frontend rule:** use the `upload.url`, `method` and `headers` exactly as returned. Never build storage URLs yourself.

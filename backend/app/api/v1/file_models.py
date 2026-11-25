@@ -11,6 +11,22 @@ from app.api.models import ApiModel, Page
 DetectedType = Literal["csv", "zip"]
 """From magic bytes, never the extension. Phases 14–16 add values (backend_plan.md)."""
 
+RejectionCode = Literal[
+    "FILE_EMPTY",
+    "FILE_SIZE_MISMATCH",
+    "FILE_TYPE_UNSUPPORTED",
+    "FILE_CORRUPT",
+    "ZIP_ENCRYPTED",
+    "ZIP_TOO_MANY_MEMBERS",
+    "ZIP_TOO_LARGE",
+    "ZIP_RATIO_EXCEEDED",
+    "ZIP_NESTED",
+    "ZIP_UNSAFE_PATH",
+    "ZIP_SYMLINK",
+    "ZIP_MEMBER_UNSUPPORTED",
+]
+"""Why `complete` rejected a file (P6.1–P6.4, S-32). Listed in contracts/error-codes.json."""
+
 
 class FileMember(ApiModel):
     """A file inside an uploaded ZIP."""
@@ -27,7 +43,7 @@ class File(ApiModel):
     size: int
     sha256: str | None = Field(description="Computed by the server on `complete`")
     status: Literal["pending", "ready", "rejected"]
-    rejection_code: str | None = None
+    rejection_code: RejectionCode | None = None
     members: list[FileMember] | None = None
     uploaded_by: UUID
     created_at: datetime
