@@ -82,6 +82,37 @@
   --artifact-structured: #9aa6ee;
 }
 
+@media (prefers-color-scheme: dark) {
+  /* No `data-theme` yet (first visit, before next-themes sets it): resolve
+   * from the live OS preference in pure CSS. Kept identical to
+   * [data-theme="dark"] above (checked by tests/unit/tokens-parity.test.ts)
+   * so next-themes attaching the attribute never changes a painted color. */
+  :root:not([data-theme]) {
+    --bg: #0d1b1f;
+    --surface: #13262b;
+    --surface-raised: #1a3137;
+    --ink: #e3ecea;
+    --ink-muted: #9db2b0;
+    --line: #28434a;
+    --petrol: #4fb0c0;
+    --petrol-contrast: #06171b;
+    --saffron: #f0b43a;
+    --saffron-contrast: #1e1600;
+    --ok: #5cc594;
+    --diff: #f2a64a;
+    --missing: #f2867e;
+    --review: #a99cf5;
+    --focus-ring: var(--petrol);
+
+    --artifact-table: #4fb0c0;
+    --artifact-text: #cdb98f;
+    --artifact-document: #d59ac6;
+    --artifact-image: #8fd08f;
+    --artifact-archive: #9db2b0;
+    --artifact-structured: #9aa6ee;
+  }
+}
+
 @theme inline {
   --radius-control: var(--radius-control);
   --radius-panel: var(--radius-panel);

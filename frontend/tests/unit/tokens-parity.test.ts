@@ -58,6 +58,26 @@ describe("color token parity with docs/design.md §3", () => {
   });
 });
 
+describe('prefers-color-scheme fallback matches [data-theme="dark"]', () => {
+  const fallbackBlock = block(tokensCss, ":root:not([data-theme])");
+  const darkTokens = [...darkBlock.matchAll(/(--[\w-]+):/g)].map(
+    ([, token]) => token,
+  );
+
+  it("has tokens to compare", () => {
+    expect(darkTokens.length).toBeGreaterThan(5);
+  });
+
+  it.each(darkTokens)('%s matches [data-theme="dark"]', (token) => {
+    expect(valueOf(fallbackBlock, token)).toBe(valueOf(darkBlock, token));
+  });
+
+  it("only applies without an explicit data-theme attribute", () => {
+    expect(tokensCss).toContain("@media (prefers-color-scheme: dark)");
+    expect(tokensCss).toContain(":root:not([data-theme])");
+  });
+});
+
 describe("artifact-type color parity with docs/design.md §3", () => {
   const artifactLine = designMd.match(/\*\*Artifact type colors\*\*.*/)?.[0];
   if (!artifactLine) {
