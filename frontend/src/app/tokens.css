@@ -29,6 +29,9 @@
   --leading-body-arabic: 1.7;
   --leading-heading-en: 1.2;
   --leading-heading-ar: 1.35;
+
+  /* --font-readex-pro is set by next/font on <html> ([locale]/layout.tsx). */
+  --font-body: var(--font-readex-pro), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root,

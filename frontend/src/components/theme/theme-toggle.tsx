@@ -1,13 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 
-const OPTIONS = [
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-  { value: "system", label: "System" },
-] as const;
+const OPTIONS = ["light", "dark", "system"] as const;
 
 function noopSubscribe() {
   return () => {};
@@ -23,6 +20,7 @@ function useMounted(): boolean {
 }
 
 export function ThemeToggle() {
+  const t = useTranslations("theme.toggle");
   const { theme, setTheme } = useTheme();
   // `theme` is unknown on the server and on the client's first render
   // (next-themes avoids guessing to prevent a hydration mismatch), so no
@@ -30,15 +28,15 @@ export function ThemeToggle() {
   const mounted = useMounted();
 
   return (
-    <div role="group" aria-label="Theme">
+    <div role="group" aria-label={t("groupLabel")}>
       {OPTIONS.map((option) => (
         <button
-          key={option.value}
+          key={option}
           type="button"
-          aria-pressed={mounted && theme === option.value}
-          onClick={() => setTheme(option.value)}
+          aria-pressed={mounted && theme === option}
+          onClick={() => setTheme(option)}
         >
-          {option.label}
+          {t(option)}
         </button>
       ))}
     </div>

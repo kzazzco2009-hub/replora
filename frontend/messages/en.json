@@ -1,1 +1,19 @@
-{}
+{
+  "theme": {
+    "toggle": {
+      "groupLabel": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "errorView": {
+    "heading": "Something went wrong",
+    "body": "Please try again. If this keeps happening, contact support with the reference below.",
+    "retry": "Try again",
+    "reference": "Reference"
+  },
+  "home": {
+    "title": "Replora"
+  }
+}

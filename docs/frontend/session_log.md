@@ -184,3 +184,31 @@ Done:
 Next step: wait for CI and review on PR #29, then P9.3 (`next-intl`, `[locale]` routing, RTL).
 
 Next step: resume §2 contract follow-ups per the Session 4 decision (Khaled's 11 `problem_codes` PR after #16).
+
+---
+
+## Session 7 — 2026-11-25
+P9.3 PR B (frontend/ only): Readex Pro font + move hardcoded strings into next-intl messages + a key-parity test. PR C (the rest of P9.3) is still open, so P9.3 stays unticked.
+
+Done:
+- Branched `frontend/p9-3-b-fonts-messages` from `origin/main` at `08ea043`.
+- Font evidence before deciding: temporarily added `Readex_Pro` from `next/font/google` to `[locale]/layout.tsx` and ran `pnpm build`. The woff2 files were actually downloaded into `.next/static/media` (not a fallback), and both `fonts.googleapis.com`/`fonts.gstatic.com` returned HTTP 200 from the sandbox. CI runs on `ubuntu-latest` (standard outbound internet access), so this holds in CI too. Reverted the temporary change before continuing — matches the already-approved choice in `docs/design.md` §3, so no self-hosted `next/font/local` files, no license file, and no new dependency (`next/font` ships inside `next`, already pinned).
+- Implemented: `Readex_Pro({ subsets: ["arabic", "latin"], variable: "--font-readex-pro" })` applied as `className` on `<html>` in `[locale]/layout.tsx`; `tokens.css` gained `--font-body: var(--font-readex-pro), ui-sans-serif, system-ui, sans-serif`; `globals.css` sets `body { font-family: var(--font-body) }`.
+- Found mid-implementation: `node_modules/next/font/google/index.js` is a 0-byte file — it only works through Next's own compiler plugin, which Vitest does not run. Any test importing `layout.tsx` would crash on `Readex_Pro is not a function`. Fixed with the mock Next.js's own testing docs recommend: `vi.mock("next/font/google", ...)` added to `tests/setup.ts` (global, all tests), leaving the real build path untouched.
+- Messages: `messages/en.json` and `messages/ar.json` filled with real copy (not placeholders) under `theme.toggle.*` (`groupLabel`, `light`, `dark`, `system`), `errorView.*` (`heading`, `body`, `retry`, `reference`), `home.title`. `theme-toggle.tsx` and `[locale]/page.tsx` now call `useTranslations`.
+- `ErrorView` (`error-view.tsx`) changed from a built-in `lang`-keyed dict to required `strings: ErrorViewStrings` + optional `dir` props. `[locale]/error.tsx` builds `strings` from `useTranslations("errorView")` and `dir` from `localeDirection(useLocale())`. `global-error.tsx` has no next-intl context (it replaces the root layout on a fatal error outside `[locale]`), so it keeps its own small local EN/AR dict and renders the `en` entry with `dir="ltr"`, same behavior as before.
+- New test: `tests/unit/messages-parity.test.ts` — recursive leaf-path comparison between `ar.json`/`en.json` (same key set) plus a check that no string value is empty, in each file separately.
+- Updated existing tests for the new APIs: `error-view.test.tsx` (passes a `strings` fixture), `home.test.tsx` and `theme-toggle.test.tsx` (wrapped in `NextIntlClientProvider` with real `en.json` messages).
+
+Evidence (commands and results, branch `frontend/p9-3-b-fonts-messages`):
+- `pnpm lint` → 0 errors.
+- `pnpm format:check` → all files match Prettier.
+- `pnpm typecheck` → clean.
+- `pnpm test` → 113 passed (113), 12 test files (was 100/8 at the end of Session 6).
+- `pnpm build` → compiled successfully (Turbopack).
+- Arabic subset check: after `pnpm build`, `.next/static/chunks/*.css` has 4 `@font-face` rules for Readex Pro; one has `unicode-range:U+6??,...` (the `?` is a CSS unicode-range wildcard, so `U+6??` = `U+0600`–`U+06FF`, the core Arabic block) plus Arabic Supplement/Extended-A/Presentation-Forms ranges, served from `06716fb78f125b1f-s.p.1ybfybs3k8tn2.woff2` (22,764 bytes). Confirmed `--font-readex-pro` → `--font-body` → `body { font-family }` resolve correctly in the same compiled CSS. `.next` removed afterwards (not committed).
+- `gitleaks git .` → no leaks found.
+
+Diff: 14 files changed (188 insertions, 61 deletions) + 1 new file (`tests/unit/messages-parity.test.ts`, 37 lines) ≈ 225 insertions / 61 deletions total. No `package.json`/`pnpm-lock.yaml` change — no new dependency.
+
+Next step: PR B opened against `main`, waiting on CI/review. Not merging without Developer B's explicit go. P9.3 itself stays unticked until PR C (the rest of the phase) also lands.
