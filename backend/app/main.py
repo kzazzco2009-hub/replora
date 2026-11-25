@@ -7,6 +7,7 @@ from fastapi.routing import APIRoute
 
 from app.api import problem, v1
 from app.config import Settings
+from app.observability import RequestIdMiddleware, configure_logging
 
 
 def operation_id(route: APIRoute) -> str:
@@ -28,4 +29,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.include_router(v1.router)
     problem.install(app)
+    app.add_middleware(RequestIdMiddleware)
+    configure_logging()
     return app

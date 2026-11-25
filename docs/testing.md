@@ -49,7 +49,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [x] T0.4 The contract drift check fails when the OpenAPI output differs from the committed file.
 - [x] T0.5 gitleaks blocks a commit containing a fake `OPENROUTER_API_KEY=sk-or-…` (pre-commit test in a scratch branch).
 - [x] T0.6 `git check-ignore .env` confirms that `.env` is ignored.
-- [ ] T0.7 Every response has an `X-Request-ID` header. Logs are JSON and carry the same ID. A log of a login request contains no password (PII scrub test).
+- [x] T0.7 Every response has an `X-Request-ID` header. Logs are JSON and carry the same ID. A log of a login request contains no password (PII scrub test).
 
 ## Phase 1 — Core contracts
 **Unit**
