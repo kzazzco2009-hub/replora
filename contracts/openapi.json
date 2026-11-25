@@ -3000,7 +3000,7 @@
             }
           },
           "404": {
-            "description": "Not found, or not in a workspace you belong to",
+            "description": "Not found, or not yours",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3124,7 +3124,7 @@
             }
           },
           "404": {
-            "description": "Not found, or not in a workspace you belong to",
+            "description": "Not found, or not yours",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3232,7 +3232,7 @@
             }
           },
           "404": {
-            "description": "Not found, or not in a workspace you belong to",
+            "description": "Not found, or not yours",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3386,7 +3386,7 @@
             }
           },
           "404": {
-            "description": "Not found, or not in a workspace you belong to",
+            "description": "Not found, or not yours",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3500,7 +3500,7 @@
             }
           },
           "404": {
-            "description": "Not found, or not in a workspace you belong to",
+            "description": "Not found, or not yours",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3605,7 +3605,7 @@
             }
           },
           "404": {
-            "description": "Not found, or not in a workspace you belong to",
+            "description": "Not found, or not yours",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3719,7 +3719,7 @@
             }
           },
           "404": {
-            "description": "Not found, or not in a workspace you belong to",
+            "description": "Not found, or not yours",
             "content": {
               "application/problem+json": {
                 "schema": {
