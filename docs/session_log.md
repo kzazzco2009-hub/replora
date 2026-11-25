@@ -8,25 +8,25 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.5 in progress:** #6, #8, **#12**, **#14** (P0.6 backend part), the frontend's **#13**, **#17** and **#15** are merged (`main` at **`75b8279`**). Open:
-- **#16** `feat/p0.5-error-codes` (**`72813b9`, base `main`**, rebased): the approved code `c6da1d1` plus the regenerated `schema.d.ts`. Waiting for the frontend's re-check and merge.
+| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.5 in progress:** #6, #8, **#12**, **#14** (P0.6 backend part), the frontend's **#13**, **#17** and **#15** are merged and **#16** (`main` at **`38095c2`**). Open:
 - **#10** `feat/p0.5-workspace-stubs` (`ea4464a`, base `feat/p0.5-auth-stubs`) and **#11** `feat/p0.5-file-stubs` (code `76bbe42`): approved, not rebased yet.
 
-Merge order: **#16 → #10 → #11**. **`feat/p0.5-file-stubs` holds the newest session log.** |
+Frontend **#18** (docs, `99574dd`) and **#19** (P0.6 prettier and typecheck hooks, `df40f54`): reviewed by us, nothing blocks them; the owner approves and merges. Merge order for ours: **#10 → #11**. **`feat/p0.5-file-stubs` holds the newest session log.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | **Frontend:**
-- re-check and merge #16 (`72813b9`);
-- their P0.6 part (prettier and typecheck hooks; #14 is merged).
+- #19: add `format:check` to CI (asked in our review), and fix the #13 SHA note in #18 (PR head `7955d6f`, merged as `14fd30b`).
 
-**Owner:** set a global git identity on this machine (see Session 13). |
-| Next step | 1) **Now (#16 is done):**
+**Owner:** approve and merge #18 and #19.
+
+Also: set a global git identity on this machine (see Session 13). |
+| Next step | 1) **Now (#16 is merged as `38095c2`):**
    - `git switch feat/p0.5-workspace-stubs; git rebase --onto origin/main 50ccf31`.
    - **Order:** retarget the PR base (`gh pr edit 10 --base main`) **before** `git push --force-with-lease`. Pushing first gives a false conflict against the old base, and no CI runs (see Session 13). Resolve the `NOT_FOUND_RESPONSE` conflict in `problem.py`: keep one constant with the generic "Not found, or not yours" text. Regenerate `openapi.json` and `schema.d.ts`, then retarget #10.
 
 2) **When #16 and #10 are in `main`:**
    - Add the §3 problem code `PERSONAL_WORKSPACE_UNDELETABLE` to `error-codes.json`.
    - Add the `AuditEvent.action` / `target_type` enums (the frontend asked for them before G5), with the proposed values, in a small PR.
-   - **§2 PR (confirmed by the frontend in #1, 7158585607; start right after #16 merges):**
+   - **§2 PR (confirmed by the frontend in #1, 7158585607; do now, #16 is merged):**
      - the 11 §2 codes in `error-codes.json` with their status;
      - `POST /auth/register` → 202 with no body (`api_contract.md` §2, the stub, `openapi.json`);
      - the 400-vs-401 rule in §1;
@@ -40,7 +40,7 @@ Merge order: **#16 → #10 → #11**. **`feat/p0.5-file-stubs` holds the newest 
 5) **Part 4:** §5–§8 stubs.
 
 6) **The P0.4 tick in `docs/plan.md`**, in the next shared docs PR. |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7158806753 }`; the reviews and comments on #16, #10 and #11 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7158990094 }`; the reviews and comments on #10, #11, #18 and #19 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -199,6 +199,14 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **Checks:** 118 passed, ruff clean, drift exit 0, frontend typecheck passes, 5 frontend tests pass, gitleaks clean.
 - **Pitfall:** I pushed before retargeting the base, so GitHub showed `CONFLICTING` against the old base and no CI ran. Retargeting does not trigger CI. Local `merge-tree` against `main` was clean. **Fix:** `gh pr close 16; gh pr reopen 16` → `MERGEABLE CLEAN`, and CI succeeded on `72813b9`.
 - Retargeted to `main`, PR body updated, and replied in #1 (7158806753) with the next steps.
+
+**Frontend replies (#1, 7158635728 and 7158990094):**
+- #16 was merged at `72813b9` (`main` is `38095c2`, CI green). They checked that `c6da1d1` has the same patches as the approved `fc31d4b`.
+- Our order is accepted: #10, then the §2 PR. They asked for reviews of #18 and #19.
+
+**Our reviews:**
+- **#19** (`df40f54`): verified locally. `format:check` passes, fails on an unformatted line (exit 1), and passes after `gen:api` (`schema.d.ts` is in `.prettierignore`). **Asked for `format:check` in the CI `frontend` job**, since hooks can be skipped. Explained the local "uv not found": the ruff hooks only match `backend/`, so use `SKIP=ruff-check,ruff-format` or install uv.
+- **#18** (`99574dd`): ok. Noted that `7955d6f` is #13's PR head and `14fd30b` its squash commit, so neither is wrong. The `decisions.md` rows come in our §2 PR.
 
 **Reviews posted** (comment reviews; the owner approves from their account):
 - **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
