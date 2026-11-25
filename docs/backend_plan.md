@@ -33,12 +33,12 @@
 - [x] P0.1 versions (backend libraries)
 - [x] P0.2 git and `.gitignore`
 - [x] P0.3 FastAPI health
-- [ ] P0.5 OpenAPI export *(in progress: export + drift check merged in #6; §2 auth stubs in #8; §3 and §4 stubs on stacked branches; §5–§8 next)*
-- [ ] P0.6 pre-commit (ruff, gitleaks)
-- [ ] P0.7 backend CI jobs (SQLite now, Postgres job added in B4) *(backend job and drift check live; done with P0.6)*
+- [ ] P0.5 OpenAPI export *(in progress: export and drift check #6; §2 #8; §3 #10; §4 #11; §5 in #28; §6–§8 next)*
+- [x] P0.6 pre-commit (ruff, gitleaks) *(#14; the frontend hooks in #19)*
+- [x] P0.7 backend CI jobs (SQLite now, Postgres job added in B4) *(backend job, `openapi.json` drift check, pip-audit, gitleaks)*
 - [x] Write the **api_contract.md draft** together with Developer B *(agreed at G0 in issue #1; `docs/api_contract.md`)*
-- [ ] Commit `contracts/error-codes.json` v0
-- [ ] Tests: [x] T0.1 · [x] T0.3 (backend job) · [x] T0.4 · [ ] T0.5 (with P0.6) · [x] T0.6
+- [x] Commit `contracts/error-codes.json` v0 *(#16)*
+- [ ] Tests: [x] T0.1 · [x] T0.3 (backend job) · [x] T0.4 · [x] T0.5 · [x] T0.6
 - [ ] Security S‑01…S‑05 verified *(S‑02 partly; see `testing.md` and `security.md`)*
 - [ ] **Gate G0** (shared: both tracks green)
 

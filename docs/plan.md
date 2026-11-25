@@ -178,10 +178,10 @@ Goal: a clean, secure, reproducible monorepo with CI that is green on empty skel
 - [x] P0.1 Verify the latest stable versions (Python, uv, FastAPI, Pydantic, SQLAlchemy, Alembic, Next.js, React, Tailwind, next-intl, TanStack Query, Playwright, Vitest). Record them in session_log.
 - [x] P0.2 `git init`. Add a root `.gitignore` (`.env*`, `.data/`, `.venv/`, `node_modules/`, `.next/`, coverage) **before the first commit**. Add `.env.example` with key names only. Run a gitleaks scan.
 - [x] P0.3 Backend skeleton: `uv init backend`. Add FastAPI, pydantic-settings, ruff and pytest. `GET /api/v1/health` returns `{status:"ok", version}`.
-- [ ] P0.4 Frontend skeleton: create a Next.js app (TS, App Router, Tailwind v4, ESLint) with pnpm. It renders one page.
+- [x] P0.4 Frontend skeleton: create a Next.js app (TS, App Router, Tailwind v4, ESLint) with pnpm. It renders one page.
 - [ ] P0.5 `contracts/` folder: an OpenAPI export script (`uv run python -m app.export_openapi`). Generate the TS client with `openapi-typescript` and `openapi-fetch`.
-- [ ] P0.6 Pre-commit hooks: ruff (lint and format), the TS linter and prettier, and gitleaks.
-- [ ] P0.7 GitHub Actions CI: backend lint and test, frontend lint, typecheck and test, a contract drift check (the generated OpenAPI must match the committed file), gitleaks, and dependency audit (`uv run pip-audit` and `pnpm audit`).
+- [x] P0.6 Pre-commit hooks: ruff (lint and format), the TS linter and prettier, and gitleaks.
+- [x] P0.7 GitHub Actions CI: backend lint and test, frontend lint, typecheck and test, a contract drift check (the generated OpenAPI must match the committed file), gitleaks, and dependency audit (`uv run pip-audit` and `pnpm audit`).
 - [ ] P0.8 Repo governance: protected `main`, required CI, 1 approving review by the other developer, CODEOWNERS, a PR template (summary, commit SHA, test commands and results, security impact).
 - [ ] P0.9 Local dev commands documented in `README.md` (`uv run uvicorn …`, `pnpm dev`, with a `/api` rewrite to the backend).
 - [x] P0.10 Owner answers decisions D1–D14. Record the answers in `session_log.md`.
