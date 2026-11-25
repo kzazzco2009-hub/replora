@@ -36,6 +36,8 @@ VALIDATION_CODES = {
         "greater_than",
         "greater_than_equal",
         "less_than_equal",
+        "too_short",
+        "too_long",
         "invalid_email",
         "mfa_code_or_recovery_required",
     )
@@ -92,6 +94,10 @@ WRONG_SECRET_RESPONSE: dict[int | str, dict[str, Any]] = {
 }
 NOT_FOUND_RESPONSE: dict[int | str, dict[str, Any]] = {
     404: _documented("Not found, or not yours"),
+}
+PRECONDITION_RESPONSES: dict[int | str, dict[str, Any]] = {
+    412: _documented("`PRECONDITION_FAILED`: the `If-Match` ETag is stale; reload and retry"),
+    428: _documented("`PRECONDITION_REQUIRED`: the `If-Match` header is missing"),
 }
 TOO_LARGE_RESPONSE: dict[int | str, dict[str, Any]] = {
     413: _documented("`FILE_TOO_LARGE`, or the workspace storage quota is full (`QUOTA_EXCEEDED`)"),

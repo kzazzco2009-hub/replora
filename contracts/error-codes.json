@@ -68,6 +68,14 @@
       "status": 409,
       "description": "The personal workspace cannot be deleted. Only workspaces you created can be."
     },
+    "PRECONDITION_FAILED": {
+      "status": 412,
+      "description": "Someone changed this since you loaded it (stale If-Match). Reload, then apply your change again."
+    },
+    "PRECONDITION_REQUIRED": {
+      "status": 428,
+      "description": "The If-Match header is missing on a PATCH that requires it (client bug)."
+    },
     "INTERNAL_ERROR": {
       "status": 500,
       "description": "Unexpected server error. Show the correlation_id so support can find it."
@@ -128,6 +136,12 @@
     },
     "LESS_THAN_EQUAL": {
       "description": "The number is too large (params.le is the maximum)."
+    },
+    "TOO_SHORT": {
+      "description": "The list has too few items (params.min_length is the minimum)."
+    },
+    "TOO_LONG": {
+      "description": "The list has too many items (params.max_length is the maximum)."
     },
     "INVALID": {
       "description": "The value is invalid (fallback for a check without its own code)."

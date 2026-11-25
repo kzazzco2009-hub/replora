@@ -61,6 +61,9 @@ def test_validation_codes_are_exactly_what_the_api_emits(error_codes):
         ("RATE_LIMITED", 429),
         ("FILE_TOO_LARGE", 413),
         ("QUOTA_EXCEEDED", 413),
+        # §1 optimistic concurrency on PATCH (drafts, workflows).
+        ("PRECONDITION_FAILED", 412),
+        ("PRECONDITION_REQUIRED", 428),
     ],
 )
 def test_agreed_problem_codes_are_listed(error_codes, code, status):
