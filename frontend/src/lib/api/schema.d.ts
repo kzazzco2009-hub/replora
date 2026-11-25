@@ -1953,6 +1953,15 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
             /** @description Conflict with the current state */
             409: {
                 headers: {
@@ -2094,6 +2103,15 @@ export interface operations {
             };
             /** @description CSRF check failed, or not allowed in this workspace */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
