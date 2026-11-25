@@ -3730,10 +3730,114 @@
           }
         }
       }
+    },
+    "/api/v1/operations": {
+      "get": {
+        "tags": [
+          "operations"
+        ],
+        "summary": "List",
+        "description": "Every operation a workflow can use, with its ports and parameter schema.",
+        "operationId": "operations_list",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "headers": {
+              "Cache-Control": {
+                "description": "Public: the same for every user",
+                "schema": {
+                  "type": "string",
+                  "example": "public, max-age=3600"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OperationContract"
+                  },
+                  "type": "array",
+                  "title": "Response Operations List"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/limits": {
+      "get": {
+        "tags": [
+          "limits"
+        ],
+        "summary": "Get",
+        "description": "File size, files per run, nodes per workflow and the workspace storage quota.",
+        "operationId": "limits_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "headers": {
+              "Cache-Control": {
+                "description": "Public: the same for every user",
+                "schema": {
+                  "type": "string",
+                  "example": "public, max-age=3600"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Limits"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "ArtifactType": {
+        "type": "string",
+        "enum": [
+          "RawFile",
+          "ArchiveManifest",
+          "TabularArtifact",
+          "TextDocumentArtifact",
+          "PagedArtifact",
+          "PresentationArtifact",
+          "ImageArtifact",
+          "StructuredObjectArtifact",
+          "ValidationReport",
+          "ComparisonReport",
+          "OutputFile"
+        ],
+        "title": "ArtifactType",
+        "description": "The 11 artifact kinds a port can carry (P1.1). Ports match exactly, with no conversion."
+      },
       "AuditEvent": {
         "properties": {
           "id": {
@@ -4175,6 +4279,39 @@
         ],
         "title": "InvitationRequest"
       },
+      "Limits": {
+        "properties": {
+          "max_file_size": {
+            "type": "integer",
+            "title": "Max File Size",
+            "description": "Bytes"
+          },
+          "max_files_per_run": {
+            "type": "integer",
+            "title": "Max Files Per Run"
+          },
+          "max_nodes": {
+            "type": "integer",
+            "title": "Max Nodes",
+            "description": "Most nodes in one workflow"
+          },
+          "workspace_quota": {
+            "type": "integer",
+            "title": "Workspace Quota",
+            "description": "Bytes of storage per workspace"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "max_file_size",
+          "max_files_per_run",
+          "max_nodes",
+          "workspace_quota"
+        ],
+        "title": "Limits",
+        "description": "Server limits. The frontend reads them from here and never hard-codes them."
+      },
       "LoginRequest": {
         "properties": {
           "email": {
@@ -4418,6 +4555,55 @@
         "title": "MfaRequired",
         "description": "Login succeeded, but the MFA challenge (`/auth/mfa/challenge`) must be passed first."
       },
+      "OperationContract": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "title_key": {
+            "type": "string",
+            "title": "Title Key",
+            "description": "i18n key for the operation's name"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/Port"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "outputs": {
+            "items": {
+              "$ref": "#/components/schemas/Port"
+            },
+            "type": "array",
+            "title": "Outputs"
+          },
+          "params_schema": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params Schema",
+            "description": "JSON Schema, limited to the subset in docs/api_contract.md §5: string, integer, boolean, enum and array of strings; no oneOf, anyOf or $ref"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "title_key",
+          "inputs",
+          "outputs",
+          "params_schema"
+        ],
+        "title": "OperationContract",
+        "description": "A known operation. The frontend renders its parameter form from `params_schema`."
+      },
       "PasswordRequest": {
         "properties": {
           "password": {
@@ -4433,6 +4619,29 @@
           "password"
         ],
         "title": "PasswordRequest"
+      },
+      "Port": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "artifact_type": {
+            "$ref": "#/components/schemas/ArtifactType"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "Required"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "artifact_type",
+          "required"
+        ],
+        "title": "Port"
       },
       "ProblemDetails": {
         "properties": {

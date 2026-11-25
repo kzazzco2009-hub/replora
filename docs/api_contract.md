@@ -103,7 +103,10 @@ This contract is what lets the two developers work at the same time. **Draft agr
 | GET | `/operations` | `OperationContract[]` | `public, max-age=3600` |
 | GET | `/limits` | `Limits` | `public, max-age=3600` |
 
+Both endpoints are **public**: no session is needed, and the answer is the same for every user (hence the public cache).
+
 `OperationContract = {id, version, title_key, inputs: [Port], outputs: [Port], params_schema (JSON Schema)}` · `Port = {name, artifact_type, required}`
+`artifact_type` is one of the 11 kinds (P1.1): `RawFile`, `ArchiveManifest`, `TabularArtifact`, `TextDocumentArtifact`, `PagedArtifact`, `PresentationArtifact`, `ImageArtifact`, `StructuredObjectArtifact`, `ValidationReport`, `ComparisonReport`, `OutputFile`. Ports connect only when the types match exactly.
 `Limits = {max_file_size, max_files_per_run, max_nodes, workspace_quota}` (bytes and counts). The frontend reads limits from here and never hard-codes them.
 
 **Supported `params_schema` subset** (so the frontend can render a form from it): `string`, `integer`, `boolean`, `enum`, and `array` of strings. Decimals are `string` with a `pattern`. `x-replora-widget: "column"` means "pick a column from an input port". No `oneOf`, `anyOf` or `$ref`.
