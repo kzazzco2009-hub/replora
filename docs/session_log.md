@@ -8,11 +8,40 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth) is **PR #8**, approved by the frontend, not merged yet (head `50ccf31`). **#12** `fix/p0.5-auth-followups` (`9f288cc`, base `feat/p0.5-auth-stubs`) holds the four #8 review follow-ups. Part 3 is split into two stacked PRs, CI green on both: **#10** `feat/p0.5-workspace-stubs` (§3, `ea4464a`, base `feat/p0.5-auth-stubs`) and **#11** `feat/p0.5-file-stubs` (§4, code `76bbe42`, base `feat/p0.5-workspace-stubs`). Merge order: **#8 → #12 → #10 → #11**. `main` at **`c6f6e92`**. **`feat/p0.5-file-stubs` holds the newest session log.** |
+| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.5 in progress:** part 1 #6 and part 2 #8 merged (`main` at **`c4ea4a9`**). Open, all CI green:
+- **#12** `fix/p0.5-auth-followups` (`78a2a0f`, base `main`): the #8 follow-ups. Approved, rebased, waiting for the frontend's "merge".
+- **#16** `feat/p0.5-error-codes` (`fc31d4b`, base `fix/p0.5-auth-followups`): `error-codes.json` v0, `INVALID_EMAIL`, one MFA challenge model.
+- **#10** `feat/p0.5-workspace-stubs` (`ea4464a`, base `feat/p0.5-auth-stubs`) and **#11** `feat/p0.5-file-stubs` (code `76bbe42`): approved, not rebased yet.
+- **#14** `chore/p0.6-pre-commit` (`7800507`, base `main`): approved by the frontend.
+
+Merge order: **#12 → #16 → #10 → #11**; #14 is independent. Frontend PRs **#13** (`pnpm gen:api`) and **#15** (#9 follow-ups): reviewed by us, nothing blocks them; **the owner approves and merges both from their account**. **`feat/p0.5-file-stubs` holds the newest session log.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend: **squash-merge PR #8** (asked on #1, [comment 7145266627](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145266627)); **review #10 and #11** (pointer: [comment 7145400523](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145400523)) and confirm the points in their bodies (`detected_type` set, nullable `sha256`/`detected_type`/`actor_id`, path-param names, operationIds); **review #12** and answer its 3 points (`VALUE_ERROR` → `INVALID_EMAIL`?, the MFA challenge union path, the `error-codes.json` shape); the non-blocking #9 follow-ups in a later PR; the `ci.yml` `next build` PR. (`ExportStatus.status` is confirmed: the #8 review.) Owner: nothing open (the old OpenRouter key was deleted and the OneDrive `Replora/` folder retired in Session 13). |
-| Next step | 1) When #8 merges: `git switch fix/p0.5-auth-followups; git rebase --onto origin/main 50ccf31`; rerun the checks; `git push --force-with-lease`; `gh pr edit 12 --base main`; post the `pnpm gen:api` note on #1. 2) When #12 merges: the same for #10 (`git rebase --onto origin/main 50ccf31`). Resolve the `NOT_FOUND_RESPONSE` conflict in `problem.py` (keep one constant) and regenerate `openapi.json`. 3) When #10 merges: the same for #11 (`git rebase --onto origin/main ea4464a`, the old 3a head), then `gh pr edit 11 --base main`. Answer the review comments as they come. 4) A small PR: `contracts/error-codes.json` (shape per the frontend's #12 answer) plus the P0.4 tick in `docs/plan.md`. 5) Part 4: §5–§8. 6) Then P0.6 (pre-commit), P0.11 (observability). |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --jq '.[] | select(.id > 7145400523) | .body'`; `gh pr view 10 -R kzazzco2009-hub/replora --comments`; `gh pr view 11 -R kzazzco2009-hub/replora --comments`, and the same for 12 (and their `/reviews`). If #8 is merged, do Next step 1. If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
+| Waiting on | **Frontend:**
+- squash-merge #12 and #14 (both approved);
+- review #16;
+- the `ci.yml` PR (`next build`, plus the `schema.d.ts` drift check asked in the #13 review);
+- their P0.6 part (prettier and typecheck hooks);
+- answer on #13 who regenerates `schema.d.ts`.
+
+**Owner:**
+- approve and squash-merge #13 and #15 (`gh pr review N -R kzazzco2009-hub/replora --approve`, then `gh pr merge N --squash --delete-branch`);
+- set a global git identity on this machine (see Session 13). |
+| Next step | 1) **When #12 merges:**
+   - `git switch feat/p0.5-error-codes; git rebase --onto origin/main 78a2a0f`, rerun the checks, `git push --force-with-lease`, then `gh pr edit 16 --base main`.
+   - Then `git switch feat/p0.5-workspace-stubs; git rebase --onto origin/main 50ccf31`. Resolve the `NOT_FOUND_RESPONSE` conflict in `problem.py`: keep one constant with the generic "Not found, or not yours" text. Regenerate `openapi.json`, retarget #10, and wait for it to merge.
+
+2) **When #16 and #10 are in `main`:**
+   - Add the §3 problem code `PERSONAL_WORKSPACE_UNDELETABLE` to `error-codes.json`.
+   - Add the `AuditEvent.action` / `target_type` enums (the frontend asked for them before G5), with the proposed values, in a small PR.
+
+3) **When #10 merges:** rebase #11 (`git rebase --onto origin/main ea4464a`), add `FILE_TOO_LARGE` and `QUOTA_EXCEEDED` to `error-codes.json`, then `gh pr edit 11 --base main`.
+
+4) **P0.11 backend part** (T0.7, S‑87): `X-Request-ID` middleware, JSON logs, PII scrub, `correlation_id` in problem+json. Branch from `main` after #12 merges (it touches `problem.py`).
+
+5) **Part 4:** §5–§8 stubs.
+
+6) **The P0.4 tick in `docs/plan.md`**, in the next shared docs PR. |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7156686717 }`; the reviews and comments on #12–#16 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). If #12 is merged, do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -129,6 +158,31 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - `VALUE_ERROR` (meaning an invalid email) is vague: rename it to `INVALID_EMAIL`?
 - The `/auth/mfa/challenge` union puts model names into `errors[].path` (`body.MfaCodeRequest.code`). I lean to one model with an exactly-one check at G5.
 - The `error-codes.json` shape.
+
+**P0.6 → PR #14** (`chore/p0.6-pre-commit`, `7800507`, from `main`; approved by the frontend):
+- **Hooks:** `.pre-commit-config.yaml` has 4 local hooks: gitleaks (staged), ruff check `--fix`, ruff format, and frontend ESLint. They run the tools from the lockfiles, so the versions match CI.
+- **A gap found while proving T0.5:** the default gitleaks rules catch `OPENROUTER_API_KEY=sk-or-…` only through `generic-api-key`, and **miss a bare key in code** (`Client("sk-or-v1-…")` → exit 0). Added `.gitleaks.toml` (the defaults plus `openrouter-api-key`); after it, both cases are caught. The full history scan with the new config: no leaks.
+- **T0.5 proof:** in a scratch clone, `pre-commit install`, then committing a fake key gave `Failed`, `RuleID: openrouter-api-key`, commit exit 1. T0.5 is ticked in `testing.md`. P0.6 in `plan.md` stays open for the frontend's prettier and typecheck hooks.
+- **Root cause of a slow hook:** `frontend/node_modules` was missing on this machine, so pnpm 12 (`verifyDepsBeforeRun`) auto-installed before `pnpm run`, against a slow registry (10–30 s per request). Fixed by running `pnpm install --frozen-lockfile` once. After that, ESLint takes about 10–25 s here.
+- **Incident, fixed:** my first T0.5 script failed to clone (no local `main` branch), and the following commands ran in the real repo. They made a local branch `scratch/t0.5` with one commit, installed the hook in the real repo and staged two fake-key files (the commit was blocked). Nothing was pushed. All of it was reverted (`git rm --cached`, `reset --soft`, `branch -D`, `pre-commit uninstall`). The rerun used `$ErrorActionPreference='Stop'` and `git -C <scratch>`.
+
+**Frontend activity (issue #1):**
+- #8 was squash-merged (`c4ea4a9`), and #12, #10 and #11 were approved.
+- They answered the #12 points: `INVALID_EMAIL`, MFA option (b), and the `error-codes.json` shape `problem_codes {status, description}` + `validation_codes {description}`.
+- They accepted the four #10/#11 points. `detected_type` stays an enum.
+- New request before G5: fixed lists for `AuditEvent.action` and `target_type`.
+
+**#12 rebased** onto `main` (`78a2a0f`): `git diff 9f288cc 78a2a0f -- backend contracts` is empty. 101 passed, the checks are clean, it's retargeted to `main`, CI is green and the frontend job now runs.
+
+**#16** (`feat/p0.5-error-codes`, `fc31d4b`, stacked on #12):
+- `contracts/error-codes.json` v0: 6 problem codes, and 12 validation codes plus `INVALID`.
+- `Email` = `EmailStr` + `WrapValidator`, which raises `invalid_email`. `value_error` is no longer mapped.
+- `MfaChallengeRequest {code?, recovery_code?}` with an exactly-one check (`MFA_CODE_OR_RECOVERY_REQUIRED` on `body`), and `recovery_code` bounded to `1..64`.
+- **Proof:** TDD red first (7 failed). With the JSON removed, the 9 tests error; with one code misspelled, the parity test fails. Result: **118 passed**, ruff clean, no drift, pip-audit clean, gitleaks clean, CI green.
+
+**Reviews posted** (comment reviews; the owner approves from their account):
+- **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
+- **#15:** nothing blocks it. Flagged the `Claude-Session:` URL trailer, which writes a private link into permanent history, and the tautological `textContent` assertion.
 
 ---
 
