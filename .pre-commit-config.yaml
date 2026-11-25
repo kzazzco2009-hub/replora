@@ -27,3 +27,15 @@ repos:
         language: system
         files: ^frontend/.*\.(ts|tsx|js|mjs)$
         pass_filenames: false
+      - id: prettier
+        name: prettier (frontend)
+        entry: pnpm -C frontend run format:check
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+      - id: typecheck
+        name: typecheck (frontend)
+        entry: pnpm -C frontend run typecheck
+        language: system
+        files: ^frontend/.*\.(ts|tsx)$
+        pass_filenames: false
