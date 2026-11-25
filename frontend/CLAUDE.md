@@ -15,6 +15,7 @@ Extends the root `CLAUDE.md` for work inside `frontend/`. The root rules still a
 - Branch from `main` (short-lived feature branches, <= 2 days). Never push to `main`; never merge any PR without Developer B's explicit approval.
 - Small PRs (<= 400 lines). No self-merge. No force-push. Run `gitleaks git .` before every push.
 - Add files by name, never `git add .` (generated files such as `pnpm-lock.yaml` are committed deliberately).
+- Every commit message ends with the line `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 
 ## Source of truth
 - Plan: `docs/frontend/plan.md`, tests: `docs/frontend/testing.md`, security: `docs/frontend/security.md`. Shared docs: `docs/api_contract.md`, `docs/design.md`, `docs/decisions.md`.
@@ -22,7 +23,7 @@ Extends the root `CLAUDE.md` for work inside `frontend/`. The root rules still a
 - Read `docs/frontend/session_log.md` at the start of every session. At the end, log steps, commands, results, decisions and the next step.
 
 ## Process
-- No code, files, installs, commits or pushes without Developer B's explicit "go" for that specific step. Do NOT work in auto mode; stay in plan/default mode and ask first.
+- Auto mode is allowed (decided by Developer B on 2026-11-25). Still STOP at the end of each stage and before every commit, push, PR or merge, and wait for Developer B's explicit go. Never merge a PR without his word.
 - Phase gate = stop, report, ask permission.
 - Mark a step [x] only after its tests pass and the evidence is logged.
 - Root cause first; write a failing test that reproduces each bug before fixing.
