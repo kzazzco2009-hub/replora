@@ -115,3 +115,35 @@ def test_invitation_email_error_is_invalid_email(client, email):
     assert response.status_code == 422
     expected = [{"path": "body.email", "code": "INVALID_EMAIL", "params": {}}]
     assert response.json()["errors"] == expected
+
+
+AUDIT_ACTIONS = {
+    "workspace.created",
+    "member.invited",
+    "member.invitation_revoked",
+    "member.joined",
+    "member.role_changed",
+    "member.removed",
+    "file.uploaded",
+    "file.downloaded",
+    "file.deleted",
+    "workflow.saved",
+    "workflow.deleted",
+    "run.created",
+    "run.approved",
+    "run.cancelled",
+    "output.downloaded",
+    "planner.called",
+}
+AUDIT_TARGETS = {"workspace", "invitation", "member", "file", "workflow", "draft", "run", "output"}
+
+
+def test_audit_action_and_target_type_are_fixed_lists(schemas):
+    properties = schemas["AuditEvent"]["properties"]
+
+    assert set(properties["action"]["enum"]) == AUDIT_ACTIONS
+    assert set(properties["target_type"]["enum"]) == AUDIT_TARGETS
+
+
+def test_every_audit_action_names_a_target_type():
+    assert {action.split(".")[0] for action in AUDIT_ACTIONS} - {"planner"} <= AUDIT_TARGETS

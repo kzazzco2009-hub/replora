@@ -51,11 +51,35 @@ class InvitationRequest(ApiModel):
     role: GrantableRole
 
 
+AuditAction = Literal[
+    "workspace.created",
+    "member.invited",
+    "member.invitation_revoked",
+    "member.joined",
+    "member.role_changed",
+    "member.removed",
+    "file.uploaded",
+    "file.downloaded",
+    "file.deleted",
+    "workflow.saved",
+    "workflow.deleted",
+    "run.created",
+    "run.approved",
+    "run.cancelled",
+    "output.downloaded",
+    "planner.called",
+]
+"""Workspace audit actions (S‑52). Auth events have no workspace and are not listed here."""
+AuditTargetType = Literal[
+    "workspace", "invitation", "member", "file", "workflow", "draft", "run", "output"
+]
+
+
 class AuditEvent(ApiModel):
     id: UUID
     actor_id: UUID | None = Field(description="`null` once the actor's account is deleted (S‑29)")
-    action: str
-    target_type: str
+    action: AuditAction
+    target_type: AuditTargetType
     target_id: UUID
     created_at: datetime
 

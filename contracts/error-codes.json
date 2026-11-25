@@ -64,6 +64,10 @@
       "status": 413,
       "description": "The workspace storage quota is full. Delete files or ask the owner to raise it."
     },
+    "PERSONAL_WORKSPACE_UNDELETABLE": {
+      "status": 409,
+      "description": "The personal workspace cannot be deleted. Only workspaces you created can be."
+    },
     "INTERNAL_ERROR": {
       "status": 500,
       "description": "Unexpected server error. Show the correlation_id so support can find it."
