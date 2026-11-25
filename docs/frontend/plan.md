@@ -99,15 +99,15 @@ frontend/
 - [x] P0.1 Verify the latest stable versions of every frontend library. Record them in session_log.
 - [x] P0.4 Next.js skeleton (TS, App Router, Tailwind v4, ESLint) with pnpm. It renders one page.
 - [x] P0.5 `pnpm gen:api` generates the types from `contracts/openapi.json`. `contracts/openapi.json` is generated from the FastAPI route stubs (handlers return 501) from B0, never hand-written (api_contract.md §0). Regenerate the types whenever it changes.
-- [ ] P0.6 Pre-commit: ESLint, prettier, typecheck, gitleaks.
+- [x] P0.6 Pre-commit: ESLint, prettier, typecheck, gitleaks. (#19)
 - [x] P0.7 CI jobs: lint, typecheck, Vitest, `pnpm build`, `pnpm audit --audit-level=high`, and a contract type check.
-- [ ] P0.9 Dev `/api` rewrite to the backend (`http://localhost:8000`), documented in the README.
-- [ ] P0.11 A global error boundary that shows the `correlation_id` from problem+json.
+- [x] P0.9 Dev `/api` rewrite to the backend (`http://localhost:8000`), documented in the README. (#20)
+- [x] P0.11 A global error boundary that shows the `correlation_id` from problem+json. (#20)
 - [ ] Co-write the `api_contract.md` draft with the backend developer.
 - [ ] Tests T0.2, T0.3, T0.5 · Security S‑01, S‑03, S‑04, S‑05 · **Gate G0 (joint)**
 
 ### F1 — Tokens, themes, i18n, app shell (P9.1–P9.4)
-- [ ] P9.1 Design tokens from `design.md` §3 as CSS variables in Tailwind v4 `@theme`, light and dark. Write the token contrast test (T11.3) now.
+- [x] P9.1 Design tokens from `design.md` §3 as CSS variables in Tailwind v4 `@theme`, light and dark. Write the token contrast test (T11.3) now. (#21)
 - [ ] P9.2 Theme with `next-themes`: system default, a Light, Dark and System toggle, a cookie so the server renders the right theme, and no flash on load.
 - [ ] P9.3 `next-intl` with `[locale]` routing (`/ar`, `/en`), `<html lang dir>` set on the server, Readex Pro (arabic and latin subsets) via `next/font`, and logical CSS properties only (a lint rule bans `left`, `right`, `ml-*`, `mr-*`, `pl-*`, `pr-*`).
 - [ ] P9.4 App shell: sidebar at ≥ 1024 px, icon rail at 640–1023 px, bottom tab bar below 640 px. No horizontal scroll at 320 px.
