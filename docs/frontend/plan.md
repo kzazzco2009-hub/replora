@@ -108,7 +108,7 @@ frontend/
 
 ### F1 — Tokens, themes, i18n, app shell (P9.1–P9.4)
 - [x] P9.1 Design tokens from `design.md` §3 as CSS variables in Tailwind v4 `@theme`, light and dark. Write the token contrast test (T11.3) now. (#21)
-- [ ] P9.2 Theme with `next-themes`: system default, a Light, Dark and System toggle, a cookie so the server renders the right theme, and no flash on load.
+- [x] P9.2 Theme with `next-themes`: system default, a Light, Dark and System toggle, a cookie so the server renders the right theme, and no flash on load. (#29)
 - [ ] P9.3 `next-intl` with `[locale]` routing (`/ar`, `/en`), `<html lang dir>` set on the server, Readex Pro (arabic and latin subsets) via `next/font`, and logical CSS properties only (a lint rule bans `left`, `right`, `ml-*`, `mr-*`, `pl-*`, `pr-*`).
 - [ ] P9.4 App shell: sidebar at ≥ 1024 px, icon rail at 640–1023 px, bottom tab bar below 640 px. No horizontal scroll at 320 px.
 - [ ] Tests T9.2, T9.3, T9.7, T9.9
