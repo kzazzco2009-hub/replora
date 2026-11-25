@@ -712,10 +712,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List
+         * @description The TemplatePlanner's templates (P3.9), for the template picker.
+         */
+        get: operations["templates_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create
+         * @description Plan a workflow from files and a template or prompt. Validated, not yet approved.
+         */
+        post: operations["drafts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/drafts/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get
+         * @description One draft.
+         */
+        get: operations["drafts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update
+         * @description Replace the whole definition. It is re-validated and gets a new `plan_hash`.
+         */
+        patch: operations["drafts_update"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AiDisclosure
+         * @description What was sent to the AI planner. Empty for template drafts.
+         */
+        AiDisclosure: {
+            /** Sent Fields */
+            sent_fields: string[];
+            /** Samples Sent */
+            samples_sent: boolean;
+        };
         /**
          * ArtifactType
          * @description The 11 artifact kinds a port can carry (P1.1). Ports match exactly, with no conversion.
@@ -777,6 +851,68 @@ export interface components {
              */
             expires_at: string;
         };
+        /** Draft */
+        Draft: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Prompt */
+            prompt: string;
+            /**
+             * Planner
+             * @enum {string}
+             */
+            planner: "template" | "ai";
+            definition: components["schemas"]["WorkflowDefinition"];
+            /**
+             * Plan Hash
+             * @description SHA-256 of the canonical definition (P1.4)
+             */
+            plan_hash: string;
+            explanation: components["schemas"]["Explanation"];
+            ai_disclosure: components["schemas"]["AiDisclosure"];
+            validation: components["schemas"]["ValidationReport"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** DraftCreate */
+        DraftCreate: {
+            /** File Ids */
+            file_ids: string[];
+            /**
+             * Prompt
+             * @default
+             */
+            prompt: string;
+            /**
+             * Planner
+             * @enum {string}
+             */
+            planner: "template" | "ai";
+            /**
+             * Template Id
+             * @description Required when planner=template
+             */
+            template_id?: string | null;
+            /**
+             * Share Samples
+             * @description Consent to send sample rows to AI
+             * @default false
+             */
+            share_samples: boolean;
+        };
+        /**
+         * DraftUpdate
+         * @description The **full** definition; the server re-validates it and computes the new `plan_hash`.
+         */
+        DraftUpdate: {
+            definition: components["schemas"]["WorkflowDefinition"];
+        };
         /** EmailRequest */
         EmailRequest: {
             /**
@@ -784,6 +920,23 @@ export interface components {
              * Format: email
              */
             email: string;
+        };
+        /**
+         * Explanation
+         * @description TemplatePlanner: `key` + `params` (translated by the client). AI planner: `text`.
+         */
+        Explanation: {
+            /** Key */
+            key?: string | null;
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Text
+             * @description Already in `user.locale`
+             */
+            text?: string | null;
         };
         /** ExportAccepted */
         ExportAccepted: {
@@ -929,6 +1082,22 @@ export interface components {
              * @enum {string}
              */
             role: "admin" | "member" | "viewer";
+        };
+        /** Issue */
+        Issue: {
+            /** Code */
+            code: string;
+            /** Path */
+            path: string;
+            /** Node Id */
+            node_id?: string | null;
+            /**
+             * Params
+             * @default {}
+             */
+            params: {
+                [key: string]: unknown;
+            };
         };
         /**
          * Limits
@@ -1192,6 +1361,29 @@ export interface components {
             /** Current */
             current: boolean;
         };
+        /** Template */
+        Template: {
+            /** Id */
+            id: string;
+            /** Title Key */
+            title_key: string;
+            /** Description Key */
+            description_key: string;
+            /** Required Inputs */
+            required_inputs: components["schemas"]["TemplateInput"][];
+        };
+        /**
+         * TemplateInput
+         * @description One file a template needs, for example the left file of a reconciliation.
+         */
+        TemplateInput: {
+            /**
+             * Title Key
+             * @description i18n key for the input's label
+             */
+            title_key: string;
+            artifact_type: components["schemas"]["ArtifactType"];
+        };
         /** TokenRequest */
         TokenRequest: {
             /** Token */
@@ -1300,6 +1492,22 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** ValidationReport */
+        ValidationReport: {
+            /** Valid */
+            valid: boolean;
+            /** Errors */
+            errors: components["schemas"]["Issue"][];
+            /** Warnings */
+            warnings: components["schemas"]["Issue"][];
+        };
+        /**
+         * WorkflowDefinition
+         * @description The typed workflow. An object until the Phase 1 JSON Schema (`contracts/schemas/`).
+         */
+        WorkflowDefinition: {
+            [key: string]: unknown;
         };
         /**
          * Workspace
@@ -4442,6 +4650,329 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Limits"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    templates_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    /** @description Public: the same for every user */
+                    "Cache-Control"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Template"][];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    drafts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ws_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    /** @description Send back as `If-Match` on PATCH */
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Draft"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    drafts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ws_id: string;
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    /** @description Send back as `If-Match` on PATCH */
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Draft"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    drafts_update: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description The draft's `ETag`. Required: 428 when missing */
+                "If-Match"?: string | null;
+            };
+            path: {
+                ws_id: string;
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    /** @description Send back as `If-Match` on PATCH */
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Draft"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `PRECONDITION_FAILED`: the `If-Match` ETag is stale; reload and retry */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `PRECONDITION_REQUIRED`: the `If-Match` header is missing */
+            428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
             /** @description Not implemented yet (contract stub) */

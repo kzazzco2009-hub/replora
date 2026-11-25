@@ -128,7 +128,13 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 `Draft = {id, prompt, planner, definition: WorkflowDefinition, plan_hash, explanation: Explanation, ai_disclosure: {sent_fields[], samples_sent: bool}, validation: ValidationReport, created_at}`
 `Explanation = {key?, params?, text?}`. The TemplatePlanner returns `key` + `params` only (no free text), and the frontend translates the key. The AI planner (Phase 12) returns `text`, written in `user.locale`.
 `ValidationReport = {valid: bool, errors: [Issue], warnings: [Issue]}` · `Issue = {code, path, node_id?, params}`
-`WorkflowDefinition` = the JSON Schema in `contracts/schemas/workflow_definition.json` (Phase 1).
+`WorkflowDefinition` = the JSON Schema in `contracts/schemas/workflow_definition.json` (Phase 1). Until then, the stubs document it as a named `object` schema.
+
+**Stub details (P0.5 part 4b, proposed):**
+- `Template.required_inputs = [{title_key, artifact_type}]`, for example the left and right files of a reconciliation.
+- `POST`, `GET` and `PATCH` all return the draft's `ETag`.
+- `DraftCreate` limits: `file_ids` 1–10 (P6.7, `TOO_SHORT` / `TOO_LONG`) and `prompt` ≤ 4,000 characters (S‑53).
+- `If-Match` is optional in the schema, so a missing header is answered with 428 `PRECONDITION_REQUIRED`, not 422.
 
 ## 7. Runs
 | Method | Path | Body | Response |
