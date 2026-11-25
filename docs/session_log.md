@@ -8,49 +8,59 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps **8/11** (P0.1, P0.2, P0.3, P0.4, P0.6, P0.7, P0.9, P0.10). The ticks for P0.4, P0.6, P0.7 and P0.9, the root `README.md` dev section, and T0.2 and T0.5 are in **#25** (`5eb32f4`, docs only, CI green), waiting for the frontend's review. Open: P0.5 (§5–§8 and `openapi-fetch`), P0.8 (branch protection, the owner's decision) and P0.11 (backend part). `main` is at **`6eef1fd`**; #10, #20, #21, #22, #23 and #24 are merged. Open:
-- **#11** `feat/p0.5-file-stubs` (**`8c55bd8`**, base `main`, CI green). Code commits:
-  - `3cb36af`: the approved `76bbe42`;
-  - `f2ce28f`: the §4 codes and the number codes;
-  - `c7faa05` and `8c55bd8`: generated only.
+| Current phase | **Phase 0 — Foundation (B0), end of Session 13.** `main` is at **`6eef1fd`**. Steps **8/11** once #25 merges (P0.1, P0.2, P0.3, P0.4, P0.6, P0.7, P0.9, P0.10), and **9/11** with #26 (P0.11). Still open: **P0.5** (§6–§8 stubs, and `openapi-fetch` to be decided) and **P0.8** (branch protection, the owner's decision).
 
-  Rebased after #22 with `error-codes.json` and `test_error_codes.py` resolved (kept both sides). 215 passed. Waiting for the frontend's re-check.
-- **#25** (above).
+**Open PRs, all CI green, none blocked on us:**
+- **#11** `feat/p0.5-file-stubs` (§4 files). Code commits: `3cb36af` (= approved `76bbe42`), `f2ce28f` (§4 codes and number codes), and `c7faa05`/`8c55bd8` (generated). The rest are log commits; **this branch holds the session log**. Waiting for the frontend's re-check.
+- **#25** `docs/phase0-ticks` (`6d0a66c`): ticks P0.4, P0.6, P0.7, P0.9, P9.1, T0.2, T0.5 and T11.3, the root `README.md` dev section, and the `security.md` Phase 0 status (S‑01, S‑03, S‑04 verified; S‑02, S‑05 open). Waiting for review and the 5 questions.
+- **#26** `feat/p0.11-observability` (`3765b7d`): `X-Request-ID`, JSON logs, PII scrub and `correlation_id`. Ticks P0.11 and T0.7. Waiting for review.
+- **#27** `feat/p0.5-workspace-codes` (`85b9a4d`): `PERSONAL_WORKSPACE_UNDELETABLE`, and the `AuditEvent` action and target enums (proposed values). Waiting for the frontend's check of the values.
+- **#28** `feat/p0.5-operations-stubs` (`c60e118`): the §5 registry (`/operations`, `/limits`, public, `ArtifactType` with 11 kinds). Waiting for review and 3 questions.
 
-**`feat/p0.5-file-stubs` holds the newest session log; it is #11's branch, so a log commit moves #11's head.** |
+**Overlap:** #11 and #27 both add to `error-codes.json`; #11, #27 and #28 all regenerate `openapi.json` and `schema.d.ts`. Whichever merges later gets rebased and regenerated. |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | **Frontend:** review #26, #27 and #28. Also (asked on #25, 7161950428, and in #1, 7161976673, 7162100230: list every shared-plan item finished on their side, P9.1 and T11.3 so far):
-- re-check #11 and review #25;
-- answer 5 questions:
-  1. add `openapi-fetch`, or drop it from P0.5;
-  2. tick their F0 "co-write `api_contract.md`";
-  3. tick their F0 tests (T0.2, T0.3, T0.5);
-  4. mark frontend S‑01, S‑03 and S‑04 verified;
-  5. log S‑05 / P0.8 as "manual rule, accepted for G0".
+| Waiting on | **Frontend** (final state in #1, comment 7162595499):
+- review #11, #25, #26, #27 and #28;
+- list the shared-plan items finished on their side (#1, 7162100230);
+- answer the 5 questions on #25 (7161950428): `openapi-fetch`, their F0 contract box, their F0 tests line, frontend S‑01/03/04, and S‑05 as a manual rule;
+- answer #27's audit values and #28's 3 questions.
 
 **Owner:**
-- decide on branch protection (GitHub Pro, a public repo, or an organization) for P0.8 / S‑05;
-- set a global git identity on this machine. |
-| Next step | 1) **When the frontend answers on #25:** apply the answers (in `plan.md`, plus their own files on their side), and do the backend half of S‑01…S‑05 in `security.md`, with evidence.
+- decide on branch protection (GitHub Pro, public repo, or organization) for P0.8 and S‑05;
+- set a global git identity on this machine (`git config --global user.name khaledhagar`, `git config --global user.email <your email>`). |
+| Next step | 1) **Apply the frontend's answers:** the ticks into #25, #27's values, #28's questions.
 
-2) **#27** (§3: `PERSONAL_WORKSPACE_UNDELETABLE`, and the `AuditEvent.action` / `target_type` enums, proposed values): wait for the frontend's check of the values. If they change, update the `Literal`s, `api_contract.md` §3 and the test, then regenerate.
+2) **Rebase whatever conflicts after each merge.** `git switch <branch>; git rebase origin/main`. Resolve `error-codes.json` by keeping both sides. Then `uv run python -m app.export_openapi` and `pnpm -C frontend run gen:api`, commit the generated files, rerun the checks, and `git push --force-with-lease`. For a PR whose base is not `main`, **retarget before pushing**.
 
-3) **#26** (P0.11 backend: `X-Request-ID`, JSON logs, PII scrub, `correlation_id`; ticks P0.11 and T0.7): wait for review. After it merges, Phase 0 is 9/11.
+3) **S‑02 (backend, small):** refuse to start when `app_env == "production"` and a required secret is missing (or debug is on). Add a unit test, then tick S‑02 in `security.md`.
 
-4) **Part 4:** the §5–§8 stubs, as small PRs.
-   - §5 is **#28** (`c60e118`), waiting for review. Its questions: is `version` an integer, how should `title_key` be named, and is public OK for both.
-   - **Next: §6** (`GET /templates`, and drafts: POST, GET with `ETag`, PATCH with `If-Match`, 412/428), from `main`. `WorkflowDefinition` is Phase 1's JSON Schema, so §6 types it as an object for now. Then §7 runs, then §8 outputs.
+4) **§6 drafts** (P0.5 part 4b), from `main`:
+   - `GET /templates`;
+   - `POST`, `GET` (with `ETag`) and `PATCH` (with `If-Match`; 412 when stale, 428 when missing) on `/workspaces/{ws_id}/drafts`;
+   - `Draft`, `Explanation`, `ValidationReport` and `Issue`;
+   - `WorkflowDefinition` as an object until the Phase 1 JSON Schema.
 
-**Overlap:** #11, #27 and #26 all touch `main`; #11 and #27 both add to `error-codes.json`. Whichever merges later gets rebased and regenerated.
+   Then **§7 runs** and **§8 outputs**, each as its own small PR.
 
-5) **Plan ticks:** tick each step in `docs/plan.md` in the PR that finishes it (not "later"). #25 catches up P0.4, P0.6 and P0.7. |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7162100230 }`; the reviews and comments on #11, #25, #26, #27 and #28 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
+5) **Tick each plan, testing or security item in the PR that finishes it.** |
+| Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`):
+1. `git fetch --all --prune`
+2. `git switch feat/p0.5-file-stubs; git pull --ff-only`. This branch has the newest session log. Read "Current status" first.
+3. `git status` must be clean. Every branch from Session 13 is pushed: `feat/p0.5-file-stubs`, `docs/phase0-ticks`, `feat/p0.11-observability`, `feat/p0.5-workspace-codes` and `feat/p0.5-operations-stubs`. For each one you work on: `git switch <branch>; git pull --ff-only`. If a branch is missing locally, `git switch <branch>` creates it from `origin`.
+4. `pnpm install --frozen-lockfile` from the repo root (the branches from `main` have `frontend/`). Then `cd backend; uv sync --locked`.
+5. `gh pr list -R kzazzco2009-hub/replora --state all --limit 15`, then the new #1 comments: `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7162595499 }`. Also the reviews and comments on #11 and #25–#28.
+
+**Notes:**
+- `gh` works from PowerShell only. `gh --jq` breaks in PowerShell 5.1, so pipe to `ConvertFrom-Json`.
+- If gitleaks isn't found, reload PATH (root `CLAUDE.md`).
+- **This machine:** local `vitest` workers time out while starting. CI runs the frontend tests.
+- **This machine** has no global git identity. Commits used `git -c user.name=khaledhagar -c user.email=…`. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 8/11 | 6/7 | 0/5 | ☐ |
+| 0 Foundation | 8/11 (#25), 9/11 with #26 | 6/7, 7/7 with #26 | 3/5 (#25) | ☐ |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -272,6 +282,17 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **`ArtifactType`:** a `StrEnum` of the 11 kinds. The list comes from `docs/history/Replora_Complete_Project_Plan_AR.md` (`plan.md` P1.1 only says "all 11"). P1.1 will own it.
 - `params_schema` is `dict[str, Any]`, with the §5 subset in its description.
 - **Tests:** 10 red first (404 and `KeyError`), then 188 passed. Ruff clean, drift 0, pip-audit clean, `schema.d.ts` regenerated, typecheck and `format:check` pass.
+
+**End of Session 13: ticks and final state:**
+- **#28 CI green** (`c60e118`).
+- **#25 rebased onto `6eef1fd`**, now `6d0a66c`. It also ticks **P9.1** (#21, #23) and **T11.3** (contrast test, #21), and adds a **Phase 0 status list in `security.md`**:
+  - S‑01 [x]: gitleaks in pre-commit and CI, T0.5/T0.6, the old key deleted;
+  - S‑02 [ ]: no production start-up check yet;
+  - S‑03 [x]: locked installs in CI;
+  - S‑04 [x]: pip-audit, pnpm audit, Dependabot for uv, npm and Actions;
+  - S‑05 [ ]: branch protection, the owner's decision.
+- **Not ticked anywhere yet:** P0.11 and T0.7. They're ticked in #26 and count once it merges.
+- Claude Code memory updated (project state and the resume rule). Every branch pushed. Final state posted in #1.
 
 **Reviews posted** (comment reviews; the owner approves from their account):
 - **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
