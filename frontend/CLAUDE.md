@@ -15,7 +15,7 @@ Extends the root `CLAUDE.md` for work inside `frontend/`. The root rules still a
 - Branch from `main` (short-lived feature branches, <= 2 days). Never push to `main`; never merge any PR without Developer B's explicit approval.
 - Small PRs (<= 400 lines). No self-merge. No force-push. Run `gitleaks git .` before every push.
 - Add files by name, never `git add .` (generated files such as `pnpm-lock.yaml` are committed deliberately).
-- Every commit message ends with the two lines `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>` and `Claude-Session: https://claude.ai/code/session_01VJjuYSHZ4GC87LMweHJ7xM`.
+- Every commit message ends with the line `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 
 ## Source of truth
 - Plan: `docs/frontend/plan.md`, tests: `docs/frontend/testing.md`, security: `docs/frontend/security.md`. Shared docs: `docs/api_contract.md`, `docs/design.md`, `docs/decisions.md`.
