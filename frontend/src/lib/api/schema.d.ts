@@ -2523,7 +2523,7 @@ export interface operations {
                     "application/json": components["schemas"]["Workspace"][];
                 };
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2532,7 +2532,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2559,7 +2559,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -2601,7 +2601,7 @@ export interface operations {
                     "application/json": components["schemas"]["Workspace"];
                 };
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2610,7 +2610,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2637,7 +2637,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -2679,7 +2679,7 @@ export interface operations {
                     "application/json": components["schemas"]["Workspace"];
                 };
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2688,7 +2688,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2715,7 +2715,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -2753,7 +2753,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2762,7 +2762,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2798,7 +2798,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -2838,7 +2838,7 @@ export interface operations {
                     "application/json": components["schemas"]["Member"][];
                 };
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2847,7 +2847,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2883,7 +2883,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -2922,7 +2922,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2931,7 +2931,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2967,7 +2967,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -3012,7 +3012,7 @@ export interface operations {
                     "application/json": components["schemas"]["Member"];
                 };
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3021,7 +3021,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3057,7 +3057,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -3097,7 +3097,7 @@ export interface operations {
                     "application/json": components["schemas"]["Invitation"][];
                 };
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3106,7 +3106,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3142,7 +3142,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -3186,7 +3186,7 @@ export interface operations {
                     "application/json": components["schemas"]["Invitation"];
                 };
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3195,7 +3195,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3231,7 +3231,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -3270,7 +3270,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3279,7 +3279,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3315,7 +3315,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -3359,7 +3359,7 @@ export interface operations {
                     "application/json": components["schemas"]["AuditEventPage"];
                 };
             };
-            /** @description Not signed in, or the session expired */
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3368,7 +3368,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description CSRF check failed, or not allowed in this workspace */
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3404,7 +3404,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Too many requests (see `Retry-After`) */
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
             429: {
                 headers: {
                     [name: string]: unknown;
