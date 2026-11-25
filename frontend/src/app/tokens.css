@@ -83,6 +83,11 @@
 }
 
 @theme inline {
+  --radius-control: var(--radius-control);
+  --radius-panel: var(--radius-panel);
+  --radius-dialog: var(--radius-dialog);
+  --radius-chip: var(--radius-chip);
+
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
