@@ -8,40 +8,42 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.5 in progress:** part 1 #6 and part 2 #8 merged (`main` at **`c4ea4a9`**). Open, all CI green:
-- **#12** `fix/p0.5-auth-followups` (`78a2a0f`, base `main`): the #8 follow-ups. Approved, rebased, waiting for the frontend's "merge".
-- **#16** `feat/p0.5-error-codes` (`fc31d4b`, base `fix/p0.5-auth-followups`): `error-codes.json` v0, `INVALID_EMAIL`, one MFA challenge model.
+| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.5 in progress:** #6, #8, **#12** and the frontend's **#13** (`gen:api`) are merged. Open, all CI green:
+- **#16** `feat/p0.5-error-codes` (`fc31d4b`, base `fix/p0.5-auth-followups`): `error-codes.json` v0, `INVALID_EMAIL`, one MFA challenge model. **Approved by the frontend.** Needs a rebase onto `main` plus a regenerated `schema.d.ts`, after #17 merges.
 - **#10** `feat/p0.5-workspace-stubs` (`ea4464a`, base `feat/p0.5-auth-stubs`) and **#11** `feat/p0.5-file-stubs` (code `76bbe42`): approved, not rebased yet.
-- **#14** `chore/p0.6-pre-commit` (`7800507`, base `main`): approved by the frontend.
+- **#14** `chore/p0.6-pre-commit` (`7800507`, base `main`): approved; the frontend merges it.
+- Frontend **#17** (`ci.yml`: `schema.d.ts` drift check, `next build`, regenerated types) and **#15** (`ec2ccca`, #9 follow-ups): reviewed by us, nothing blocks them; **the owner approves and merges both**.
 
-Merge order: **#12 → #16 → #10 → #11**; #14 is independent. Frontend PRs **#13** (`pnpm gen:api`) and **#15** (#9 follow-ups): reviewed by us, nothing blocks them; **the owner approves and merges both from their account**. **`feat/p0.5-file-stubs` holds the newest session log.** |
+Merge order: **#17 (+ #14) → #15 → #16 → #10 → #11**. **`feat/p0.5-file-stubs` holds the newest session log.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | **Frontend:**
-- squash-merge #12 and #14 (both approved);
-- review #16;
-- the `ci.yml` PR (`next build`, plus the `schema.d.ts` drift check asked in the #13 review);
-- their P0.6 part (prettier and typecheck hooks);
-- answer on #13 who regenerates `schema.d.ts`.
+- merge #14;
+- answer our §2 `problem_codes` proposal in #1 (comment 7158357090): (a) the code table, (b) 400 for a wrong secret and 401 only for "no session", (c) register → 202 with no body (S‑26, no enumeration);
+- their P0.6 part (prettier and typecheck hooks, after #14).
 
 **Owner:**
-- approve and squash-merge #13 and #15 (`gh pr review N -R kzazzco2009-hub/replora --approve`, then `gh pr merge N --squash --delete-branch`);
+- approve and squash-merge #17, then #15 (`gh pr review N -R kzazzco2009-hub/replora --approve`, then `gh pr merge N -R kzazzco2009-hub/replora --squash --delete-branch`);
 - set a global git identity on this machine (see Session 13). |
-| Next step | 1) **When #12 merges:**
-   - `git switch feat/p0.5-error-codes; git rebase --onto origin/main 78a2a0f`, rerun the checks, `git push --force-with-lease`, then `gh pr edit 16 --base main`.
-   - Then `git switch feat/p0.5-workspace-stubs; git rebase --onto origin/main 50ccf31`. Resolve the `NOT_FOUND_RESPONSE` conflict in `problem.py`: keep one constant with the generic "Not found, or not yours" text. Regenerate `openapi.json`, retarget #10, and wait for it to merge.
+| Next step | 1) **When #17 merges:**
+   - `git switch feat/p0.5-error-codes; git rebase --onto origin/main 78a2a0f`.
+   - On the rebased branch, run `pnpm install --frozen-lockfile` and `pnpm -C frontend run gen:api`, then commit **only** `frontend/src/lib/api/schema.d.ts`.
+   - Rerun the checks, `git push --force-with-lease`, `gh pr edit 16 --base main`, and ask the frontend to re-check the new head.
+   - Then `git switch feat/p0.5-workspace-stubs; git rebase --onto origin/main 50ccf31`. Resolve the `NOT_FOUND_RESPONSE` conflict in `problem.py`: keep one constant with the generic "Not found, or not yours" text. Regenerate `openapi.json` and `schema.d.ts`, then retarget #10.
 
 2) **When #16 and #10 are in `main`:**
    - Add the §3 problem code `PERSONAL_WORKSPACE_UNDELETABLE` to `error-codes.json`.
    - Add the `AuditEvent.action` / `target_type` enums (the frontend asked for them before G5), with the proposed values, in a small PR.
+   - Add the §2 `problem_codes` as the frontend confirms them in #1, plus the register → 202 change if agreed (`api_contract.md` §2, the stub, `openapi.json`, `schema.d.ts`).
+   - Record the `schema.d.ts` rule in `docs/decisions.md`: backend PRs regenerate only that file under `frontend/`.
 
-3) **When #10 merges:** rebase #11 (`git rebase --onto origin/main ea4464a`), add `FILE_TOO_LARGE` and `QUOTA_EXCEEDED` to `error-codes.json`, then `gh pr edit 11 --base main`.
+3) **When #10 merges:** rebase #11 (`git rebase --onto origin/main ea4464a`), add `FILE_TOO_LARGE` and `QUOTA_EXCEEDED` to `error-codes.json`, regenerate `schema.d.ts`, then `gh pr edit 11 --base main`.
 
-4) **P0.11 backend part** (T0.7, S‑87): `X-Request-ID` middleware, JSON logs, PII scrub, `correlation_id` in problem+json. Branch from `main` after #12 merges (it touches `problem.py`).
+4) **P0.11 backend part** (T0.7, S‑87): `X-Request-ID` middleware, JSON logs, PII scrub, `correlation_id` in problem+json. Branch from `main` (#12 is merged).
 
 5) **Part 4:** §5–§8 stubs.
 
 6) **The P0.4 tick in `docs/plan.md`**, in the next shared docs PR. |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7156686717 }`; the reviews and comments on #12–#16 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). If #12 is merged, do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7158357090 }`; the reviews and comments on #14–#17 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). If #17 is merged, do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -179,6 +181,18 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - `Email` = `EmailStr` + `WrapValidator`, which raises `invalid_email`. `value_error` is no longer mapped.
 - `MfaChallengeRequest {code?, recovery_code?}` with an exactly-one check (`MFA_CODE_OR_RECOVERY_REQUIRED` on `body`), and `recovery_code` bounded to `1..64`.
 - **Proof:** TDD red first (7 failed). With the JSON removed, the 9 tests error; with one code misspelled, the parity test fails. Result: **118 passed**, ruff clean, no drift, pip-audit clean, gitleaks clean, CI green.
+
+**Frontend reply (issue #1, 7156875222), and our answers:**
+- They merged #12 (head `78a2a0f`) and #13. They accepted that backend PRs regenerate `schema.d.ts`, on one condition: no other file under `frontend/`, and it still goes through CODEOWNERS.
+- They approved **#16**, with two non-blocking requests: the full §2 `problem_codes` before G5, and a regenerated `schema.d.ts` after #17.
+- They opened **#17** (`ci.yml`: the `schema.d.ts` drift check, `next build`, and the regenerated stale types from #12). They pushed **`ec2ccca` on #15**, which fixes all three of our notes.
+- **Checking #17:** `pnpm dlx openapi-typescript@7.13.0` on `main`'s `openapi.json` gives exactly their `schema.d.ts`. The only differences were BOM and `§` artifacts from PowerShell `Out-File` on our side. Comment review posted: no blockers.
+- **#15 re-check:** posted; all resolved.
+- **#16 reply:** posted. The §2 codes come in a separate PR after #16, so the approval stays valid.
+- **Issue #1, 7158357090:** proposed 11 §2 codes (`UNAUTHENTICATED`, `INVALID_CREDENTIALS`, `MFA_CODE_INVALID`, `PASSWORD_INCORRECT`, `TOKEN_INVALID`, `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, `MFA_ALREADY_ENABLED`, `MFA_NOT_ENABLED`, `RATE_LIMITED`, plus the existing `MFA_CHALLENGE_INVALID`).
+  - **Rule:** 401 only means "no session". A wrong secret is 400, so the client does not log the user out.
+  - **No "email taken" code (S‑26):** register returns 202 with no body in every case, and an existing account gets a notice email. This waits for their confirmation.
+- **Note:** this branch has no `frontend/` and no root `pnpm-lock.yaml` (it predates #9). So a `pnpm` run here makes an untracked root lockfile, which was deleted again. That was also the cause of the one found at the start of Session 13.
 
 **Reviews posted** (comment reviews; the owner approves from their account):
 - **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
