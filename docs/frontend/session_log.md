@@ -131,7 +131,7 @@ Next step: gitleaks, commit, push, open the PR (template-filled, SHA + test resu
 Docs-only: tick P0.5 and P0.7 in `plan.md` now that their PRs are merged; fix the stale T0.3 note above.
 
 Merged since Session 3 (confirmed via `gh pr view` against `main`):
-- PR #13, "`pnpm gen:api` generates TS types from `contracts/openapi.json` (P0.5)" — merge commit `14fd30b19b3dd56eb861c8f20e2926a12d3ea096`. (Note: the merge SHA given verbally for this PR was `7955d6f`; `gh pr view 13` and `git log --oneline main` both show `14fd30b1` as the actual merge commit on `main` — used the verified value here.)
+- PR #13, "`pnpm gen:api` generates TS types from `contracts/openapi.json` (P0.5)" — PR head `7955d6f`, merged as `14fd30b`.
 - PR #17, "ci(frontend): contract types drift check + production build" — merge commit `73ef4b162cbb99c7e8d4d70b861e80fb67873f33`.
 - PR #14, "pre-commit hooks (P0.6 backend part, T0.5)" — merge commit `dbe95655b60ff3adf26f43bcdac4c5ad9e111a58`.
 - PR #15, "Frontend follow-ups from PR #9 review" — merge commit `75b8279a860875ee5d17d155bec9878c97705d2f` (current `main` tip).
@@ -151,3 +151,15 @@ Decisions recorded this session (not yet in `docs/decisions.md` — owner's call
 - Khaled proposed, and it was accepted, 11 `problem_codes` for §2 (auth) plus `register` returning `202` in every case (to avoid leaking whether an email is already registered); lands in Khaled's PR after #16.
 
 Next step: open the PR for this doc update (no code, no contract, no security impact), then resume §2 contract follow-ups per the decision above.
+
+---
+
+## Session 5 — 2026-11-25
+Docs-only: tick P0.6, P0.9, P0.11, P9.1 in `plan.md` (PRs merged to `main`, confirmed via `git log origin/main`), and log #19, #20, #21, #23.
+
+- PR #19, "chore(frontend): prettier + typecheck pre-commit hooks (P0.6)" — merge commit `6651bebaaa3652197245b7c9583e704da025cbcb`. Adds Prettier (`format:check` script) and wires `prettier`/`typecheck` hooks into the shared `.pre-commit-config.yaml`, plus a CI step. Frontend half of P0.6 (backend half in #14).
+- PR #20, "feat(frontend): dev /api rewrite + global error boundary (P0.9, P0.11)" — merge commit `c19af0961f8f0b7eccea8e9fea9937304f9b1d35`. Dev-only `/api/:path*` rewrite to `BACKEND_ORIGIN` (default `http://localhost:8000`) in `next.config.ts`, documented in a new `frontend/README.md`; global error boundary (`src/app/error.tsx`, `global-error.tsx`, `ErrorView`) shows only the opaque `correlation_id`/`digest`, never raw `problem.detail`.
+- PR #21, "feat(frontend): design tokens from design.md §3 as CSS variables (P9.1)" — merge commit `e4fe0631718b2ccdacd905f10b83b5817e24fc54`. Color/radius/motion/type-scale/line-height tokens in `tokens.css`, `@theme inline` mapping to Tailwind utilities, `prefers-reduced-motion` override, T11.3 contrast tests (18/18 pairs pass both themes).
+- PR #23, "feat(frontend): dev-only /tokens-preview page (P9.1 follow-up)" — merge commit `17e7bbf9d70573cb8f0562243f2b0d5301f9d0b7`. Dev-only `/tokens-preview` reference page (404s in production); also fixes `--radius-control`/`--radius-panel`/`--radius-dialog`/`--radius-chip` having been declared in plain `:root` instead of `@theme`, so Tailwind never generated `rounded-control`/`rounded-panel`/`rounded-chip`.
+
+Next step: resume §2 contract follow-ups per the Session 4 decision (Khaled's 11 `problem_codes` PR after #16).
