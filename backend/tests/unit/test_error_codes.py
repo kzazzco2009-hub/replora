@@ -1,10 +1,12 @@
 """contracts/error-codes.json lists every code the API sends; the frontend translates each one."""
 
 import json
+from typing import get_args
 
 import pytest
 
 from app.api.problem import FALLBACK_VALIDATION_CODE, VALIDATION_CODES
+from app.api.v1.file_models import RejectionCode
 from app.config import REPO_ROOT
 
 
@@ -13,8 +15,13 @@ def error_codes() -> dict:
     return json.loads((REPO_ROOT / "contracts" / "error-codes.json").read_text(encoding="utf-8"))
 
 
-def test_has_the_two_agreed_sections(error_codes):
-    assert set(error_codes) == {"problem_codes", "validation_codes"}
+def test_has_the_agreed_sections(error_codes):
+    assert set(error_codes) == {"problem_codes", "validation_codes", "rejection_codes"}
+
+
+def test_rejection_codes_are_exactly_the_file_rejection_codes(error_codes):
+    assert set(error_codes["rejection_codes"]) == set(get_args(RejectionCode))
+    assert all(entry["description"] for entry in error_codes["rejection_codes"].values())
 
 
 def test_problem_codes_have_a_status_and_a_description(error_codes):

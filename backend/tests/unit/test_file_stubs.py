@@ -100,6 +100,7 @@ def test_file_schema_matches_contract(schemas):
         "members", "uploaded_by", "created_at", "expires_at",
     }  # fmt: skip
     assert file["status"]["enum"] == ["pending", "ready", "rejected"]
+    assert "ZIP_NESTED" in file["rejection_code"]["anyOf"][0]["enum"]
     assert set(schemas["FileMember"]["properties"]) == {"path", "detected_type", "size"}
 
 

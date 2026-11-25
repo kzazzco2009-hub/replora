@@ -830,7 +830,7 @@ export interface components {
              */
             status: "pending" | "ready" | "rejected";
             /** Rejection Code */
-            rejection_code?: string | null;
+            rejection_code?: ("FILE_EMPTY" | "FILE_SIZE_MISMATCH" | "FILE_TYPE_UNSUPPORTED" | "FILE_CORRUPT" | "ZIP_ENCRYPTED" | "ZIP_TOO_MANY_MEMBERS" | "ZIP_TOO_LARGE" | "ZIP_RATIO_EXCEEDED" | "ZIP_NESTED" | "ZIP_UNSAFE_PATH" | "ZIP_SYMLINK" | "ZIP_MEMBER_UNSUPPORTED") | null;
             /** Members */
             members?: components["schemas"]["FileMember"][] | null;
             /**
