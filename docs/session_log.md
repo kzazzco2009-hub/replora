@@ -8,62 +8,57 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0), end of Session 13.** `main` is at **`8b756a8`**: #11 (§4 files) and #26 (P0.11 backend) are merged, so **P0.11 and T0.7 are ticked on `main`**.
+| Current phase | **Phase 0 — Foundation (B0), end of Session 14.** `main` is at **`a536353`**: #25 (plan ticks), #28 (§5 registry), #29 (frontend P9.2) and **#31** (`allowBuilds`, approved and merged by the owner) are merged. CI is green on `main`.
 
-**Steps:** 9/11 once #25 merges (P0.1, P0.2, P0.3, P0.4, P0.6, P0.7, P0.9, P0.10, P0.11). Open: **P0.5** (§5 in #28; §6–§8 to do; `openapi-fetch` to be decided) and **P0.8** (branch protection: the repo is going public, see below).
+**Steps:** 9/11 (P0.1–P0.4, P0.6, P0.7, P0.9, P0.10, P0.11). Open: **P0.5** (§6 in #34; §7 and §8 to do; `openapi-fetch` to be decided) and **P0.8** (branch protection: the repo is going public).
 
-**Open PRs.** All three were rebased onto `8b756a8` at the end of the session:
-- **#25** `docs/phase0-ticks`: the plan, testing and security ticks (P0.4, P0.6, P0.7, P0.9, P9.1, T0.2, T0.5, T11.3; S‑01/03/04 verified), the root `README.md` dev section, and **this session log**. **The newest log is on this branch until #25 merges.**
-- **#27** `feat/p0.5-workspace-codes` (`5754260`): `PERSONAL_WORKSPACE_UNDELETABLE` and the audit enums. 237 passed, no drift.
-- **#28** `feat/p0.5-operations-stubs` (`ac8e8c6`): the §5 registry. The router and generated files were merged with #11's `files` router. 244 passed, no drift.
+**Open backend PRs** (all from `f463fea`; none touch `pnpm-workspace.yaml`, so #31 needs no rebase; CI green):
+- **#27** `feat/p0.5-workspace-codes`: rebased on `f463fea`, head **`cc0e01c`**, code unchanged (range-diff). Approved; waiting for the frontend's re-verify, then the owner merges.
+- **#32** `feat/p0.5-rejection-codes` (`8909c07`): the 12 `File.rejection_code` values, a new `rejection_codes` section in `error-codes.json`, and `rejection_code` as an enum. Asked for by the frontend on #11.
+- **#33** `feat/s02-prod-config` (`6405b69`): **S‑02**. It ticks S‑02 in `security.md`, so Phase 0 security is 4/5.
+- **#34** `feat/p0.5-drafts-stubs` (`b52afbe`; its log commits were moved here, so it is code only): the **§6** templates and drafts stubs, with 3 proposals for the frontend to confirm.
+- **#35** `chore/p0.8-ruleset` (`f91f774`): **P0.8** as code (`.github/rulesets/main.json`, its README with the admin's apply and verify commands, and `test_repo_rules.py`).
+- **This PR** `docs/session-14-state`: this log only. **The newest log is on this branch until it merges.**
 
-**Overlap:** #27 and #28 both change `openapi.json` and `schema.d.ts`. Whichever merges second gets rebased and regenerated. |
+**Overlap:** #32 and #34 both change `error-codes.json`, `test_error_codes.py`, `openapi.json` and `schema.d.ts`, and #27 changes the generated files too. Whichever merges later gets rebased and regenerated.
+
+**Frontend PRs:** #30 (P9.3 i18n part A). Its blocker #31 is merged, and the frontend was told on #30 (7171493813) to update from `main`. |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | **Frontend:**
-- **make the repo public** and add the `main` ruleset (#1, 7163028157, with the before and after checklist);
-- review and merge #25, #27 and #28;
-- the 5 questions on #25 (7161950428);
-- their list of shared-plan items finished (#1, 7162100230);
-- #27's audit values and #28's 3 questions.
+- review and merge **#35**, then **make the repo public** and run its README steps (#1, 7171185834);
+- re-verify #27; review #32, #33 and #34 (including #34's 3 proposals), and this log PR;
+- the 4 open questions from #25 (7161950428), repeated in #1 (7169288460);
+- no objection to #28's `version: int` and `title_key` (taken as accepted);
+- their list of finished shared-plan items (P9.2 from #29?).
 
 **Owner:**
 - turn on GitHub "Keep my email addresses private", and set `git config --global user.email 143901646+khaledhagar@users.noreply.github.com`;
-- decide whether to add a `LICENSE`.
+- decide whether to add a `LICENSE`. |
+| Next step | 1) **Apply the frontend's answers and merge in order.** After each merge, rebase the remaining PRs: `git rebase origin/main`, keep both sides in `error-codes.json`, regenerate `openapi.json` (`uv run python -m app.export_openapi`) and `schema.d.ts` (`pnpm -C frontend run gen:api`), rerun the checks, `git push --force-with-lease`.
 
-**Done:** git identity set on this machine; branch protection decided (public). |
-| Next step | 1) **When the repo is public and the ruleset is in:** tick **P0.8** in `plan.md` and **S‑05** in `security.md`, with the ruleset as evidence. Phase 0 is then 10/11.
+2) **P0.8 is ready as code in #35** (`chore/p0.8-ruleset`, `f91f774`: `.github/rulesets/main.json`, its README and `test_repo_rules.py`). After #35 merges, the admin (frontend) makes the repo public and runs the README steps. Then run `gh api repos/kzazzco2009-hub/replora/rules/branches/main` and tick **P0.8** in `plan.md` and **S‑05** in `security.md` with that output. Phase 0 is then 10/11, and security 5/5.
 
-2) **Apply the frontend's answers** (the ticks into #25, #27's values, #28's questions). Rebase whatever conflicts after each merge: `git rebase origin/main`, keep both sides in `error-codes.json`, regenerate `openapi.json` and `schema.d.ts`, rerun the checks, `git push --force-with-lease`.
+3) **§7 runs** (P0.5 part 4c), from `main` after #34: create, approve (`{plan_hash}`, `Idempotency-Key`, 409 `PLAN_HASH_MISMATCH`), cancel, get, list, events. Then **§8 outputs**. Once §8 is merged, tick P0.5. Then G0.
 
-3) **S‑02 (small, backend):** refuse to start when `app_env == "production"` and a required secret is missing (or debug is on). Add a unit test, then tick S‑02.
-
-4) **§6 drafts** (P0.5 part 4b), from `main`:
-   - `GET /templates`;
-   - `POST`, `GET` (with `ETag`) and `PATCH` (with `If-Match`; 412 when stale, 428 when missing) on `/workspaces/{ws_id}/drafts`;
-   - `Draft`, `Explanation`, `ValidationReport` and `Issue`;
-   - `WorkflowDefinition` as an object until the Phase 1 JSON Schema.
-
-   Then **§7 runs** and **§8 outputs**. Once §8 is merged, tick P0.5.
-
-5) **Tick each plan, testing or security item in the PR that finishes it.** |
+4) **Tick each plan, testing or security item in the PR that finishes it.** |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`):
 1. `git fetch --all --prune`
-2. **Newest log:** if #25 is merged, `git switch main; git pull --ff-only`. If not, `git switch docs/phase0-ticks; git pull --ff-only`. Check with `gh pr view 25 -R kzazzco2009-hub/replora --json state`. Then read "Current status".
-3. `git status` must be clean. Everything from Session 13 is pushed. The working branches are `docs/phase0-ticks`, `feat/p0.5-workspace-codes` and `feat/p0.5-operations-stubs`. For each one: `git switch <branch>; git pull --ff-only`. `git switch` creates a missing local branch from `origin`.
+2. **Newest log:** if the `docs/session-14-state` PR is merged, `git switch main; git pull --ff-only`. If not, `git switch docs/session-14-state; git pull --ff-only`. Check with `gh pr list -R kzazzco2009-hub/replora --head docs/session-14-state --state all`.
+3. `git status` must be clean. Everything from Session 14 is pushed. For each open branch (`feat/p0.5-workspace-codes`, `feat/p0.5-rejection-codes`, `feat/s02-prod-config`, `feat/p0.5-drafts-stubs`, `chore/p0.8-ruleset`): `git switch <branch>; git pull --ff-only`. If a pull refuses because the branch was rebased on the other machine, check that `git cherry` and the content diff show nothing local, then `git reset --hard origin/<branch>`.
 4. `pnpm install --frozen-lockfile` from the repo root, then `cd backend; uv sync --locked`.
-5. `gh pr list -R kzazzco2009-hub/replora --state all --limit 15`, and `gh repo view kzazzco2009-hub/replora --json visibility`. Then the new #1 comments: `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7163028157 }`. Also the reviews and comments on #25, #27 and #28.
+5. `gh pr list -R kzazzco2009-hub/replora --state all --limit 15`, `gh repo view kzazzco2009-hub/replora --json visibility`, and the #1 comments after 7171185834: `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7171185834 }`. Also the reviews on #27, #32, #33, #34, #35 and the log PR: `gh api repos/kzazzco2009-hub/replora/pulls/<n>/reviews`.
 
 **Notes:**
 - `gh` works from PowerShell only. `gh --jq` breaks in PowerShell 5.1, so pipe to `ConvertFrom-Json`.
 - If gitleaks isn't found, reload PATH (root `CLAUDE.md`).
-- **This machine:** local `vitest` workers time out while starting, so CI runs the frontend tests. The global git identity is set.
-- The old branches (`feat/p0.5-file-stubs`, `feat/p0.11-observability` and the earlier ones) are merged. They can be deleted locally with `git branch -d <name>`. |
-| Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
+- **Both machines** have a root `.env` with `OPENROUTER_API_KEY`. So `APP_ENV=production` starts locally; to see the S‑02 refusal, also set `DEBUG=true`.
+- Approving PRs and deleting remote branches are blocked for Claude by the permission check; the owner runs those commands. |
+| Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 9/11 (with #25) | 7/7 (with #25) | 3/5 (with #25) | ☐ |
+| 0 Foundation | 9/11 | 7/7 | 3/5 (4/5 with #33) | ☐ |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -141,6 +136,53 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 **After the owner's installs (same session):** gitleaks 8.30.1 · pnpm 12.23.0 · Node 26.13.1 · uv 0.13.9 · Python 3.14 (uv-managed) · pre-commit 4.7.0. git 2.49 and gh 2.102 kept as they are.
 
 ---
+
+## Session 14 — 2026-11-25 (first machine, after Session 13 on the other one)
+**Goal:** align this machine with the other machine, rebase #27, answer the frontend, then continue Phase 0 (P0.5 part 4, S‑02).
+
+**Alignment:**
+- On arrival, `feat/p0.5-file-stubs` was 10 commits ahead and 38 behind `origin`, and `main` was 23 behind. This was the Session 12 state; Session 13 had rebased and merged the branches.
+- **Checked that nothing was only local:** `git cherry` showed all 10 as "+" (squash-merged or rebased, so the patch IDs differ). Then a content diff of `HEAD` against `origin/main` over `backend/` and `contracts/`: `main` held every local change in its later, reviewed form.
+- Fast-forwarded `main` to `f463fea`. `pnpm install --frozen-lockfile` and `uv sync --locked` passed. `ruff` clean, **244 passed**, and both drift checks clean.
+- **Deleted 5 merged local branches** (owner's go): `feat/p0.5-auth-stubs` (#8), `feat/p0.5-openapi-export` (#6), `feat/p0.5-workspace-stubs` (#10), `feat/p0.5-file-stubs` (#11) and `docs/original-plan` (#7). `-D` was needed because squash merges aren't ancestors; each PR's `MERGED` state was checked first.
+
+**#27 rebase:** `git rebase origin/main` applied with no conflicts. Regenerating both files gave no diff, so nothing new was committed. `git range-diff 8b756a8..5754260 origin/main..cc0e01c`: identical patches, apart from one hunk-header context line. **247 passed**, no drift, no leaks. Pushed `cc0e01c` with `--force-with-lease`.
+
+**Frontend review of #31** (root `pnpm-workspace.yaml`, `allowBuilds` denying `@parcel/watcher` and `@swc/core`):
+- In a scratch worktree, #30 alone (`81c071d`): `pnpm install --frozen-lockfile` exits 1, `Ignored build scripts: @parcel/watcher@2.6.0, @swc/core@1.16.22`.
+- With #31's file: exit 0, and `pnpm -C frontend build` passes.
+- I couldn't post the approval: the permission check blocks `gh pr review --approve`. The #1 comment 7169288460 had already called it approved; this was corrected in 7169675538.
+- **The owner approved and squash-merged #31** (`a536353`). The first merge attempt didn't take: the PR stayed `OPEN` with `mergeStateStatus: CLEAN`, so the merge was run again. CI on `main` at `a536353`: all jobs green (run 45679116372). Told the frontend on #30 (7171493813).
+
+**Replies posted:** on #27 (7169287531) and #1 (7169288460). The #1 comment covers the rebase, the repo-public request, the 4 open #25 questions, #28's questions (taken as accepted unless they object), and the `rejection_code` plan.
+
+**#32 `File.rejection_code` values** (`8909c07`):
+- 12 codes in a new `rejection_codes` section, from T6.1, T6.4–T6.6, T6.8 and S‑32.
+- `RejectionCode` is a `Literal`, and a test keeps the JSON section and the `Literal` identical.
+- TDD: red first (`ImportError`, then 2 failures for the missing section). **245 passed.**
+
+**#33 S‑02** (`6405b69`):
+- With `APP_ENV=production`, `Settings` refuses a missing `PRODUCTION_SECRETS` entry (`openrouter_api_key`) or `DEBUG=true`. A new `debug` setting is passed to `FastAPI(debug=)`.
+- **Root cause found while proving it:** `uvicorn --factory` first *started* in production. This machine's `.env` sets `OPENROUTER_API_KEY` (checked by key name only), so that was correct behavior. With `DEBUG=true` it refused, but pydantic printed `input_value={'openrouter_api_key': 's...`, echoing the raw secret input.
+- **Fix:** `hide_input_in_errors=True`. The test now asserts that no `input_value` and no key prefix appear; it was red before the fix.
+- **248 passed.** The startup refusal is proven: exit 1, `Value error, debug must be off in production [type=value_error]`.
+- A stray uvicorn from the first attempt (port 8765) was stopped.
+
+**#34 §6 drafts stubs** (`b52afbe`):
+- `GET /templates` (public, 1 h cache) and drafts `POST`, `GET`, `PATCH`, each with `ETag`. `PATCH` takes `If-Match` and documents 412 and 428.
+- `DraftCreate` limits: 1–10 `file_ids`, `prompt` ≤ 4,000, `planner` `template | ai`.
+- New codes `PRECONDITION_FAILED`, `PRECONDITION_REQUIRED`, `TOO_SHORT` and `TOO_LONG`.
+- TDD: 27 red first. One of my own test bugs: `dict.items() <=` fails with dict values; I now compare `(in, name)` pairs. FastAPI names the header `if-match` by default, so I set `alias="If-Match"`. `test_workspace_stubs` now excludes `/drafts`.
+- **271 passed**, `tsc --noEmit` clean, no drift.
+
+**#35 P0.8 ruleset as code** (`f91f774`):
+- This account is `push`, not admin (`gh api repos/... .permissions`), and the private repo's rulesets API returns 403 "Upgrade to GitHub Pro or make this repository public". So the protection is prepared as `.github/rulesets/main.json`, with apply and verify steps for the admin.
+- `require_code_owner_review` is off: the single-owner `/backend/` and `/frontend/` paths would self-block.
+- `test_repo_rules.py` checks that the required checks equal the CI job names. I mutated one check name and the test failed. The restore needed a manual edit, because `git checkout` can't restore an untracked file. **246 passed.**
+- Posted on #1 (7171185834).
+
+**Decisions (proposed, waiting on the frontend):** the ruleset as above;
+`rejection_codes` as a third section; `Template.required_inputs = [{title_key, artifact_type}]`; `ETag` on the `POST` 201; `If-Match` optional in the schema, with 428 when it's missing.
 
 ## Session 13 — 2026-11-25 (other machine, `D:\Projects\replora`)
 **Goal:** check the state is aligned, then do the #8 review follow-ups.
