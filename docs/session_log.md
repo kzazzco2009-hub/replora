@@ -26,7 +26,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 - answer #27's audit values and #28's 3 questions.
 
 **Owner:**
-- decide on branch protection (GitHub Pro, public repo, or organization) for P0.8 and S‑05;
+- branch protection: **decided, make the repo public** (asked the frontend, who is repo admin, in #1, 7163028157, with a pre-public checklist and the `main` ruleset settings). When they confirm, tick P0.8 in `plan.md` and S‑05 in `security.md`;
 - ~~set a global git identity on this machine~~: done (`khaledhagar`, 2026-11-25). |
 | Next step | 1) **Apply the frontend's answers:** the ticks into #25, #27's values, #28's questions.
 
@@ -48,7 +48,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 2. `git switch feat/p0.5-file-stubs; git pull --ff-only`. This branch has the newest session log. Read "Current status" first.
 3. `git status` must be clean. Every branch from Session 13 is pushed: `feat/p0.5-file-stubs`, `docs/phase0-ticks`, `feat/p0.11-observability`, `feat/p0.5-workspace-codes` and `feat/p0.5-operations-stubs`. For each one you work on: `git switch <branch>; git pull --ff-only`. If a branch is missing locally, `git switch <branch>` creates it from `origin`.
 4. `pnpm install --frozen-lockfile` from the repo root (the branches from `main` have `frontend/`). Then `cd backend; uv sync --locked`.
-5. `gh pr list -R kzazzco2009-hub/replora --state all --limit 15`, then the new #1 comments: `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7162595499 }`. Also the reviews and comments on #11 and #25–#28.
+5. `gh pr list -R kzazzco2009-hub/replora --state all --limit 15`, then the new #1 comments: `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7163028157 }`. Also the reviews and comments on #11 and #25–#28.
 
 **Notes:**
 - `gh` works from PowerShell only. `gh --jq` breaks in PowerShell 5.1, so pipe to `ConvertFrom-Json`.
