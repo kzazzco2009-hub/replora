@@ -169,3 +169,83 @@ def test_request_bodies_reject_unknown_fields(client):
     body = {"email": "a@example.com", "password": PASSWORD, "remember_me": True}
 
     assert client.post("/api/v1/auth/login", json=body).status_code == 422
+
+
+@pytest.mark.parametrize(
+    ("method", "path"),
+    [
+        ("get", "/api/v1/auth/me/export/{export_id}"),
+        ("delete", "/api/v1/auth/sessions/{session_id}"),
+    ],
+)
+def test_lookup_by_id_documents_404_as_problem_details(openapi, method, path):
+    responses = openapi["paths"][path][method]["responses"]
+
+    assert responses["404"]["content"] == {"application/problem+json": {"schema": PROBLEM_REF}}
+
+
+@pytest.mark.parametrize(
+    ("method", "path", "body"),
+    [
+        ("delete", "/api/v1/auth/me", {"password": "p" * 257}),
+        ("delete", "/api/v1/auth/mfa", {"password": "p" * 257, "code": "123456"}),
+        ("post", "/api/v1/auth/login", {"email": "a@example.com", "password": "p" * 257}),
+    ],
+)
+def test_password_fields_reject_more_than_256_characters(client, method, path, body):
+    response = client.request(method, path, json=body)
+
+    assert response.status_code == 422
+    assert response.json()["errors"] == [
+        {"path": "body.password", "code": "STRING_TOO_LONG", "params": {"max_length": 256}}
+    ]
+
+
+# One request per validation code our models can produce today. The codes are an explicit
+# list (problem.VALIDATION_CODES), so a Pydantic upgrade that renames a type fails here.
+VALIDATION_CASES = [
+    ("post", "/api/v1/auth/login", {"json": {"password": PASSWORD}}, "body.email", "MISSING"),
+    ("post", "/api/v1/auth/login", {}, "body", "MISSING"),
+    (
+        "post",
+        "/api/v1/auth/login",
+        {"json": {"email": "a@example.com", "password": PASSWORD, "x": 1}},
+        "body.x",
+        "EXTRA_FORBIDDEN",
+    ),
+    ("post", "/api/v1/auth/password/forgot", {"json": {"email": "x"}}, "body.email", "VALUE_ERROR"),
+    ("post", "/api/v1/auth/password/forgot", {"json": {"email": 5}}, "body.email", "STRING_TYPE"),
+    ("post", "/api/v1/auth/password/forgot", {"json": [1]}, "body", "MODEL_ATTRIBUTES_TYPE"),
+    (
+        "post",
+        "/api/v1/auth/password/forgot",
+        {"content": b"{bad", "headers": {"content-type": "application/json"}},
+        "body.1",
+        "JSON_INVALID",
+    ),
+    ("delete", "/api/v1/auth/me", {"json": {"password": ""}}, "body.password", "STRING_TOO_SHORT"),
+    (
+        "delete",
+        "/api/v1/auth/me",
+        {"json": {"password": "p" * 257}},
+        "body.password",
+        "STRING_TOO_LONG",
+    ),
+    (
+        "post",
+        "/api/v1/auth/mfa/enroll/confirm",
+        {"json": {"code": "12"}},
+        "body.code",
+        "STRING_PATTERN_MISMATCH",
+    ),
+    ("patch", "/api/v1/auth/me", {"json": {"locale": "fr"}}, "body.locale", "LITERAL_ERROR"),
+    ("get", "/api/v1/auth/me/export/x", {}, "path.export_id", "UUID_PARSING"),
+]
+
+
+@pytest.mark.parametrize(("method", "path", "request_args", "field", "code"), VALIDATION_CASES)
+def test_validation_codes_are_explicit_and_stable(client, method, path, request_args, field, code):
+    response = client.request(method, path, **request_args)
+
+    assert response.status_code == 422
+    assert (field, code) in {(e["path"], e["code"]) for e in response.json()["errors"]}

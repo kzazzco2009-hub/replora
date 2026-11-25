@@ -12,6 +12,7 @@ from app.api.v1.workspace_models import Workspace
 Locale = Literal["ar", "en"]
 Theme = Literal["light", "dark", "system"]
 Password = Annotated[str, Field(min_length=12, max_length=256)]
+CurrentPassword = Annotated[str, Field(min_length=1, max_length=256)]
 OtpCode = Annotated[str, Field(pattern=r"^\d{6}$")]
 
 
@@ -54,7 +55,7 @@ class RegisterRequest(ApiModel):
 
 class LoginRequest(ApiModel):
     email: EmailStr
-    password: Annotated[str, Field(min_length=1, max_length=256)]
+    password: CurrentPassword
 
 
 class UpdateMeRequest(ApiModel):
@@ -78,7 +79,7 @@ class ResetPasswordRequest(ApiModel):
 
 
 class PasswordRequest(ApiModel):
-    password: str
+    password: CurrentPassword
 
 
 class MfaEnrollment(ApiModel):
@@ -97,7 +98,7 @@ class MfaRecoveryRequest(ApiModel):
 
 
 class MfaDisableRequest(ApiModel):
-    password: str
+    password: CurrentPassword
     code: OtpCode
 
 

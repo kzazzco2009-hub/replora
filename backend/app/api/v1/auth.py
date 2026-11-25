@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter
 
-from app.api.problem import ERROR_RESPONSES, not_implemented
+from app.api.problem import ERROR_RESPONSES, NOT_FOUND_RESPONSE, not_implemented
 from app.api.v1.auth_models import (
     EmailRequest,
     ExportAccepted,
@@ -124,7 +124,7 @@ def start_export() -> ExportAccepted:
     raise not_implemented()
 
 
-@router.get("/me/export/{export_id}")
+@router.get("/me/export/{export_id}", responses=NOT_FOUND_RESPONSE)
 def get_export(export_id: UUID) -> ExportStatus:
     """Poll an export; `url` is set when it is ready."""
     raise not_implemented()
@@ -136,7 +136,7 @@ def list_sessions() -> list[Session]:
     raise not_implemented()
 
 
-@router.delete("/sessions/{session_id}", status_code=204)
+@router.delete("/sessions/{session_id}", status_code=204, responses=NOT_FOUND_RESPONSE)
 def revoke_session(session_id: UUID) -> None:
     """Revoke a session. Revoking the current one also clears its cookies."""
     raise not_implemented()

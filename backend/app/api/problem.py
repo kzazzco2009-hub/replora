@@ -1,14 +1,34 @@
 """RFC 9457 problem+json errors: the model, the exception, the handlers and the OpenAPI wiring."""
 
+from http import HTTPStatus
 from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException
 
 from app.api.models import ApiModel
 
 PROBLEM_MEDIA_TYPE = "application/problem+json"
+
+# Pydantic error type → our stable 422 `code`. Explicit, so a library upgrade cannot rename a code.
+VALIDATION_CODES = {
+    name: name.upper()
+    for name in (
+        "missing",
+        "extra_forbidden",
+        "json_invalid",
+        "model_attributes_type",
+        "string_type",
+        "string_too_short",
+        "string_too_long",
+        "string_pattern_mismatch",
+        "literal_error",
+        "uuid_parsing",
+        "value_error",
+    )
+}
 
 
 class ProblemItem(ApiModel):
@@ -56,12 +76,17 @@ ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
     429: _documented("Too many requests (see `Retry-After`)"),
     501: _documented("Not implemented yet (contract stub)"),
 }
+NOT_FOUND_RESPONSE: dict[int | str, dict[str, Any]] = {
+    404: _documented("Not found, or not yours"),
+}
 
 
 def install(app: FastAPI) -> None:
     """Register the problem handlers and document error bodies as problem+json."""
     app.add_exception_handler(ProblemError, _handle_problem)
     app.add_exception_handler(RequestValidationError, _handle_validation)
+    app.add_exception_handler(HTTPException, _handle_http)
+    app.add_exception_handler(Exception, _handle_unexpected)
     build_openapi = app.openapi
 
     def openapi() -> dict[str, Any]:
@@ -81,7 +106,7 @@ async def _handle_validation(_: Request, error: RequestValidationError) -> JSONR
     items = [
         ProblemItem(
             path=".".join(str(part) for part in issue["loc"]),
-            code=issue["type"].upper(),
+            code=validation_code(issue["type"]),
             params={key: _plain(value) for key, value in issue.get("ctx", {}).items()},
         )
         for issue in error.errors()
@@ -92,9 +117,33 @@ async def _handle_validation(_: Request, error: RequestValidationError) -> JSONR
     return _problem_response(problem)
 
 
-def _problem_response(problem: ProblemDetails) -> JSONResponse:
+async def _handle_http(_: Request, error: HTTPException) -> JSONResponse:
+    """Routing 404/405 and any HTTPException. `detail` is not sent: clients translate `code`."""
+    return _problem_response(_status_problem(error.status_code), error.headers)
+
+
+async def _handle_unexpected(_: Request, __: Exception) -> JSONResponse:
+    """An unhandled error. Nothing about it is sent; the server still logs the traceback."""
+    return _problem_response(_status_problem(500, code="INTERNAL_ERROR"))
+
+
+def validation_code(error_type: str) -> str:
+    """The stable 422 `code` for a Pydantic error type; `INVALID` for one we have not listed."""
+    return VALIDATION_CODES.get(error_type, "INVALID")
+
+
+def _status_problem(status: int, code: str | None = None) -> ProblemDetails:
+    http_status = HTTPStatus(status)
+    return ProblemDetails(status=status, code=code or http_status.name, title=http_status.phrase)
+
+
+def _problem_response(
+    problem: ProblemDetails, headers: dict[str, str] | None = None
+) -> JSONResponse:
     body = problem.model_dump(exclude_none=True)
-    return JSONResponse(body, status_code=problem.status, media_type=PROBLEM_MEDIA_TYPE)
+    return JSONResponse(
+        body, status_code=problem.status, headers=headers, media_type=PROBLEM_MEDIA_TYPE
+    )
 
 
 def _plain(value: Any) -> Any:
