@@ -672,10 +672,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List
+         * @description Every operation a workflow can use, with its ports and parameter schema.
+         */
+        get: operations["operations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get
+         * @description File size, files per run, nodes per workflow and the workspace storage quota.
+         */
+        get: operations["limits_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * ArtifactType
+         * @description The 11 artifact kinds a port can carry (P1.1). Ports match exactly, with no conversion.
+         * @enum {string}
+         */
+        ArtifactType: "RawFile" | "ArchiveManifest" | "TabularArtifact" | "TextDocumentArtifact" | "PagedArtifact" | "PresentationArtifact" | "ImageArtifact" | "StructuredObjectArtifact" | "ValidationReport" | "ComparisonReport" | "OutputFile";
         /** AuditEvent */
         AuditEvent: {
             /**
@@ -878,6 +924,29 @@ export interface components {
              */
             role: "admin" | "member" | "viewer";
         };
+        /**
+         * Limits
+         * @description Server limits. The frontend reads them from here and never hard-codes them.
+         */
+        Limits: {
+            /**
+             * Max File Size
+             * @description Bytes
+             */
+            max_file_size: number;
+            /** Max Files Per Run */
+            max_files_per_run: number;
+            /**
+             * Max Nodes
+             * @description Most nodes in one workflow
+             */
+            max_nodes: number;
+            /**
+             * Workspace Quota
+             * @description Bytes of storage per workspace
+             */
+            workspace_quota: number;
+        };
         /** LoginRequest */
         LoginRequest: {
             /**
@@ -992,10 +1061,44 @@ export interface components {
              */
             mfa_required: true;
         };
+        /**
+         * OperationContract
+         * @description A known operation. The frontend renders its parameter form from `params_schema`.
+         */
+        OperationContract: {
+            /** Id */
+            id: string;
+            /** Version */
+            version: number;
+            /**
+             * Title Key
+             * @description i18n key for the operation's name
+             */
+            title_key: string;
+            /** Inputs */
+            inputs: components["schemas"]["Port"][];
+            /** Outputs */
+            outputs: components["schemas"]["Port"][];
+            /**
+             * Params Schema
+             * @description JSON Schema, limited to the subset in docs/api_contract.md §5: string, integer, boolean, enum and array of strings; no oneOf, anyOf or $ref
+             */
+            params_schema: {
+                [key: string]: unknown;
+            };
+        };
         /** PasswordRequest */
         PasswordRequest: {
             /** Password */
             password: string;
+        };
+        /** Port */
+        Port: {
+            /** Name */
+            name: string;
+            artifact_type: components["schemas"]["ArtifactType"];
+            /** Required */
+            required: boolean;
         };
         /**
          * ProblemDetails
@@ -4271,6 +4374,68 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    operations_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    /** @description Public: the same for every user */
+                    "Cache-Control"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationContract"][];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    limits_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    /** @description Public: the same for every user */
+                    "Cache-Control"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Limits"];
                 };
             };
             /** @description Not implemented yet (contract stub) */
