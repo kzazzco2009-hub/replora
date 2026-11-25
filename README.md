@@ -16,7 +16,7 @@ Start with `docs/plan.md`, then `docs/session_log.md` for the current status.
 - Python 3.14 (`.python-version`) with [uv](https://docs.astral.sh/uv/): always `uv run …` and `uv add …`.
 - Node 26 LTS (`.nvmrc`) with pnpm 12.23.0 (pinned in `package.json` → `packageManager`).
 - Local setup: copy `.env.example` to `.env` and fill in the values. `.env` is git-ignored.
-- Git hooks: install [pre-commit](https://pre-commit.com) (`uv tool install pre-commit`) and gitleaks (on PATH), then run `pre-commit install` once per clone. On every commit the hooks run gitleaks, ruff (lint and format) and the frontend ESLint. `.gitleaks.toml` adds project rules (for example OpenRouter keys) on top of the gitleaks defaults, and CI uses it too.
+- Git hooks: install [pre-commit](https://pre-commit.com) (`uv tool install pre-commit`) and gitleaks (on PATH), then run `pre-commit install` once per clone. On every commit the hooks run gitleaks, ruff (lint and format), and the frontend ESLint, prettier and typecheck. `.gitleaks.toml` adds project rules (for example OpenRouter keys) on top of the gitleaks defaults, and CI uses it too.
 
 ### Backend (from `backend/`)
 ```
@@ -26,7 +26,15 @@ uv run pytest                                            # tests
 uv run python -m app.export_openapi                      # regenerate contracts/openapi.json (commit it)
 uv run ruff check . && uv run ruff format --check .      # lint
 ```
-The full local dev setup, with the frontend `/api` rewrite, is added in P0.9.
+### Frontend (from the repo root)
+```
+pnpm install --frozen-lockfile    # install the locked dependencies
+pnpm -C frontend dev              # http://localhost:3000
+pnpm -C frontend run gen:api      # regenerate src/lib/api/schema.d.ts after a contract change (commit it)
+```
+
+### Local dev, both together
+Run the backend (`uvicorn` above, port 8000) and `pnpm -C frontend dev` in two terminals, and open `http://localhost:3000`. In development, Next.js rewrites `/api/*` to the backend (`BACKEND_ORIGIN`, default `http://localhost:8000`). So the browser stays on one origin, and cookies and CSRF work without CORS. More frontend commands: `frontend/README.md`.
 
 ## Contributing
 - Every change reaches `main` through a small PR (≤ 400 lines) reviewed by the other developer. No direct pushes and no self-merge.
