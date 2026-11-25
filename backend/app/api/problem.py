@@ -28,6 +28,11 @@ VALIDATION_CODES = {
         "string_pattern_mismatch",
         "literal_error",
         "uuid_parsing",
+        "int_parsing",
+        "int_from_float",
+        "greater_than",
+        "greater_than_equal",
+        "less_than_equal",
         "invalid_email",
         "mfa_code_or_recovery_required",
     )

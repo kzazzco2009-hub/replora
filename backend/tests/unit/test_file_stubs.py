@@ -115,3 +115,21 @@ def test_operation_ids_name_the_resource(openapi):
     ids = {op["operationId"] for ops in openapi["paths"].values() for op in ops.values()}
 
     assert {"files_create_upload_intent", "files_list", "files_get", "files_delete"} <= ids
+
+
+NUMBER_CASES = [
+    ("post", "upload-intent", {"json": INTENT | {"size": 0}}, "body.size", "GREATER_THAN"),
+    ("post", "upload-intent", {"json": INTENT | {"size": "x"}}, "body.size", "INT_PARSING"),
+    ("post", "upload-intent", {"json": INTENT | {"size": 1.5}}, "body.size", "INT_FROM_FLOAT"),
+    ("get", "", {"params": {"limit": 0}}, "query.limit", "GREATER_THAN_EQUAL"),
+    ("get", "", {"params": {"limit": 101}}, "query.limit", "LESS_THAN_EQUAL"),
+]
+
+
+@pytest.mark.parametrize(("method", "suffix", "request_args", "path", "code"), NUMBER_CASES)
+def test_number_errors_have_explicit_codes(client, method, suffix, request_args, path, code):
+    url = f"{FILES}/{suffix}".rstrip("/").format(**IDS)
+    response = client.request(method, url, **request_args)
+
+    assert response.status_code == 422
+    assert [(error["path"], error["code"]) for error in response.json()["errors"]] == [(path, code)]
