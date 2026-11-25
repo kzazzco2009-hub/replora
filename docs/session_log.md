@@ -8,17 +8,17 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 4/11 done (P0.1, P0.2, P0.3, P0.10). **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth) is **PR #8**, approved by the frontend, not merged yet (head `50ccf31`). Part 3 is split into two stacked PRs, CI green on both: **#10** `feat/p0.5-workspace-stubs` (§3, `ea4464a`, base `feat/p0.5-auth-stubs`) and **#11** `feat/p0.5-file-stubs` (§4, code `76bbe42`, base `feat/p0.5-workspace-stubs`). `main` at **`c6f6e92`** (#9 P0.4 merged, CI green). **`feat/p0.5-file-stubs` holds the newest session log.** |
+| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth) is **PR #8**, approved by the frontend, not merged yet (head `50ccf31`). **#12** `fix/p0.5-auth-followups` (`9f288cc`, base `feat/p0.5-auth-stubs`) holds the four #8 review follow-ups. Part 3 is split into two stacked PRs, CI green on both: **#10** `feat/p0.5-workspace-stubs` (§3, `ea4464a`, base `feat/p0.5-auth-stubs`) and **#11** `feat/p0.5-file-stubs` (§4, code `76bbe42`, base `feat/p0.5-workspace-stubs`). Merge order: **#8 → #12 → #10 → #11**. `main` at **`c6f6e92`**. **`feat/p0.5-file-stubs` holds the newest session log.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend: **squash-merge PR #8** (asked on #1, [comment 7145266627](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145266627)); **review #10 and #11** (pointer: [comment 7145400523](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145400523)) and confirm the points in their bodies (`detected_type` set, nullable `sha256`/`detected_type`/`actor_id`, path-param names, operationIds); the non-blocking #9 follow-ups in a later PR; the `ci.yml` `next build` PR; confirm `ExportStatus.status`. Owner: delete the old OpenRouter key; retire the OneDrive `Replora/` folder; on the other machine, pull and create `.env` (step-by-step in `D:\Projects\replora_env_setup.txt` on the first machine, outside the repo, with no secret in it). |
-| Next step | 1) When #8 merges: `git switch feat/p0.5-workspace-stubs; git rebase --onto origin/main 50ccf31`; rerun the checks; `git push --force-with-lease`; retarget #10 to `main` (`gh pr edit 10 --base main` if GitHub has not done it); post the `pnpm gen:api` note on #1. 2) When #10 merges: the same for #11 (`git rebase --onto origin/main ea4464a`, the old 3a head), then `gh pr edit 11 --base main`. Answer the review comments on #10 and #11 as they come. 3) Part 4: §5–§8. 4) Then P0.6 (pre-commit), P0.11 (observability). |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --jq '.[] | select(.id > 7145400523) | .body'`; `gh pr view 10 -R kzazzco2009-hub/replora --comments`; `gh pr view 11 -R kzazzco2009-hub/replora --comments` (and their `/reviews`). If #8 is merged, do Next step 1. If gitleaks is not found, reload PATH (root `CLAUDE.md`). |
+| Waiting on | Frontend: **squash-merge PR #8** (asked on #1, [comment 7145266627](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145266627)); **review #10 and #11** (pointer: [comment 7145400523](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7145400523)) and confirm the points in their bodies (`detected_type` set, nullable `sha256`/`detected_type`/`actor_id`, path-param names, operationIds); **review #12** and answer its 3 points (`VALUE_ERROR` → `INVALID_EMAIL`?, the MFA challenge union path, the `error-codes.json` shape); the non-blocking #9 follow-ups in a later PR; the `ci.yml` `next build` PR. (`ExportStatus.status` is confirmed: the #8 review.) Owner: nothing open (the old OpenRouter key was deleted and the OneDrive `Replora/` folder retired in Session 13). |
+| Next step | 1) When #8 merges: `git switch fix/p0.5-auth-followups; git rebase --onto origin/main 50ccf31`; rerun the checks; `git push --force-with-lease`; `gh pr edit 12 --base main`; post the `pnpm gen:api` note on #1. 2) When #12 merges: the same for #10 (`git rebase --onto origin/main 50ccf31`). Resolve the `NOT_FOUND_RESPONSE` conflict in `problem.py` (keep one constant) and regenerate `openapi.json`. 3) When #10 merges: the same for #11 (`git rebase --onto origin/main ea4464a`, the old 3a head), then `gh pr edit 11 --base main`. Answer the review comments as they come. 4) A small PR: `contracts/error-codes.json` (shape per the frontend's #12 answer) plus the P0.4 tick in `docs/plan.md`. 5) Part 4: §5–§8. 6) Then P0.6 (pre-commit), P0.11 (observability). |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --jq '.[] | select(.id > 7145400523) | .body'`; `gh pr view 10 -R kzazzco2009-hub/replora --comments`; `gh pr view 11 -R kzazzco2009-hub/replora --comments`, and the same for 12 (and their `/reviews`). If #8 is merged, do Next step 1. If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 4/11 | 4/7 | 0/5 | ☐ |
+| 0 Foundation | 5/11 | 4/7 | 0/5 | ☐ |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -94,6 +94,41 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 **Second dev machine (Developer A), checked 2026-11-24 in Session 8:** git 2.49.0 · gh 2.102.0 · uv 0.11.6 · Node 22.16.0 · npm 10.9.2 · Docker 29.5.2 · Python 3.13.3 and 3.12 only. Missing at first: gitleaks, pnpm, pre-commit, Python 3.14. `D:\Projects\replora` did not exist and was cloned again.
 **After the owner's installs (same session):** gitleaks 8.30.1 · pnpm 12.23.0 · Node 26.13.1 · uv 0.13.9 · Python 3.14 (uv-managed) · pre-commit 4.7.0. git 2.49 and gh 2.102 kept as they are.
+
+---
+
+## Session 13 — 2026-11-25 (other machine, `D:\Projects\replora`)
+**Goal:** check the state is aligned, then do the #8 review follow-ups.
+
+**Alignment check:**
+- `git fetch --all --prune`: every local branch equals its remote (`feat/p0.5-file-stubs` `3e9c06f`, #10 `ea4464a`, #8 `50ccf31`, `main` `c6f6e92`).
+- There was no new GitHub activity since Session 12. The last #1 comment is ours (7145400523). #10 and #11 have no reviews, and #8 is still unmerged.
+- `.env` is present here, and git ignores it.
+- **Deleted an untracked root `pnpm-lock.yaml`.** It was 9 lines with empty importers (`.: {}`), made on this machine at 08:55 by a pnpm run on this pre-#9 branch. It would have blocked the rebase onto `main`, which has the real 5,075-line lockfile.
+- Found the log out of date in two places, now fixed:
+  - P0.4 (#9) was done but not counted (now 5/11);
+  - `ExportStatus.status` was still listed as waiting, though the #8 review had confirmed it.
+- **Owner:** deleted the old OpenRouter key and the OneDrive `Replora/` folder.
+- This machine has **no global git identity**. The commit used `git -c user.name=khaledhagar -c user.email=…` (the same identity as the history). Owner: run `git config --global user.name khaledhagar` and `git config --global user.email <your email>`.
+
+**#8 follow-ups → PR #12** (`fix/p0.5-auth-followups`, `9f288cc`, stacked on #8 because the code exists only there):
+1. 404 is documented on `GET /auth/me/export/{export_id}` and `DELETE /auth/sessions/{session_id}` (`NOT_FOUND_RESPONSE`).
+2. `HTTPException` (routing 404/405) and unhandled exceptions now answer problem+json.
+   - `code` = the HTTP status name, or `INTERNAL_ERROR` for an unhandled error.
+   - `detail` and exception text are never sent.
+   - Headers such as `Allow` are kept.
+3. `PasswordRequest` and `MfaDisableRequest` passwords are bounded `1..256` (`CurrentPassword`). Before this, an empty password was also accepted.
+4. The 422 codes come from the explicit `VALIDATION_CODES` (11 types, the same names as before); an unlisted type maps to `INVALID`. The 11 types were found by probing every model with bad input. Each is pinned by a request test.
+
+**Proof:**
+- TDD: the new tests were red first.
+- With only the 2 new handlers disabled, 4/5 of `test_problem.py` failed (404, 405, HTTPException, 500).
+- Restored: **101 passed** (79 on #8 + 22) · ruff check and format clean · drift check exit 0 · `uv sync --locked` · pip-audit "No known vulnerabilities found" · gitleaks no leaks.
+
+**Found while probing, asked on #12:**
+- `VALUE_ERROR` (meaning an invalid email) is vague: rename it to `INVALID_EMAIL`?
+- The `/auth/mfa/challenge` union puts model names into `errors[].path` (`body.MfaCodeRequest.code`). I lean to one model with an exactly-one check at G5.
+- The `error-codes.json` shape.
 
 ---
 
