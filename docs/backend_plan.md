@@ -30,9 +30,17 @@
 ## Phases (steps reference `plan.md`; tick here **and** in plan.md)
 
 ### B0 — Foundation (backend half of Phase 0)
-- [ ] P0.1 versions (backend libraries) · P0.2 git and `.gitignore` · P0.3 FastAPI health · P0.5 OpenAPI export · P0.6 pre-commit (ruff, gitleaks) · P0.7 backend CI jobs (SQLite now, Postgres job added in B4)
-- [ ] Write the **api_contract.md draft** together with Developer B. Commit `contracts/error-codes.json` v0.
-- [ ] Tests T0.1, T0.3–T0.6 · Security S‑01…S‑05 · **Gate G0**
+- [x] P0.1 versions (backend libraries)
+- [x] P0.2 git and `.gitignore`
+- [x] P0.3 FastAPI health
+- [ ] P0.5 OpenAPI export *(in progress: export + drift check merged in #6; §2 auth stubs in #8; §3–§4 and §5–§8 next)*
+- [ ] P0.6 pre-commit (ruff, gitleaks)
+- [ ] P0.7 backend CI jobs (SQLite now, Postgres job added in B4) *(backend job and drift check live; done with P0.6)*
+- [x] Write the **api_contract.md draft** together with Developer B *(agreed at G0 in issue #1; `docs/api_contract.md`)*
+- [ ] Commit `contracts/error-codes.json` v0
+- [ ] Tests: [x] T0.1 · [x] T0.3 (backend job) · [x] T0.4 · [ ] T0.5 (with P0.6) · [x] T0.6
+- [ ] Security S‑01…S‑05 verified *(S‑02 partly; see `testing.md` and `security.md`)*
+- [ ] **Gate G0** (shared: both tracks green)
 
 ### B1 — Core contracts → Phase 1 (P1.1–P1.7) · T1.* · S‑10, S‑11 · **Gate G1**
 ### B2 — Registry and validator → Phase 2 (P2.1–P2.6) · T2.* · S‑12 · **Gate G2**

@@ -8,11 +8,12 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0). P0.1, P0.2, P0.3 and P0.10 done; P0.5 in progress (export + drift check PR open, then the 501 stubs by section). `main` at `8722ebf`.** |
+| Current phase | **Phase 0 — Foundation (B0).** Steps 4/11 done (P0.1, P0.2, P0.3, P0.10). **P0.5 in progress:** part 1 merged (#6, `7343aea`); part 2 (§2 auth stubs, with the review feedback applied) is **PR #8** from `feat/p0.5-auth-stubs` (head `ed9999c`, CI green). `main` at `887892a`. **This branch holds the newest session log until it merges.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | Frontend review of the P0.5 export PR, and their merge of #5. Then F0 from `main`. |
-| Next step | P0.5 part 2: 501 stubs + Pydantic models for auth (§2), with `openapi.json` regenerated. Then §3–§4 and §5–§8. Then P0.6 (pre-commit) and P0.11 (observability). |
-| Blockers | none. **`docs/` in the repo is now the single source**; the OneDrive `Planning/` and `Frontend_Planning/` folders are frozen. Dependabot `uv in /backend` should pass once `backend/` is merged. |
+| Waiting on | Frontend: review **PR #8** (§2 auth stubs), confirm `ExportStatus.status = pending | ready | failed`, tick P0.1 in `docs/frontend/plan.md`; F0 / P0.4 is in progress on their side. Owner: delete the old OpenRouter key on openrouter.ai, then retire the OneDrive `Replora/` folder and empty the OneDrive recycle bin; on the other machine, pull and create `.env`. |
+| Next step | 1) After the part 2 PR merges, tell the frontend on issue #1 that `pnpm gen:api` can start for auth. 2) P0.5 part 3: §3–§4 stubs (workspaces, members, invitations, audit, files). 3) Part 4: §5–§8. 4) Then P0.6 (pre-commit), P0.11 (observability). |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `gh pr view 8 -R kzazzco2009-hub/replora --comments`; `gh api repos/kzazzco2009-hub/replora/pulls/8/reviews`; `gh issue view 1 -R kzazzco2009-hub/replora --comments` (new comments after id 7144709728); `gh pr list -R kzazzco2009-hub/replora --state all`. If #8 is merged: `git switch main; git pull --ff-only`, then post the `pnpm gen:api` note on #1 and start P0.5 part 3 on a new branch from `main`. |
+| Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
@@ -96,6 +97,41 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 ---
 
+## Session 11 — 2026-11-24 (second dev machine, handover)
+**Goal:** get the latest state to the frontend, retire the OneDrive folder, and hand over to a session opened in `D:\Projects\replora`.
+
+Done:
+- **PRs:**
+  - #5 (frontend log + `frontend/CLAUDE.md`) was merged by the frontend.
+  - #6 is approved.
+  - On issue #1 ([comment 7144367719](https://github.com/kzazzco2009-hub/replora/issues/1#issuecomment-7144367719)) I gave the owner's go to merge #6, asked for a review and merge of #7, and previewed part 2. Part 2 includes the proposal `ExportStatus.status = pending | ready | failed`, to confirm at G5.
+- **PR #7 (`docs/original-plan`):** `docs/history/Replora_Complete_Project_Plan_AR.md`, a byte-identical copy (SHA-256 `16247D27FCE2…C3`), plus a README marking it historical and superseded by `plan.md` v1.1. Read in full first: no secrets; it names a person and the old multi-AI-agent roles. CI green.
+- **OneDrive decision:** the repo lives on the local disk (`D:\Projects\replora`) and GitHub is the sync between machines. OneDrive is unsuitable for git: risk of `.git` corruption, conflict copies instead of merges, `.env` uploaded to the cloud, `.venv`/`node_modules` churn, and files-on-demand placeholders.
+  - Before deleting the OneDrive folder I checked its contents: `.env`, the frozen `Planning/` and `Frontend_Planning/`, the original plan (now in #7) and the frontend zip (a copy of `Frontend_Planning/`).
+- **Secrets (S‑01):**
+  - The owner created a **new OpenRouter key** in `D:\Projects\replora\.env`.
+  - Verified without printing it: `git check-ignore` gives `.gitignore:2:.env`; not tracked or staged; `Settings()` loads it (`sk-or-` prefix, 73 characters, no stray quotes or spaces; the repr hides it); it differs from the OneDrive copy.
+  - Still for the owner: **delete the old key** on openrouter.ai, then delete the OneDrive folder and empty the recycle bin (local and onedrive.com).
+- **Claude Code memory** copied to `~/.claude/projects/D--Projects-replora/memory/` (for sessions opened in the repo folder). It holds this machine only; the other machine relies on the root `CLAUDE.md`.
+- No code changes in this session.
+
+- **#6 and #7 merged** (squash, by the frontend: `7343aea`, `887892a`). Their #6 review asked for two things in the auth-stubs PR:
+  1. Errors documented as problem+json with a shared `ProblemDetails` schema (401, 403, 409, 422, 429).
+  2. Short, stable `operationId`s (`auth_login`).
+- **Rebased part 2** onto `main` (`git rebase --onto origin/main b156a40`; the squash dropped the old part 1 commit). 56 passed and the drift check was clean after the rebase.
+- **Feedback applied with TDD (23 new tests seen red first):**
+  - `Problem` renamed to **`ProblemDetails`**. Explicit 401/403/409/422/429/501 responses, all `application/problem+json` with `$ref ProblemDetails`. FastAPI's `HTTPValidationError` is not exposed.
+  - **Runtime 422 handler:** before, FastAPI answered `application/json` `{detail: […]}`, which bypassed the error-code mapper. Now it answers problem+json `VALIDATION_FAILED` with `errors[{path, code, params}]`, for example `body.password` / `STRING_TOO_SHORT` / `{min_length: 12}`.
+  - **Security finding:** FastAPI's default 422 **echoed the rejected input**, so a too-short password came back in the response body. Proven by temporarily restoring the default handler: `'tiny-secret' is contained here`. Our handler never includes `input`. Also fixed a bug in my own test: the first secret (`short-secret`) was exactly 12 characters, so it was valid and proved nothing.
+  - `operationId` = `<tag>_<function>` via `generate_unique_id_function` (20 IDs: `auth_login`, `auth_get_me`, …, `health_get`). They are unique and match `[a-z]+_[a-z_]+`.
+  - Checks: **79 passed** · ruff clean · drift exit 0 · `uv sync --locked` · pip-audit clean.
+- **Track-plan ticks (found when the owner asked why only P0.3 looked ticked):** `docs/plan.md` was right (P0.1, P0.2, P0.3, P0.10 ticked). But `docs/backend_plan.md` B0 was **one combined checkbox**, so it could not show progress, even though the file says "tick here **and** in plan.md". I split it into one line per step and ticked P0.1, P0.2, P0.3, the api_contract draft, T0.1, T0.3, T0.4 and T0.6.
+  - `docs/frontend/plan.md` P0.1 is unticked although the frontend logged it as done. It is the frontend's file, so I asked them on #8 to tick it.
+
+**Handover:** the newest log is on `feat/p0.5-auth-stubs` until its PR merges (`main` has up to Session 10, through #6). Start the next session in `D:\Projects\replora` with `git fetch --all --prune`, then read this file on `main`, or on the branch if the PR is still open.
+
+---
+
 ## Session 10 — 2026-11-24 (second dev machine)
 **Goal:** review PR #5, then start P0.5 (generated OpenAPI + drift check).
 
@@ -126,6 +162,13 @@ Done (branch `feat/p0.5-openapi-export`):
 - `contracts/README.md` (what is generated and how). README: the export command.
 - **T0.4 passed** (unit and CLI). **T0.6 ticked** (evidence in Session 8).
 - **P0.5 partly done:** the export and the drift check are done; the stubs and the frontend client are next.
+- **P0.5 part 2 (§2 auth stubs)**, branch `feat/p0.5-auth-stubs` (stacked on part 1; its PR opens after #6 merges):
+  - TDD: `tests/unit/test_auth_stubs.py` with 44 tests. They cover: every §2 operation documented with its success status; every stub answering 501 `application/problem+json` `{type, title, status, code: NOT_IMPLEMENTED}`; exactly the 19 contract operations and nothing more; the `User` fields and enums; login documented as `User | MfaRequired`; errors documented only as problem+json; register rejecting a password under 12 characters; unknown body fields rejected. All 44 were red first (routes missing), then green.
+  - Code: `app/api/models.py` (`ApiModel`, `extra=forbid`), `app/api/problem.py` (`Problem`, `ProblemError`, `not_implemented()`, the handler, and `use_problem_media_type`), `app/api/v1/auth_models.py`, `app/api/v1/workspace_models.py` (`Workspace`, `Role`) and `app/api/v1/auth.py` (19 routes). `uv add email-validator` (2.4.0) for `EmailStr`.
+  - Finding: FastAPI documents error models under `application/json`, the route's media type, and has no option to change that (I checked with a scratch script). `problem.install` post-processes the document, moving `4XX`/`5XX` schemas to `application/problem+json`, so the live and committed documents match the real responses.
+  - Bug found and fixed (in my test): the drift test wrote with `write_text()` and no encoding, which is cp1252 on Windows. Once the document contained `§`, the UTF-8 read failed (`0xa7`). Proven with `locale.getpreferredencoding()` and the offending text; fixed with `encoding="utf-8"`. It would have passed on Linux CI and failed on Windows only.
+  - ruff `S105`/`S106` are ignored in `tests/**` only, for fake credentials.
+  - Checks: ruff clean · 16 files formatted · **56 passed** · drift check exit 0 · `uv sync --locked` · pip-audit clean. `openapi.json` now has 19 auth operations and 21 schemas (1,569 generated lines).
 
 ---
 

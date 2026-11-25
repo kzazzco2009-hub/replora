@@ -27,7 +27,8 @@ def test_check_passes_after_write(tmp_path):
 def test_check_fails_when_committed_file_drifted(tmp_path):
     target = tmp_path / "openapi.json"
     write(target)
-    target.write_text(target.read_text(encoding="utf-8").replace("/api/v1/health", "/api/v1/old"))
+    drifted = target.read_text(encoding="utf-8").replace("/api/v1/health", "/api/v1/old")
+    target.write_text(drifted, encoding="utf-8")
 
     assert check(target) == 1
 
