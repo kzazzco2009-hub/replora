@@ -8,37 +8,32 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.6 is done on both sides** (#14 and the frontend's #19); its tick in `docs/plan.md` also goes in the next shared docs PR. **P0.5 in progress:** #6, #8, #12, #16 and the frontend's #13 and #17 are merged (`main` at **`6651beb`**). Open:
-- **#10** `feat/p0.5-workspace-stubs` (**`55f6a1a`, base `main`**, rebased, CI green). Its commits:
-  - `9ba8d55`, the approved code;
-  - `5efb957`, the invitation email reports `INVALID_EMAIL` (`Email` moved to `app/api/models.py`);
-  - `55f6a1a`, `gen:api`.
+| Current phase | **Phase 0 — Foundation (B0).** Steps 5/11 done (P0.1, P0.2, P0.3, P0.4, P0.10). P0.4 = #9, merged, CI green on `main` (run 45493973176); its `[x]` in `docs/plan.md` goes in the next shared docs PR. **P0.6 is done on both sides** (#14 and the frontend's #19); its tick in `docs/plan.md` also goes in the next shared docs PR. **P0.5 in progress:** #6, #8, #10, #12, #16 and the frontend's #13 and #17 are merged (`main` at **`7b2f66b`**). Open, both CI green and rebased on `7b2f66b`:
+- **#22** `feat/p0.5-auth-error-codes` (**`076ba16`**): the 11 §2 codes, 400 documented on the 6 secret endpoints, the 401 vs 400 rule, register → 202, 2 `decisions.md` rows, and `schema.d.ts`. 178 passed. Waiting for the frontend's review.
+- **#11** `feat/p0.5-file-stubs` (**`e4c707a`**, base `main`):
+  - `1198405` is the approved code (= `76bbe42`; per file the patches are identical, except one context line in `problem.py`);
+  - `be47429` adds `FILE_TOO_LARGE` and `QUOTA_EXCEEDED` and 5 explicit number codes;
+  - `e4c707a` is the generated files.
 
-  Waiting for the frontend's re-check.
-- **#22** `feat/p0.5-auth-error-codes` (`1f326bc`, base `main`): the 11 §2 codes, 400 documented on the 6 secret endpoints, the 401 vs 400 rule, register → 202, 2 `decisions.md` rows, and `schema.d.ts`. 135 passed locally.
-- **#11** `feat/p0.5-file-stubs` (code `76bbe42`): approved, not rebased yet.
+  198 passed. Waiting for the frontend's re-check.
 
-Merge order: **#10 → #22** (whichever is second gets rebased, with `openapi.json` and `schema.d.ts` regenerated), **then #11**. Frontend #20 and #21 are open; review them when they ask. **`feat/p0.5-file-stubs` holds the newest session log.** |
+Merge order: #22 and #11 in either order; **whichever merges second gets rebased and regenerated** (both touch `error-codes.json`, `openapi.json` and `schema.d.ts`). Frontend #20 and #21: reviewed by us (comment reviews), nothing blocks them; the owner approves and merges. **`feat/p0.5-file-stubs` holds the newest session log; it is #11's branch, so a log commit moves #11's head.** |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
-| Waiting on | **Frontend:** re-check and merge #10, review #22 (asked in #1, 7160558200).
+| Waiting on | **Frontend:** review #22, re-check #11 (both asked in #1, 7160831011), and add the 5 new number codes to their translations.
 
-**Owner:** set a global git identity on this machine (see Session 13). |
-| Next step | 1) **When #10 merges:**
-   - Rebase #22: `git switch feat/p0.5-auth-error-codes; git rebase origin/main`. Then regenerate `openapi.json` (`uv run python -m app.export_openapi`) and `schema.d.ts` (`pnpm -C frontend run gen:api`), and commit them.
-   - Rerun the checks, `git push --force-with-lease` (the base is already `main`), and ask for a re-check.
-   - Then the small §3 PR: `PERSONAL_WORKSPACE_UNDELETABLE` in `error-codes.json`, and the `AuditEvent.action` / `target_type` enums with proposed values.
+**Owner:** approve and merge #20 and #21 when the frontend asks; set a global git identity on this machine (see Session 13). |
+| Next step | 1) **When the first of #22 and #11 merges, rebase the other:**
+   - `git rebase origin/main`. Resolve `error-codes.json` by keeping both sets of codes.
+   - Regenerate (`uv run python -m app.export_openapi`, then `pnpm -C frontend run gen:api`), commit, rerun the checks, `git push --force-with-lease`, and ask for a re-check.
 
-2) **Rebase #11:**
-   - `git switch feat/p0.5-file-stubs`, then `git rebase --onto origin/main ea4464a`. It keeps the log commits.
-   - Add `FILE_TOO_LARGE` and `QUOTA_EXCEEDED` to `error-codes.json` and regenerate `schema.d.ts`.
-   - **Retarget before pushing:** `gh pr edit 11 --base main`, then `git push --force-with-lease`.
+2) **After #22 is in:** the small §3 PR: `PERSONAL_WORKSPACE_UNDELETABLE` in `error-codes.json` and the `AuditEvent.action` / `target_type` enums with proposed values. Consider `TOKEN_INVALID` (400) on `POST /invitations/accept`, and ask the frontend first.
 
-3) **P0.11 backend part** (T0.7, S‑87): `X-Request-ID` middleware, JSON logs, PII scrub, `correlation_id` in problem+json. Branch from `main`.
+3) **P0.11 backend part** (T0.7, S‑87): `X-Request-ID` middleware, JSON logs, PII scrub, `correlation_id` in every problem+json. The frontend's #20 error boundary shows it. Branch from `main`.
 
 4) **Part 4:** §5–§8 stubs.
 
 5) **The P0.4 and P0.6 ticks in `docs/plan.md`**, in the next shared docs PR. |
-| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7160558200 }`; the reviews and comments on #10, #11, #20, #21 and #22 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
+| Resume (next session) | In PowerShell from `D:/Projects/replora`: `git fetch --all --prune`; `git switch feat/p0.5-file-stubs; git pull --ff-only` (newest log); `gh pr list -R kzazzco2009-hub/replora --state all`; `gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | Where-Object { $_.id -gt 7160831011 }`; the reviews and comments on #11, #20, #21 and #22 (`gh api repos/.../pulls/N/reviews`, `.../issues/N/comments`). Then do Next step 1. If `frontend/node_modules` is missing, run `pnpm install --frozen-lockfile` first (otherwise the ESLint hook auto-installs for minutes). If gitleaks is not found, reload PATH (root `CLAUDE.md`). Comments with `gh api ... --jq` break in PowerShell 5.1 (quoting); pipe to `ConvertFrom-Json` instead. |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). The OneDrive folders are frozen and being retired. Dependabot `uv in /backend` should pass on its next weekly run. |
 
 ## Phase tracker
@@ -224,6 +219,18 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
   - `schema.d.ts` regenerated.
   - **Result:** 135 passed, ruff clean, drift 0, pip-audit clean, gitleaks clean, frontend typecheck, `format:check` and tests (5) pass.
 - Updated the #10 PR body, and replied in #1 (7160558200).
+
+**Continued: #10 merged, #22 rebased, #11 rebased, #20 and #21 reviewed:**
+- The frontend merged **#10** at `55f6a1a` (`main` is `7b2f66b`), one minute before our #1 comment asking them to re-check it. Corrected in #1 (7160831011).
+- **#22's first CI run failed the drift check.** The cause: CI tests the PR merged into the new `main`, and #10's 11 §3 routes still had the old 401, 403 and 429 texts. Reproduced locally after `git rebase origin/main`: `--check` exit 1, and exit 0 after regenerating. Commit `076ba16` holds the generated files only. Result: 178 passed, CI green.
+- **#11 rebased:**
+  - `git rebase --onto origin/main ea4464a` replayed 11 commits with no conflict, because `main`'s log is unchanged since `ea4464a`.
+  - **Patch check:** `git patch-id` per file. Every file is identical to the approved `76bbe42`, except `problem.py`: one context line differs (the 404 text) and the added lines are the same.
+  - **Gap found by probing:** number errors (`size`, `limit`) fell back to `INVALID`. Added `int_parsing`, `int_from_float`, `greater_than`, `greater_than_equal` and `less_than_equal` to `VALIDATION_CODES` and `error-codes.json`, plus `FILE_TOO_LARGE` and `QUOTA_EXCEEDED`. 7 tests were red first. Result: 198 passed.
+  - Retargeted before the push. CI green on `e4c707a`.
+- **#20 and #21 reviewed** (comment reviews, no blockers):
+  - #20: `correlation_id` arrives with our P0.11; the dev-only rewrite means no proxy under `next start`; `lang="en"` placeholder.
+  - #21: light `--diff` on `--bg` is 4.11:1, so not for text; add `--surface-raised` pairs (all ≥ 5.4:1 today); theme `system` needs a pre-paint `data-theme` or a `prefers-color-scheme` block.
 
 **Reviews posted** (comment reviews; the owner approves from their account):
 - **#13:** nothing blocks it. Asked for a `schema.d.ts` drift check in CI, and who regenerates it.
