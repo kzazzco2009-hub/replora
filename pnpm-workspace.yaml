@@ -1,2 +1,5 @@
 packages:
   - frontend
+allowBuilds:
+  '@parcel/watcher': false
+  '@swc/core': false
