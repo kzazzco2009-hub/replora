@@ -169,6 +169,12 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 
 `RunEvent = {seq, type: "state_changed"|"node_started"|"node_finished"|"warning", node_id?, payload, created_at}`
 
+**Stub details (P0.5 parts 4c and 4d, proposed):**
+- `Idempotency-Key` is a required UUID header. When it's missing, the answer is 422 `MISSING` at `header.Idempotency-Key`. A reuse with a different body is 409 `IDEMPOTENCY_KEY_MISMATCH`.
+- `RunState` is a named enum. `RunNode.state` is a string until P1.5 (G1). `RunNode.warnings` is a list of `Issue`.
+- A preview row is `{row, status, cells}`. A cell is `string | integer | boolean | null`. Decimals and dates are strings (D14). An `integer` cell stays within ±(2^53 − 1); a column with larger values is `decimal`. The preview takes `limit` 1–100 and `q` ≤ 200 characters.
+- `OutputArtifact.type` is the §5 `ArtifactType`.
+
 **Polling contract:** while the state is `QUEUED`, `RUNNING` or `CANCEL_REQUESTED`, poll `events?after=last_seq` every 1 s, backing off to 5 s. Stop when the state is terminal. (SSE may be added later without breaking this.)
 
 ## 8. Workflows and replay (Phase 13)
@@ -181,6 +187,13 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 | POST | `/workspaces/{ws}/workflows/{id}/replay-check` | `{file_ids[]}` | `{compatible: bool, drift: [{input, expected_columns, found_columns, suggestions}]}` |
 | POST | `/workspaces/{ws}/workflows/{id}/versions` | `{base_version, mapping}` | 201 `WorkflowVersion` (new version) |
 | DELETE | `/workspaces/{ws}/workflows/{id}` | — | 204 (soft delete) |
+
+**Stub details (P0.5 part 4e, proposed):**
+- `Workflow = {id, name, latest_version, created_by, created_at}`. `GET /{id}` returns `WorkflowDetail`, which adds `versions: [{version, plan_hash, created_at}]`.
+- `WorkflowVersion = {workflow_id, version, definition, plan_hash, created_at}`, immutable.
+- `drift[].suggestions = [{expected, found}]`.
+- `mapping` is per input: `{input: {expected column: column found}}`, keyed like `drift[].input`. An input left out keeps its columns. An unknown input or column is a 422.
+- A new version that isn't built on `latest_version` gets 409 `BASE_VERSION_STALE`.
 
 ## 9. Change Request process (after a freeze)
 1. Open a PR that edits `contracts/` **only**, with the label `contract-change`, describing the change, the reason and the impact on the other side.

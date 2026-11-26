@@ -48,7 +48,7 @@ def test_all_contract_paths_and_nothing_else(openapi):
         (method, path)
         for path, operations in openapi["paths"].items()
         if path.startswith(("/api/v1/workspaces", "/api/v1/invitations"))
-        and not any(section in path for section in ("/files", "/drafts", "/runs"))
+        and not any(section in path for section in ("/files", "/drafts", "/runs", "/workflows"))
         for method in operations
     }
 
