@@ -141,7 +141,8 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 |---|---|---|---|
 | POST | `/workspaces/{ws}/runs` | `{draft_id}` **or** `{workflow_id, version, file_ids[]}` | 201 `Run` (state `AWAITING_APPROVAL` or `NEEDS_REVIEW`) |
 | POST | `/workspaces/{ws}/runs/{id}/approve` | `{plan_hash}` | 202 `Run` (state `QUEUED`); 409 `PLAN_HASH_MISMATCH` |
-| POST | `/workspaces/{ws}/runs/{id}/cancel` | — | 202 `Run` (`CANCEL_REQUESTED`) |
+| POST | `/workspaces/{ws}/runs/{id}/resolve` | `{plan_hash, choices: [{code, path, value}]}` | 200 `Run` (state `AWAITING_APPROVAL`, new `plan_hash`); 409 `PLAN_HASH_MISMATCH` |
+| POST | `/workspaces/{ws}/runs/{id}/cancel` | — | 202 `Run` (`CANCEL_REQUESTED`), or `CANCELLED` from `NEEDS_REVIEW` |
 | GET | `/workspaces/{ws}/runs` | `?cursor&limit&state` | page of `RunSummary` |
 | GET | `/workspaces/{ws}/runs/{id}` | — | `Run` |
 | GET | `/workspaces/{ws}/runs/{id}/events` | `?after=<seq>` | `{events: [RunEvent], last_seq}` |
@@ -150,13 +151,25 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 | GET | `/workspaces/{ws}/runs/{id}/outputs/{artifact_id}/download` | — | `{url, expires_at}` |
 | GET | `/workspaces/{ws}/runs/{id}/outputs/{artifact_id}/rows/{row}/lineage` | — | `Lineage` |
 
-`Run = {id, state, plan_hash, definition, nodes: [{node_id, operation_id, state, attempt, started_at, finished_at, error_code?, warnings[]}], summary?: {matched, value_diff, missing_left, missing_right}, approved_by?, approved_at?, created_at, finished_at?}`
+`Run = {id, state, plan_hash, definition, nodes: [{node_id, operation_id, state, attempt, started_at, finished_at, error_code?, warnings[]}], summary?: {matched, value_diff, missing_left, missing_right}, approved_by?, approved_at?, created_at, finished_at?, review_issues: [Issue]}`
 `state ∈ DRAFT | VALIDATED | AWAITING_APPROVAL | QUEUED | RUNNING | NEEDS_REVIEW | SUCCEEDED | PARTIAL | FAILED | CANCEL_REQUESTED | CANCELLED | EXPIRED`
 **State rules:**
 - `POST /runs` from a draft whose `validation.valid` is `false` returns 422 `DRAFT_INVALID` with the validation issues in `errors`. No run is created.
 - `approve` is allowed **only** in `AWAITING_APPROVAL`. In any other state, including `NEEDS_REVIEW`, it returns 409 `INVALID_STATE_TRANSITION` with `params: {from, action}`.
-- `cancel` is allowed in `AWAITING_APPROVAL`, `QUEUED` and `RUNNING`. In a terminal state it returns 409 `INVALID_STATE_TRANSITION`.
-- `NEEDS_REVIEW` is resolved by a user decision (for example a date format or a column mapping). The decision produces a new `plan_hash` and returns the run to `AWAITING_APPROVAL`, where it must be approved again. The resolution endpoint is specified together with the transition table (P1.5) at G1.
+- `cancel` is allowed in `AWAITING_APPROVAL`, `QUEUED` and `RUNNING` (→ `CANCEL_REQUESTED`), and in `NEEDS_REVIEW`, where nothing is running, so it goes straight to `CANCELLED`. In a terminal state it returns 409 `INVALID_STATE_TRANSITION`.
+- `NEEDS_REVIEW` is resolved by a user decision (for example a date format or a column mapping). The open questions are `Run.review_issues`; each `Issue` lists its allowed answers in `params.options`. `POST …/resolve` answers them with one `{code, path, value}` per issue, plus the `plan_hash` the user reviewed. The decision produces a new `plan_hash` and returns the run to `AWAITING_APPROVAL`, where it must be approved again. Outside `NEEDS_REVIEW`, `resolve` returns 409 `INVALID_STATE_TRANSITION`. It needs an `Idempotency-Key`.
+
+**Transition table (P1.5, `backend/app/core/run_state.py`).** Every pair not listed is illegal (409 `INVALID_STATE_TRANSITION`, `params: {from, action}`). `SUCCEEDED`, `PARTIAL`, `FAILED`, `CANCELLED` and `EXPIRED` are terminal.
+
+| From | Action | To |
+|---|---|---|
+| `DRAFT` | validate | `VALIDATED` |
+| `VALIDATED` | request_approval · request_review | `AWAITING_APPROVAL` · `NEEDS_REVIEW` |
+| `AWAITING_APPROVAL` | approve · expire (24 h) · cancel | `QUEUED` · `EXPIRED` · `CANCEL_REQUESTED` |
+| `NEEDS_REVIEW` | resolve · cancel | `AWAITING_APPROVAL` · `CANCELLED` |
+| `QUEUED` | start · cancel | `RUNNING` · `CANCEL_REQUESTED` |
+| `RUNNING` | succeed · finish_partial · fail · request_review · cancel | `SUCCEEDED` · `PARTIAL` · `FAILED` · `NEEDS_REVIEW` · `CANCEL_REQUESTED` |
+| `CANCEL_REQUESTED` | confirm_cancel (between nodes) | `CANCELLED` |
 
 **Draft shapes (locked at G1):**
 - `Column = {name, type: "string"|"decimal"|"integer"|"date"|"boolean", nullable: bool}`

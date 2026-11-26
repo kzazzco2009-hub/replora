@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import Field, JsonValue
 
 from app.api.models import ApiModel, Page
 from app.api.v1.draft_models import Issue, WorkflowDefinition
@@ -12,6 +12,8 @@ from app.core.run_state import RunState
 
 __all__ = [
     "ApproveRequest",
+    "ResolveRequest",
+    "ReviewChoice",
     "Run",
     "RunCounts",
     "RunEvent",
@@ -42,6 +44,21 @@ class RunFromWorkflow(ApiModel):
 
 class ApproveRequest(ApiModel):
     plan_hash: PlanHash
+
+
+class ReviewChoice(ApiModel):
+    """The user's answer to one of the run's `review_issues`, picked from its `params.options`."""
+
+    code: str
+    path: str
+    value: JsonValue
+
+
+class ResolveRequest(ApiModel):
+    """Answer a `NEEDS_REVIEW` run. `plan_hash` is the plan the user reviewed."""
+
+    plan_hash: PlanHash
+    choices: Annotated[list[ReviewChoice], Field(min_length=1, max_length=100)]
 
 
 class RunCounts(ApiModel):
@@ -75,6 +92,9 @@ class Run(ApiModel):
     approved_at: datetime | None = None
     created_at: datetime
     finished_at: datetime | None = None
+    review_issues: list[Issue] = Field(
+        default=[], description="What the user must decide while the run is `NEEDS_REVIEW`"
+    )
 
 
 class RunSummary(ApiModel):

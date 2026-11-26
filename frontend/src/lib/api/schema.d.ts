@@ -824,6 +824,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resolve
+         * @description Answer the review questions: a new `plan_hash`, waiting again in `AWAITING_APPROVAL`.
+         *
+         *     Only from `NEEDS_REVIEW`; otherwise 409 `INVALID_STATE_TRANSITION`.
+         *     409 `PLAN_HASH_MISMATCH` if the plan changed since it was reviewed.
+         */
+        post: operations["runs_resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{ws_id}/runs/{run_id}/cancel": {
         parameters: {
             query?: never;
@@ -835,7 +858,7 @@ export interface paths {
         put?: never;
         /**
          * Cancel
-         * @description Ask to stop. From `AWAITING_APPROVAL`, `QUEUED` or `RUNNING`; else 409.
+         * @description Ask to stop (`AWAITING_APPROVAL`, `QUEUED`, `RUNNING`); `NEEDS_REVIEW` stops at once.
          */
         post: operations["runs_cancel"];
         delete?: never;
@@ -1439,6 +1462,7 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        JsonValue: unknown;
         /**
          * Limits
          * @description Server limits. The frontend reads them from here and never hard-codes them.
@@ -1785,6 +1809,30 @@ export interface components {
             /** Password */
             password: string;
         };
+        /**
+         * ResolveRequest
+         * @description Answer a `NEEDS_REVIEW` run. `plan_hash` is the plan the user reviewed.
+         */
+        ResolveRequest: {
+            /**
+             * Plan Hash
+             * @description Lowercase hex SHA-256
+             */
+            plan_hash: string;
+            /** Choices */
+            choices: components["schemas"]["ReviewChoice"][];
+        };
+        /**
+         * ReviewChoice
+         * @description The user's answer to one of the run's `review_issues`, picked from its `params.options`.
+         */
+        ReviewChoice: {
+            /** Code */
+            code: string;
+            /** Path */
+            path: string;
+            value: components["schemas"]["JsonValue"];
+        };
         /** Run */
         Run: {
             /**
@@ -1813,6 +1861,12 @@ export interface components {
             created_at: string;
             /** Finished At */
             finished_at?: string | null;
+            /**
+             * Review Issues
+             * @description What the user must decide while the run is `NEEDS_REVIEW`
+             * @default []
+             */
+            review_issues: components["schemas"]["Issue"][];
         };
         /**
          * RunCounts
@@ -5916,6 +5970,99 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    runs_resolve: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description One per user action, reused on retry. A reuse with another body is 409 */
+                "Idempotency-Key": string;
+            };
+            path: {
+                ws_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

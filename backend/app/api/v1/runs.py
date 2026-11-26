@@ -9,6 +9,7 @@ from app.api.models import Cursor, Limit
 from app.api.problem import ERROR_RESPONSES, NOT_FOUND_RESPONSE, not_implemented
 from app.api.v1.run_models import (
     ApproveRequest,
+    ResolveRequest,
     Run,
     RunEvents,
     RunFromDraft,
@@ -54,9 +55,21 @@ def approve_run(
     raise not_implemented()
 
 
+@router.post("/{run_id}/resolve", name="resolve")
+def resolve_run(
+    ws_id: UUID, run_id: UUID, body: ResolveRequest, idempotency_key: IdempotencyKey
+) -> Run:
+    """Answer the review questions: a new `plan_hash`, waiting again in `AWAITING_APPROVAL`.
+
+    Only from `NEEDS_REVIEW`; otherwise 409 `INVALID_STATE_TRANSITION`.
+    409 `PLAN_HASH_MISMATCH` if the plan changed since it was reviewed.
+    """
+    raise not_implemented()
+
+
 @router.post("/{run_id}/cancel", status_code=202, name="cancel")
 def cancel_run(ws_id: UUID, run_id: UUID) -> Run:
-    """Ask to stop. From `AWAITING_APPROVAL`, `QUEUED` or `RUNNING`; else 409."""
+    """Ask to stop (`AWAITING_APPROVAL`, `QUEUED`, `RUNNING`); `NEEDS_REVIEW` stops at once."""
     raise not_implemented()
 
 
