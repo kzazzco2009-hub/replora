@@ -26,7 +26,9 @@ Append a new entry per session (newest at the top). For each step record: what w
 - delete their 21 merged branches;
 - close #1.
 
-**Developer A (backend):** `pre-commit install` on the **other machine** too (done on this one, Session 15). Check that `git config --global user.email` is the `noreply` address there as well.
+**Developer A (backend):**
+- **approve #58 at `75528d1`** (re-reviewed, comment 7192378154; the permission check blocked Claude's approval);
+- on the **other machine**, follow `D:\Projects\replora_handover.md` (Session 15 end). It covers `pre-commit install`, the `noreply` git email and the Claude memory files.
 
 **Owners:** `LICENSE` is done (proprietary, #55). Auto-delete of merged branches is on. |
 | Next step | 1) **Merge the P1.4 PR** after the frontend approves it. Then **P1.5**: the `RunState` enum and transition table as data. `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED`. T1.5 is the exhaustive 12×12 test. One small PR per step. Before every push to a PR, check its reviews, because a push dismisses an approval.
@@ -212,6 +214,13 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - ruff caught `Random(seed)` (S311), so the test uses hypothesis `st.randoms()`.
 - Checks: ruff clean (56 files), **491 passed**, no drift.
 - **P1.4, T1.3 and T1.4 ticked.** S‑11 stays open, because it also needs T3.1 (the approver ID and time).
+- Opened as **#60** (`7285ddb`), CI 4/4 green, waiting on the frontend's review.
+
+**End of Session 15 (this machine):**
+- **The frontend's #58** moved to `75528d1`. Its new commit was re-reviewed (7192378154): status-matched fallback codes (413 `FILE_TOO_LARGE`, 429 `RATE_LIMITED`, else `INTERNAL_ERROR`), `X-CSRF-Token` same-origin only, and an idempotency reset on body change. The `CSRF_FAILED` retry moves to their refresh PR. **Claude's re-approval was blocked by the permission check**, so Developer A approves it.
+- **Status sent to the frontend:** #1, 7192378739.
+- **Claude memory:** 4 notes (`commit-msg-no-bom`, `check-reviews-before-push`, `merge-rules`, `powershell-gotchas`). **Handover for the other machine:** `D:\Projects\replora_handover.md`, outside the repo. It holds the memory notes, the commands to reach this state, and the expected check results.
+- **State:** `main` `6190e52` (476 passed); `feat/p1.4-plan-hash` (#60) 491 passed; no drift.
 
 ## Session 15 — 2026-11-26 (`D:\Projects\replora`, after Session 14 on the other machine)
 **Goal:** check that this machine matches Session 14, answer the frontend, and finalize P0.5 and P0.8.
