@@ -74,5 +74,5 @@ def test_only_a_run_awaiting_approval_can_expire(state):
 
 
 def test_the_ttl_is_configurable_and_defaults_to_24_hours():
-    assert Settings().approval_ttl == TTL
-    assert Settings(approval_ttl_hours=2).approval_ttl == timedelta(hours=2)
+    assert Settings(_env_file=None).approval_ttl == TTL
+    assert Settings(_env_file=None, approval_ttl_hours=2).approval_ttl == timedelta(hours=2)
