@@ -10,7 +10,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|
 | Current phase | **Phase 0 — Foundation (B0), Session 15.** `main` is at **`8e8b24b`**, CI green. Merged in Session 15: #40 (`d45be72`), #44 (`cabb1d1`), #45 (`e86d475`), #41 (`f07e323`), **#42 (`8e8b24b`)**, and the frontend's #39, #46 and #48.
 
-**Steps:** 10/11 on `main`. **P0.8 is ticked on this branch (#43)**, so it shows on `main` once #43 merges. **P0.5** can be ticked now that #42 has merged. The tick, with evidence from `8e8b24b`, is in the `docs/g0-readiness` PR, which also moves `openapi-fetch` to P9.6 (#1, 7187542043).
+**Steps: 11/11.** P0.8 is ticked in #43 and P0.5 in the `docs/g0-readiness` PR, so both show on `main` once those two merge. The P0.5 evidence is from `main` `8e8b24b`: 402 passed, no drift, `gen:api` with no diff. `openapi-fetch` moves to P9.6 (#1, 7187542043). **Phase 0 is complete, and G0 has been asked of both developers on #1. No Phase 1 work starts before it.**
 
 **Ticked in Session 14:** P9.2 and P9.3 in `plan.md`. Owners: **both developers** (#45, merged).
 
@@ -65,7 +65,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 10/11 | 7/7 | 5/5 | ☐ |
+| 0 Foundation | 11/11 | 7/7 | 5/5 | ☐ (asked, #1) |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -200,12 +200,12 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 | **T0.5, re-proven** | a fake `sk-or-v1-<64 hex>` in an empty temp dir, `gitleaks dir --config .gitleaks.toml` | `leaks found: 1` (`openrouter-api-key`), exit 1, probe removed |
 | **T0.3 lint gate, re-proven locally** | a probe file with `className="ml-2"`, then `eslint` | `local/no-physical-direction` error, exit 1, probe removed |
 
-**G0 gate report (draft, to post on #1 once #42 is merged and P0.5 is ticked):**
+**G0 gate report (posted on #1):**
 
 | Item | State | Evidence |
 |---|---|---|
 | P0.1–P0.4, P0.6, P0.7, P0.9–P0.11 | ✅ | #2, #6, #14, #19, #25, #26 and the earlier sessions |
-| P0.5 contract and types | ⏳ #42 | §2 #8 · §3 #10, #27 · §4 #11, #32 · §5 #28 · §6 #34 · §7 #40, #41 · §8 #42 · `gen:api` on `main`. `openapi-fetch` → P9.6 |
+| P0.5 contract and types | ✅ | §2 #8 · §3 #10, #27 · §4 #11, #32 · §5 #28 · §6 #34 · §7 #40, #41 · §8 #42 · `gen:api` on `main` `8e8b24b` (402 passed, no drift). `openapi-fetch` → P9.6 |
 | P0.8 governance | ✅ | ruleset `main` live (Session 15), CODEOWNERS, PR template |
 | Tests T0.1–T0.7 | ✅ 7/7 | T0.3–T0.5 re-proven above |
 | Security S‑01–S‑05 | ✅ 5/5 | `security.md` Phase 0; S‑05 Session 15 |
@@ -221,9 +221,19 @@ The G0 decision needs **both developers**. No Phase 1 work starts before it.
 - `feat/p0.5-file-stubs` held an old log line that `main` supersedes;
 - `backend/setup` held only the initial commit, already in `main`.
 
-`feat/p0.5-workflows-stubs` (#42) was kept. The merged remote branches #40, #41, #44 and #45 are for Developer A to delete (Claude can't).
+`feat/p0.5-workflows-stubs` (#42, now merged) was kept. The merged remote branches #40, #41, #42, #44 and #45 are for Developer A to delete (Claude can't).
 
-**P0.5 not ticked:** it waits on #42 only. `openapi-fetch` is P9.6 in the frontend's plan, and the P0.5 text is corrected on `docs/g0-readiness`. Earlier note: it waited on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
+**P0.5 ticked** (`plan.md` and `backend_plan.md`) after #42 merged. The evidence is on `main` `8e8b24b`, in a scratch worktree (`pnpm install --frozen-lockfile`, `uv sync --locked`):
+
+| Check | Command | Result |
+|---|---|---|
+| Lint | `uv run ruff check .` | all checks passed |
+| Backend tests | `uv run pytest -q` | **402 passed** |
+| Contract drift | `uv run python -m app.export_openapi --check` | exit 0 |
+| TS types | `pnpm -C frontend gen:api`, then `git status --porcelain frontend/src/lib/api` | no diff |
+| Frontend | `pnpm -C frontend typecheck` · `test` | exit 0 · **21 files, 147 passed** |
+
+§2–§8 are all stubbed (#8, #10, #11, #27, #28, #32, #34, #40, #41, #42). `openapi-fetch` is P9.6 in the frontend's plan. Earlier note: P0.5 waited on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
 
 **Stray `plan.md` line:** an uncommitted blank line at the end of `docs/plan.md` was there on arrival. Developer A said to drop it (`git restore docs/plan.md`).
 

@@ -33,7 +33,7 @@
 - [x] P0.1 versions (backend libraries)
 - [x] P0.2 git and `.gitignore`
 - [x] P0.3 FastAPI health
-- [ ] P0.5 OpenAPI export *(export and drift check #6; §2 #8; §3 #10; §4 #11; §5 #28; §6 #34; §7 #40 and #41; §8 in #42. `openapi-fetch` is P9.6, not P0.5)*
+- [x] P0.5 OpenAPI export *(export and drift check #6; §2 #8; §3 #10; §4 #11; §5 #28; §6 #34; §7 #40 and #41; §8 #42. `openapi-fetch` is P9.6, not P0.5)*
 - [x] P0.6 pre-commit (ruff, gitleaks) *(#14; the frontend hooks in #19)*
 - [x] P0.7 backend CI jobs (SQLite now, Postgres job added in B4) *(backend job, `openapi.json` drift check, pip-audit, gitleaks)*
 - [x] Write the **api_contract.md draft** together with Developer B *(agreed at G0 in issue #1; `docs/api_contract.md`)*
