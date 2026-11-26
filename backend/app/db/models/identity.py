@@ -17,6 +17,7 @@ class User(IdMixin, CreatedMixin, Base):
     )
 
     email: Mapped[str] = mapped_column(String(320))
+    display_name: Mapped[str] = mapped_column(String(100), default="", server_default="")
     password_hash: Mapped[str] = mapped_column(String(255))
     email_verified_at: Mapped[datetime | None]
     locale: Mapped[str] = mapped_column(String(8), default="ar")
@@ -67,6 +68,20 @@ class Session(IdMixin, CreatedMixin, Base):
     revoked_at: Mapped[datetime | None]
     user_agent: Mapped[str | None] = mapped_column(String(255))
     ip_hash: Mapped[str | None] = mapped_column(String(64))
+
+
+class UsedRefreshToken(IdMixin, Base):
+    """A refresh token already rotated away. Seeing it again means the session leaked (S-24)."""
+
+    __tablename__ = "used_refresh_tokens"
+    __table_args__ = (
+        Index("uq_used_refresh_hash", "token_hash", unique=True),
+        Index("ix_used_refresh_session_id", "session_id"),
+    )
+
+    session_id: Mapped[UUID] = mapped_column(ForeignKey("sessions.id", ondelete="CASCADE"))
+    token_hash: Mapped[str] = mapped_column(String(64))
+    used_at: Mapped[datetime]
 
 
 class AuthToken(IdMixin, CreatedMixin, Base):
