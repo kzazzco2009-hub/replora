@@ -13,7 +13,7 @@ Step IDs (`P9.1`, `T10.2`, `S‑60`…) match the master plan, so both developer
 - **Work incrementally, ALWAYS.** Small, simple steps. Validate and check each increment before moving on.
 - Mark a step `[x]` only after its tests pass and its evidence (command plus result) is written in `session_log.md`.
 - **A phase is finished only when** all of its steps are `[x]`, all of its tests in `testing.md` pass, and all of its items in `security.md` are verified.
-- **Phase gate:** at the end of each phase, report the results to the owner and **ask for permission** before starting the next phase.
+- **Phase gate:** at the end of each phase, report the results to the gate approver — Developer B for this track's gates, both developers for the shared gates (0, 17, 18 and 19) — and **ask for permission** before starting the next phase.
 - Your track's gates are approved independently of the backend track. **Integration milestones and shared phases need both tracks green.**
 - Record all progress in `session_log.md` (started, finished, blockers, decisions, next step).
 
@@ -103,19 +103,21 @@ frontend/
 - [x] P0.7 CI jobs: lint, typecheck, Vitest, `pnpm build`, `pnpm audit --audit-level=high`, and a contract type check.
 - [x] P0.9 Dev `/api` rewrite to the backend (`http://localhost:8000`), documented in the README. (#20)
 - [x] P0.11 A global error boundary that shows the `correlation_id` from problem+json. (#20)
-- [ ] Co-write the `api_contract.md` draft with the backend developer.
-- [ ] Tests T0.2, T0.3, T0.5 · Security S‑01, S‑03, S‑04, S‑05 · **Gate G0 (joint)**
+- [x] Co-write the `api_contract.md` draft with the backend developer. *(agreed at G0 in issue #1; `docs/api_contract.md`; same step ticked in `docs/backend_plan.md:39`)*
+- [x] Tests T0.2, T0.3, T0.5 · Security S‑01, S‑03, S‑04, S‑05 · **Gate G0 (joint)**
 
 ### F1 — Tokens, themes, i18n, app shell (P9.1–P9.4)
 - [x] P9.1 Design tokens from `design.md` §3 as CSS variables in Tailwind v4 `@theme`, light and dark. Write the token contrast test (T11.3) now. (#21)
 - [x] P9.2 Theme with `next-themes`: system default, a Light, Dark and System toggle, a cookie so the server renders the right theme, and no flash on load. (#29)
 - [x] P9.3 `next-intl` with `[locale]` routing (`/ar`, `/en`), `<html lang dir>` set on the server, Readex Pro (arabic and latin subsets) via `next/font`, and logical CSS properties only (a lint rule bans `left`, `right`, `ml-*`, `mr-*`, `pl-*`, `pr-*`). (#30, #37, #38)
-- [ ] P9.4 App shell: sidebar at ≥ 1024 px, icon rail at 640–1023 px, bottom tab bar below 640 px. No horizontal scroll at 320 px.
+- [x] P9.4 App shell: sidebar at ≥ 1024 px, icon rail at 640–1023 px, bottom tab bar below 640 px. No horizontal scroll at 320 px. (#46, #47)
 - [ ] Tests T9.2, T9.3, T9.7, T9.9
 
 ### F2 — UI kit and data layer (P9.5–P9.6)
 - [ ] P9.5 Components: Button, Input, Select, Dialog, Sheet, Toast, Tabs, Table, Badge, StatusChip (icon plus text), EmptyState, ErrorState, and Skeleton variants per layout. Each has a Vitest test in LTR and RTL.
+  - Progress: 3 of 4 PRs merged — #48 (Button, Input, Badge primitives), #49 (Dialog and Sheet), #54 (Toast). Still open: Controls (Select, Tabs) and Data display (Table, StatusChip, EmptyState, ErrorState, Skeleton).
 - [ ] P9.6 The generated client (openapi-fetch) with CSRF header injection (on app start, call `GET /auth/csrf` if the `replora_csrf` cookie is missing; login and register send the token too; re-read the cookie after login and logout because the token rotates), an ETag-aware fetch and a 401 → refresh → retry-once flow. TanStack Query provider. MSW handlers from `contracts/fixtures`, with scenario switches (each run state, slow network, each error code). An error-code → AR/EN message mapper with a parity test against `contracts/error-codes.json`, and a CI check that `ar.json` and `en.json` have the same keys.
+  - Progress: PR 1 (#53, MSW auth handlers) merged. PR 2 (#58, typed client, CSRF, Idempotency-Key) in review. PRs 3 and 4 not started.
 - [ ] Tests T9.1, T9.4
 
 ### F3 — Auth screens and loading routes (P9.7–P9.8) · Gate G9
