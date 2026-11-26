@@ -1,0 +1,16 @@
+{
+  "ok": {
+    "status": 204,
+    "body": null
+  },
+  "unauthenticated": {
+    "status": 401,
+    "body": {
+      "type": "about:blank",
+      "title": "Unauthorized",
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "correlation_id": "01937a5e-7f00-7000-8000-00000000c0de"
+    }
+  }
+}

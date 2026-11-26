@@ -776,6 +776,194 @@ export interface paths {
         patch: operations["drafts_update"];
         trace?: never;
     };
+    "/api/v1/workspaces/{ws_id}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List
+         * @description The workspace runs, newest first.
+         */
+        get: operations["runs_list"];
+        put?: never;
+        /**
+         * Create
+         * @description Start a run from a draft or a saved workflow. It waits in `AWAITING_APPROVAL`.
+         *
+         *     A draft that is not valid is refused with 422 `DRAFT_INVALID`, its issues in `errors`.
+         */
+        post: operations["runs_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve
+         * @description Approve the exact plan shown: 409 `PLAN_HASH_MISMATCH` if it changed.
+         *
+         *     Only from `AWAITING_APPROVAL`; otherwise 409 `INVALID_STATE_TRANSITION`.
+         */
+        post: operations["runs_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel
+         * @description Ask to stop. From `AWAITING_APPROVAL`, `QUEUED` or `RUNNING`; else 409.
+         */
+        post: operations["runs_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get
+         * @description One run with its nodes.
+         */
+        get: operations["runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Events
+         * @description Events after sequence number `after`. Poll every 1 s, backing off to 5 s.
+         */
+        get: operations["runs_events"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/outputs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List
+         * @description The files a run produced.
+         */
+        get: operations["outputs_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/outputs/{artifact_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview
+         * @description A page of an output table, optionally filtered by reconciliation status or text.
+         */
+        get: operations["outputs_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/outputs/{artifact_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download
+         * @description A short-lived signed download URL.
+         */
+        get: operations["outputs_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/outputs/{artifact_id}/rows/{row}/lineage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lineage
+         * @description The source rows and operations behind one output row.
+         */
+        get: operations["outputs_lineage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -789,6 +977,14 @@ export interface components {
             sent_fields: string[];
             /** Samples Sent */
             samples_sent: boolean;
+        };
+        /** ApproveRequest */
+        ApproveRequest: {
+            /**
+             * Plan Hash
+             * @description Lowercase hex SHA-256
+             */
+            plan_hash: string;
         };
         /**
          * ArtifactType
@@ -835,6 +1031,18 @@ export interface components {
             items: components["schemas"]["AuditEvent"][];
             /** Next Cursor */
             next_cursor: string | null;
+        };
+        /** Column */
+        Column: {
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "decimal" | "integer" | "date" | "boolean";
+            /** Nullable */
+            nullable: boolean;
         };
         /** CreateWorkspaceRequest */
         CreateWorkspaceRequest: {
@@ -1122,6 +1330,30 @@ export interface components {
              */
             workspace_quota: number;
         };
+        /** Lineage */
+        Lineage: {
+            /** Sources */
+            sources: components["schemas"]["LineageSource"][];
+            /** Operations */
+            operations: components["schemas"]["OperationRef"][];
+        };
+        /**
+         * LineageSource
+         * @description Where an output row came from: a file, the member inside a ZIP, a row, a PDF page.
+         */
+        LineageSource: {
+            /**
+             * File Id
+             * Format: uuid
+             */
+            file_id: string;
+            /** Member Path */
+            member_path?: string | null;
+            /** Row */
+            row: number;
+            /** Page */
+            page?: number | null;
+        };
         /** LoginRequest */
         LoginRequest: {
             /**
@@ -1262,6 +1494,41 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** OperationRef */
+        OperationRef: {
+            /** Id */
+            id: string;
+            /** Version */
+            version: number;
+        };
+        /** OutputArtifact */
+        OutputArtifact: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            type: components["schemas"]["ArtifactType"];
+            /**
+             * Format
+             * @description File format, for example `csv` or `xlsx`
+             */
+            format: string;
+            /**
+             * Size
+             * @description Bytes
+             */
+            size: number;
+            /** Row Count */
+            row_count?: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /** PasswordRequest */
         PasswordRequest: {
             /** Password */
@@ -1274,6 +1541,41 @@ export interface components {
             artifact_type: components["schemas"]["ArtifactType"];
             /** Required */
             required: boolean;
+        };
+        /**
+         * Preview
+         * @description One page of an output table.
+         */
+        Preview: {
+            /** Columns */
+            columns: components["schemas"]["Column"][];
+            /** Rows */
+            rows: components["schemas"]["PreviewRow"][];
+            /**
+             * Total
+             * @description Rows matching the filter
+             */
+            total: number;
+            /** Offset */
+            offset: number;
+        };
+        /**
+         * PreviewRow
+         * @description One output row; `cells` follow `columns` in order.
+         */
+        PreviewRow: {
+            /**
+             * Row
+             * @description The output row number, as taken by the lineage path
+             */
+            row: number;
+            /**
+             * Status
+             * @description Null outside a reconciliation
+             */
+            status: ("matched" | "value_diff" | "missing_left" | "missing_right") | null;
+            /** Cells */
+            cells: (string | number | boolean | null)[];
         };
         /**
          * ProblemDetails
@@ -1338,6 +1640,163 @@ export interface components {
             token: string;
             /** Password */
             password: string;
+        };
+        /** Run */
+        Run: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            state: components["schemas"]["RunState"];
+            /**
+             * Plan Hash
+             * @description Lowercase hex SHA-256
+             */
+            plan_hash: string;
+            definition: components["schemas"]["WorkflowDefinition"];
+            /** Nodes */
+            nodes: components["schemas"]["RunNode"][];
+            summary?: components["schemas"]["RunCounts"] | null;
+            /** Approved By */
+            approved_by?: string | null;
+            /** Approved At */
+            approved_at?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at?: string | null;
+        };
+        /**
+         * RunCounts
+         * @description Reconciliation row counts.
+         */
+        RunCounts: {
+            /** Matched */
+            matched: number;
+            /** Value Diff */
+            value_diff: number;
+            /** Missing Left */
+            missing_left: number;
+            /** Missing Right */
+            missing_right: number;
+        };
+        /** RunEvent */
+        RunEvent: {
+            /** Seq */
+            seq: number;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "state_changed" | "node_started" | "node_finished" | "warning";
+            /** Node Id */
+            node_id?: string | null;
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /**
+         * RunEvents
+         * @description Poll with `after=last_seq` while the state is `QUEUED`, `RUNNING` or `CANCEL_REQUESTED`.
+         */
+        RunEvents: {
+            /** Events */
+            events: components["schemas"]["RunEvent"][];
+            /** Last Seq */
+            last_seq: number;
+        };
+        /** RunFromDraft */
+        RunFromDraft: {
+            /**
+             * Draft Id
+             * Format: uuid
+             */
+            draft_id: string;
+        };
+        /**
+         * RunFromWorkflow
+         * @description Replay a saved workflow version on new files (Phase 13).
+         */
+        RunFromWorkflow: {
+            /**
+             * Workflow Id
+             * Format: uuid
+             */
+            workflow_id: string;
+            /** Version */
+            version: number;
+            /** File Ids */
+            file_ids: string[];
+        };
+        /** RunNode */
+        RunNode: {
+            /** Node Id */
+            node_id: string;
+            /** Operation Id */
+            operation_id: string;
+            /**
+             * State
+             * @description Node state; its values are locked with P1.5 at G1
+             */
+            state: string;
+            /** Attempt */
+            attempt: number;
+            /** Started At */
+            started_at?: string | null;
+            /** Finished At */
+            finished_at?: string | null;
+            /** Error Code */
+            error_code?: string | null;
+            /**
+             * Warnings
+             * @default []
+             */
+            warnings: components["schemas"]["Issue"][];
+        };
+        /**
+         * RunState
+         * @description The 12 run states. The allowed transitions are the P1.5 table, locked at G1.
+         * @enum {string}
+         */
+        RunState: "DRAFT" | "VALIDATED" | "AWAITING_APPROVAL" | "QUEUED" | "RUNNING" | "NEEDS_REVIEW" | "SUCCEEDED" | "PARTIAL" | "FAILED" | "CANCEL_REQUESTED" | "CANCELLED" | "EXPIRED";
+        /**
+         * RunSummary
+         * @description One row of the runs list.
+         */
+        RunSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            state: components["schemas"]["RunState"];
+            /** Title */
+            title: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at?: string | null;
+            summary?: components["schemas"]["RunCounts"] | null;
+        };
+        /** RunSummaryPage */
+        RunSummaryPage: {
+            /** Items */
+            items: components["schemas"]["RunSummary"][];
+            /** Next Cursor */
+            next_cursor: string | null;
         };
         /** Session */
         Session: {
@@ -4959,6 +5418,895 @@ export interface operations {
             };
             /** @description `PRECONDITION_REQUIRED`: the `If-Match` header is missing */
             428: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    runs_list: {
+        parameters: {
+            query?: {
+                /** @description Opaque `next_cursor` from the previous page */
+                cursor?: string | null;
+                limit?: number;
+                state?: components["schemas"]["RunState"] | null;
+            };
+            header?: never;
+            path: {
+                ws_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunSummaryPage"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    runs_create: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description One per user action, reused on retry. A reuse with another body is 409 */
+                "Idempotency-Key": string;
+            };
+            path: {
+                ws_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunFromDraft"] | components["schemas"]["RunFromWorkflow"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    runs_approve: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description One per user action, reused on retry. A reuse with another body is 409 */
+                "Idempotency-Key": string;
+            };
+            path: {
+                ws_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    runs_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ws_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    runs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ws_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    runs_events: {
+        parameters: {
+            query?: {
+                after?: number;
+            };
+            header?: never;
+            path: {
+                ws_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunEvents"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    outputs_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ws_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OutputArtifact"][];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    outputs_preview: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+                status?: ("matched" | "value_diff" | "missing_left" | "missing_right") | null;
+                /** @description Text search in cells */
+                q?: string | null;
+            };
+            header?: never;
+            path: {
+                ws_id: string;
+                run_id: string;
+                artifact_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Preview"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    outputs_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ws_id: string;
+                run_id: string;
+                artifact_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DownloadLink"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `RATE_LIMITED` (see `Retry-After`) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not implemented yet (contract stub) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    outputs_lineage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ws_id: string;
+                run_id: string;
+                artifact_id: string;
+                row: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lineage"];
+                };
+            };
+            /** @description `UNAUTHENTICATED` (no session, or it expired): go to sign-in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description `CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict with the current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Validation failed (`code: VALIDATION_FAILED`, details in `errors`) */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

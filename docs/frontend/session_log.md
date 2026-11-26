@@ -8,9 +8,9 @@ Append a new entry per session (newest first). Record what was done, the command
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | Phase 0, frontend half (F0). P0.1, P0.4 done. P0.5 implemented on branch `feat/p0.5-gen-api`, PR open — not ticked until merged. |
+| Current phase | Phase 0, frontend half (F0), done. P9.1-P9.3 done. P9.4 in progress (PR A #46, PR B #47). P0.5 is all contract sections stubbed on the backend side, waiting for merges. |
 | Last gate passed | Planning approved. G0 agreement confirmed by both sides in issue #1. The formal G0 gate (end of Phase 0) is still open. |
-| Next step | Wait for CI and review on PR #29 (P9.2, theme switching). Then P9.3 (`next-intl`, RTL). |
+| Next step | P9.3 done (#30, #37, #38 merged). Next: P9.4 app shell. |
 | Blockers | none |
 
 ## Recorded versions (P0.1)
@@ -181,9 +181,7 @@ Done:
   - `gitleaks git .` → no leaks found (104 commits scanned).
 - PR #29 opened against `main` (not merged). Diff ≈ 300 lines, under the 400 cap.
 
-Next step: wait for CI and review on PR #29, then P9.3 (`next-intl`, `[locale]` routing, RTL).
-
-Next step: resume §2 contract follow-ups per the Session 4 decision (Khaled's 11 `problem_codes` PR after #16).
+Next step: P9.4 app shell (PRs #46, #47), then F2 (P9.5 UI kit, P9.6 data layer with openapi-fetch).
 
 ---
 
@@ -212,3 +210,14 @@ Evidence (commands and results, branch `frontend/p9-3-b-fonts-messages`):
 Diff: 14 files changed (188 insertions, 61 deletions) + 1 new file (`tests/unit/messages-parity.test.ts`, 37 lines) ≈ 225 insertions / 61 deletions total. No `package.json`/`pnpm-lock.yaml` change — no new dependency.
 
 Next step: PR B opened against `main`, waiting on CI/review. Not merging without Developer B's explicit go. P9.3 itself stays unticked until PR C (the rest of the phase) also lands.
+
+---
+
+## Session 8 — 2026-11-25
+P9.3 complete (all three PRs merged). Ticked in `docs/frontend/plan.md`.
+
+- PR A — #30, merged `41007d5`: `next-intl` `[locale]` routing, `proxy.ts`, `<html lang dir>` set on the server.
+- PR B — #37, merged `7759c31`: Readex Pro via `next/font/google`; hardcoded strings moved into `next-intl` messages.
+- PR C — #38, merged `308f2f9`: the logical-CSS lint rule (`local/no-physical-direction`) banning physical-direction Tailwind classes/style properties, plus a `src/**/*.css` scan test.
+
+Next step: P9.4 app shell.

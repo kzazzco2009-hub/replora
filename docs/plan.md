@@ -99,11 +99,12 @@ Billing and subscriptions, a public API with API keys, SSO/SAML, real-time colla
 - **Work incrementally, ALWAYS.** Small, simple steps. Validate and check each increment before moving on.
 - Mark each step `[x]` only after its tests pass and its evidence (command plus result) is written in `session_log.md`.
 - **A phase is finished only when** all of its steps are `[x]`, every test for that phase in `testing.md` passes, and every security item for that phase in `security.md` is verified.
-- **Phase gate:** at the end of every phase, stop, report the results to the owner, and **ask for permission** before starting the next phase.
+- **Phase gate:** at the end of every phase, stop, report the results to the gate approver, and **ask for permission** before starting the next phase.
 - Before each step, check the **production compatibility checklist** (§4).
 - Record all progress in `session_log.md` (started, finished, blockers, decisions, next step).
-- **Gate approvals (agreed in issue #1):** backend gates are approved by the owner (Developer A), frontend gates by Developer B, and shared gates (0, 17, 18, 19) by both. Review time is 24 h for PRs and 48 h for gates (working days; a "working on it" reply counts).
-- **Gates with two developers working in parallel:** each track (backend phases B*, frontend phases F*) passes its own phase gates independently, but each track still needs the owner's permission before moving to its next phase. Integration milestones (I1–I6) and shared phases (0, 17, 18, 19) need **both** tracks green before the gate.
+- **Owners (2026-11-25):** both developers are co-owners. Owner decisions (for example the `LICENSE`, changes to D1–D14, data retention, and which accounts production uses) need both. In a disagreement, each developer decides within their own track (backend or frontend), and a shared file (root files, `.github/`, `contracts/`, `docs/`) changes only when both agree.
+- **Gate approvals (agreed in issue #1):** backend gates are approved by Developer A, frontend gates by Developer B, and shared gates (0, 17, 18, 19) by both. Review time is 24 h for PRs and 48 h for gates (working days; a "working on it" reply counts).
+- **Gates with two developers working in parallel:** each track (backend phases B*, frontend phases F*) passes its own phase gates independently, but each track still needs its gate approver's permission before moving to its next phase. Integration milestones (I1–I6) and shared phases (0, 17, 18, 19) need **both** tracks green before the gate.
 
 ### MANDATORY code style
 - Do not overengineer. Do not program defensively. Use exception handlers only when needed.
@@ -169,7 +170,7 @@ The same-origin rewrite means cookies are first-party. There are no cross-site c
 
 ## 5. Phases
 
-Legend: `[ ]` todo · `[x]` done (with evidence in session_log) · **Gate** = stop and ask the owner for permission.
+Legend: `[ ]` todo · `[x]` done (with evidence in session_log) · **Gate** = stop and ask the gate approver for permission.
 Sizing: S ≈ ≤ 1 week, M ≈ 1–2 weeks, L ≈ 2–4 weeks for one developer. These are estimates, not commitments. Re-baseline after Phase 3.
 **Realistic schedule (2 developers × ~20 h/week):** the MVP (Phases 0–13) takes about 14–18 weeks. The full scope (Phases 0–19, all 14 formats) realistically takes **9–12 months**. The original v0.6 estimate was 1,800–2,560 engineering hours. The week numbers in the track plans describe the MVP path and are re-baselined at G3.
 
@@ -350,7 +351,7 @@ Goal: frozen domain models that both developers rely on.
 ### Phase 16 — Formats batch C: JPG, PNG, WEBP plus OCR (L, decision gate D6 first)
 - [ ] P16.1 Image adapter (Pillow, 20 MP limit, EXIF stripped on outputs).
 - [ ] P16.2 OCR per D6, ≤ 20 pages per run, Arabic and English.
-- [ ] P16.3 Holdout quality set (AR and EN) with measured accuracy thresholds agreed with the owner.
+- [ ] P16.3 Holdout quality set (AR and EN) with measured accuracy thresholds agreed by both owners.
 - [ ] P16.4 Review UI for low-confidence OCR fields.
 - [ ] Tests T16.* pass · Security S‑43 verified · **Gate G16**
 
@@ -384,7 +385,7 @@ Goal: frozen domain models that both developers rely on.
 - [ ] P19.5 Production observability (structured logs exist from P0.11): error tracking, uptime check, alerts on failed-run rate and 5xx rate, and **cost alerts** for Vercel, Supabase and OpenRouter (NFR‑12).
 - [ ] P19.6 Smoke tests and the E2E suite against the production URL (phone, tablet and laptop projects).
 - [ ] P19.7 Rollback plan tested (instant rollback in Vercel, migration downgrade path).
-- [ ] P19.8 Go-live checklist signed off by the owner.
+- [ ] P19.8 Go-live checklist signed off by both owners.
 - [ ] Tests T19.* pass · Security S‑80…S‑85 verified · **Gate G19 (production release)**
 
 ---

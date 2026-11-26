@@ -76,6 +76,22 @@
       "status": 428,
       "description": "The If-Match header is missing on a PATCH that requires it (client bug)."
     },
+    "DRAFT_INVALID": {
+      "status": 422,
+      "description": "A run can't start from a draft that failed validation. The issues are in `errors`."
+    },
+    "PLAN_HASH_MISMATCH": {
+      "status": 409,
+      "description": "The plan changed since it was shown. Review it again, then approve."
+    },
+    "INVALID_STATE_TRANSITION": {
+      "status": 409,
+      "description": "The action isn't allowed in the run's current state (params.from, params.action)."
+    },
+    "IDEMPOTENCY_KEY_MISMATCH": {
+      "status": 409,
+      "description": "The Idempotency-Key was already used with a different request (client bug)."
+    },
     "INTERNAL_ERROR": {
       "status": 500,
       "description": "Unexpected server error. Show the correlation_id so support can find it."

@@ -1,0 +1,30 @@
+{
+  "ok": {
+    "status": 200,
+    "body": {
+      "otpauth_uri": "otpauth://totp/Replora:salma%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=Replora",
+      "recovery_codes": [
+        "7KQ2-9XMD",
+        "P4TB-6WRE",
+        "H8NC-3VLA",
+        "Z5FJ-2QYU",
+        "M9GS-4KTD",
+        "R3WX-8PNE",
+        "B6LH-5CJQ",
+        "T2VY-7MFA",
+        "E4QK-9ZRS",
+        "N7DP-3GWB"
+      ]
+    }
+  },
+  "mfa_already_enabled": {
+    "status": 409,
+    "body": {
+      "type": "about:blank",
+      "title": "Conflict",
+      "status": 409,
+      "code": "MFA_ALREADY_ENABLED",
+      "correlation_id": "01937a5e-7f00-7000-8000-00000000c0de"
+    }
+  }
+}
