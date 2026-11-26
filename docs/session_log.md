@@ -46,7 +46,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
 | 1 Contracts | 7/7 | 6/6 | 2/2 (S‑11 re-checked at G3) | ☑ G1 2026-11-26 (Developer A; stack merging) |
-| 2 Validator | 1/6 | 1/8 | 0/1 | ☐ |
+| 2 Validator | 3/6 | 5/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
 | 5 Auth | 0/11 | 0/15 | 0/10 | ☐ |
@@ -198,7 +198,25 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **New `contracts/error-codes.json` → `workflow_codes`** (the validator's `Issue` codes), mirrored by `app/core/issue_codes.py` `IssueCode`, with a parity test. It starts with `OP_UNKNOWN` and `OP_VERSION_INVALID`; each Phase 2 step adds its own. The frontend's #67 parity test reads the other sections by name, so it is unaffected.
 - **TDD:** `test_registry.py` was red first (no module), then **16 passed**. The parity tests were red (2 failed) until the section was added. **The tests bite:** without the duplicate guard 1 fails; accepting any array `items` fails 1.
 - Checks: ruff clean (65 files), **1120 passed**, no drift.
-- **P2.1 and T2.1 ticked.**
+- **P2.1 and T2.1 ticked.** Opened as **#72** (base #71).
+
+**P2.2 + P2.5: `app/core/validator/`** (branch `feat/p2.2-structural-validator`, stacked on #72):
+- `validate(definition, registry) -> ValidationReport`. **It never raises.** `Graph.build` indexes the nodes and resolves each operation. `structure.check` covers the edge and IO references, port bindings, unbound required inputs and cycles.
+- Codes (in `workflow_codes` and `IssueCode`):
+  - `NODE_ID_DUPLICATE` (the second node, `nodes/i/id`);
+  - `OP_UNKNOWN` / `OP_VERSION_INVALID` (`nodes/i/operation`, with `params.known`; versions ≤ 0 too: P2.5);
+  - `NODE_UNKNOWN` (`…/node_id`, `params.node_id`);
+  - `PORT_UNKNOWN` (`…/port`, `params.port` and `params.direction`, so an edge *from* an input port is caught);
+  - `EDGE_DUPLICATE` (the second edge);
+  - `PORT_BOUND_TWICE` (an input fed twice; one output may feed many inputs);
+  - `PORT_UNBOUND` (a required input with no edge and no workflow input, `nodes/i`, `params.port`);
+  - `DAG_CYCLE` (`params.nodes`: only the nodes on the loop).
+- **Cycles:** Kahn's algorithm forwards, then on the reversed edges of what is left. That drops nodes downstream or upstream of a loop, so only the loop is named. It's linear in nodes plus edges, so an oversized definition can't make the validator slow (the limits come in P2.4).
+- A node whose operation didn't resolve gets no port findings, so one mistake gives one issue.
+- **TDD:** `test_validator_structure.py` was red first (no module), then **22 passed**. They include T2.2 (self-loop, 2-cycle, a 6-cycle with nodes before and after it), T2.4 and T2.7, and three hypothesis tests: **T2.8** random DAGs validate and one back-edge always gives `DAG_CYCLE` (200 examples each), and random malformed definitions never raise (300). One real bug was found on the way: the `issue()` helper's `node_id` parameter swallowed `params.node_id`, and it was renamed.
+- **The tests bite:** skipping the reverse peel fails 1; dropping the bound-twice rule fails 1; ignoring self-loops fails 1.
+- Checks: ruff clean (70 files), **1145 passed**, no drift.
+- **P2.2, P2.5, T2.2, T2.4, T2.7 and T2.8 ticked.**
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.

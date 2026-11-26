@@ -211,6 +211,27 @@
     },
     "OP_VERSION_INVALID": {
       "description": "A node pins a version of the operation that doesn't exist (params.operation, params.version, params.known)."
+    },
+    "NODE_ID_DUPLICATE": {
+      "description": "Two nodes have the same id. The second one is reported (node_id)."
+    },
+    "NODE_UNKNOWN": {
+      "description": "An edge or workflow input/output points at a node that doesn't exist (params.node_id)."
+    },
+    "PORT_UNKNOWN": {
+      "description": "A port name doesn't exist on that node's operation (params.port, params.direction: input or output)."
+    },
+    "PORT_UNBOUND": {
+      "description": "A required input port of a node is fed by no edge and no workflow input (node_id, params.port)."
+    },
+    "PORT_BOUND_TWICE": {
+      "description": "An input port is fed more than once. The second binding is reported (node_id, params.port)."
+    },
+    "EDGE_DUPLICATE": {
+      "description": "The same edge appears twice. The second one is reported."
+    },
+    "DAG_CYCLE": {
+      "description": "The steps form a loop, so the workflow can never finish (params.nodes: the nodes on the loop)."
     }
   }
 }
