@@ -21,14 +21,28 @@ const csrfMiddleware: Middleware = {
 
 /**
  * Every non-2xx response (except 304, which isn't an error — api_contract.md
- * §1) is `application/problem+json`. Throwing here means callers get either
- * typed data or a thrown ApiError, never a `{data, error}` pair to remember
- * to check. `problem.detail` is never read for display anywhere.
+ * §1) is meant to be `application/problem+json`, but one that never
+ * reached the backend (a 502/504 from an infra proxy, an empty body) might
+ * not be. Falling back to a minimal Problem using INTERNAL_ERROR — the
+ * contract's own catch-all code (error-codes.json), not an invented one —
+ * means every caller gets an ApiError either way, never a raw JSON parse
+ * error. `problem.detail` is never read for display anywhere.
  */
 const errorMiddleware: Middleware = {
   async onResponse({ response }) {
     if (response.ok || response.status === 304) return;
-    const problem = (await response.json()) as Problem;
+
+    let problem: Problem;
+    try {
+      problem = (await response.json()) as Problem;
+    } catch {
+      problem = {
+        type: "about:blank",
+        title: response.statusText || "Unexpected error",
+        status: response.status,
+        code: "INTERNAL_ERROR",
+      };
+    }
     throw new ApiError(problem);
   },
 };

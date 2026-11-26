@@ -94,6 +94,75 @@ describe("error passthrough", () => {
   });
 });
 
+describe("error passthrough for a non-JSON error response", () => {
+  it("throws ApiError for an HTML 502 (e.g. from an infra proxy)", async () => {
+    setCsrfCookie("test-token");
+    server.use(
+      http.post(
+        "/api/v1/auth/login",
+        () =>
+          new HttpResponse("<html><body>Bad Gateway</body></html>", {
+            status: 502,
+            headers: { "content-type": "text/html" },
+          }),
+      ),
+    );
+
+    let caught: unknown;
+    try {
+      await client.POST("/api/v1/auth/login", {
+        body: { email: "x", password: "y" },
+      });
+    } catch (error) {
+      caught = error;
+    }
+
+    if (!isApiError(caught)) throw new Error("expected an ApiError");
+    expect(caught.problem.status).toBe(502);
+    expect(caught.problem.code).toBe("INTERNAL_ERROR");
+  });
+
+  it("throws ApiError for an empty 500 body", async () => {
+    setCsrfCookie("test-token");
+    server.use(
+      http.post(
+        "/api/v1/auth/login",
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+
+    let caught: unknown;
+    try {
+      await client.POST("/api/v1/auth/login", {
+        body: { email: "x", password: "y" },
+      });
+    } catch (error) {
+      caught = error;
+    }
+
+    if (!isApiError(caught)) throw new Error("expected an ApiError");
+    expect(caught.problem.status).toBe(500);
+    expect(caught.problem.code).toBe("INTERNAL_ERROR");
+  });
+
+  it("still parses a normal problem+json error response correctly", async () => {
+    setCsrfCookie("test-token");
+    setScenario("auth_login", "invalid_credentials");
+
+    let caught: unknown;
+    try {
+      await client.POST("/api/v1/auth/login", {
+        body: { email: "x", password: "y" },
+      });
+    } catch (error) {
+      caught = error;
+    }
+
+    if (!isApiError(caught)) throw new Error("expected an ApiError");
+    expect(caught.problem.code).toBe("INVALID_CREDENTIALS");
+  });
+});
+
 describe("useIdempotencyKey", () => {
   it("returns a stable UUID across re-renders, and a new one after reset", () => {
     const { result, rerender } = renderHook(() => useIdempotencyKey());
