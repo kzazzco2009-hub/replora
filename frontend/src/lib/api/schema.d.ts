@@ -2205,16 +2205,20 @@ export interface components {
         /**
          * WorkflowVersionCreate
          * @description A new version from a column mapping; it needs a new approval (P13.3).
+         *
+         *     An input left out of `mapping` keeps its columns. An unknown input or column is a 422.
          */
         WorkflowVersionCreate: {
             /** Base Version */
             base_version: number;
             /**
              * Mapping
-             * @description Expected column → column found in the new files
+             * @description Per input (as in `InputDrift.input`): expected column → column found
              */
             mapping: {
-                [key: string]: string;
+                [key: string]: {
+                    [key: string]: string;
+                };
             };
         };
         /** WorkflowVersionInfo */

@@ -76,7 +76,12 @@ class ReplayCheck(ApiModel):
 
 
 class WorkflowVersionCreate(ApiModel):
-    """A new version from a column mapping; it needs a new approval (P13.3)."""
+    """A new version from a column mapping; it needs a new approval (P13.3).
+
+    An input left out of `mapping` keeps its columns. An unknown input or column is a 422.
+    """
 
     base_version: Annotated[int, Field(ge=1)]
-    mapping: dict[str, str] = Field(description="Expected column → column found in the new files")
+    mapping: dict[str, dict[str, str]] = Field(
+        description="Per input (as in `InputDrift.input`): expected column → column found"
+    )

@@ -9065,11 +9065,14 @@
           },
           "mapping": {
             "additionalProperties": {
-              "type": "string"
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
             },
             "type": "object",
             "title": "Mapping",
-            "description": "Expected column → column found in the new files"
+            "description": "Per input (as in `InputDrift.input`): expected column → column found"
           }
         },
         "additionalProperties": false,
@@ -9079,7 +9082,7 @@
           "mapping"
         ],
         "title": "WorkflowVersionCreate",
-        "description": "A new version from a column mapping; it needs a new approval (P13.3)."
+        "description": "A new version from a column mapping; it needs a new approval (P13.3).\n\nAn input left out of `mapping` keeps its columns. An unknown input or column is a 422."
       },
       "WorkflowVersionInfo": {
         "properties": {

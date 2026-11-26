@@ -9,7 +9,7 @@ WORKFLOW = f"{WORKFLOWS}/{{workflow_id}}"
 PROBLEM = {"application/problem+json": {"schema": {"$ref": "#/components/schemas/ProblemDetails"}}}
 CREATE = {"name": "Monthly bank reconciliation", "draft_id": UUID}
 REPLAY = {"file_ids": [UUID]}
-NEW_VERSION = {"base_version": 1, "mapping": {"Amount": "Total"}}
+NEW_VERSION = {"base_version": 1, "mapping": {"bank": {"Amount": "Total"}}}
 
 # (method, OpenAPI path, success status, sample valid body, operationId) — api_contract.md §8.
 ENDPOINTS = [
@@ -73,6 +73,24 @@ def test_body_limits(client, path, body, error_path, code):
     assert [(error["path"], error["code"]) for error in response.json()["errors"]] == [
         (error_path, code)
     ]
+
+
+def test_mapping_is_per_input(schemas):
+    mapping = schemas["WorkflowVersionCreate"]["properties"]["mapping"]
+
+    assert mapping["type"] == "object"
+    assert mapping["additionalProperties"] == {
+        "type": "object",
+        "additionalProperties": {"type": "string"},
+    }
+
+
+def test_a_flat_mapping_is_rejected(client):
+    url = f"{WORKFLOW}/versions".format(**IDS)
+    response = client.post(url, json={"base_version": 1, "mapping": {"Amount": "Total"}})
+
+    assert response.status_code == 422
+    assert [error["path"] for error in response.json()["errors"]] == ["body.mapping.Amount"]
 
 
 def test_version_in_the_path_starts_at_1(client):
