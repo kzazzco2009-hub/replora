@@ -200,7 +200,7 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 | **T0.5, re-proven** | a fake `sk-or-v1-<64 hex>` in an empty temp dir, `gitleaks dir --config .gitleaks.toml` | `leaks found: 1` (`openrouter-api-key`), exit 1, probe removed |
 | **T0.3 lint gate, re-proven locally** | a probe file with `className="ml-2"`, then `eslint` | `local/no-physical-direction` error, exit 1, probe removed |
 
-**G0 gate report (posted on #1):**
+**G0 gate report (posted on #1, 7189613742, with the G0 request to both developers; PR #50 opened, stacked on #43):**
 
 | Item | State | Evidence |
 |---|---|---|
