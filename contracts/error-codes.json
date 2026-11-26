@@ -232,6 +232,12 @@
     },
     "DAG_CYCLE": {
       "description": "The steps form a loop, so the workflow can never finish (params.nodes: the nodes on the loop)."
+    },
+    "PORT_TYPE_MISMATCH": {
+      "description": "A port receives a different artifact type than it accepts. There is no implicit conversion (node_id, params.port, params.expected, params.got)."
+    },
+    "PARAM_INVALID": {
+      "description": "A node parameter breaks the operation's parameter schema (node_id, params.field, params.rule: the JSON Schema keyword, such as required, type, enum or pattern)."
     }
   }
 }
