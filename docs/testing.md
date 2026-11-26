@@ -84,7 +84,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [x] T3.5 Idempotency: re-running the same node with the same inputs does not execute it again (spy counter = 1).
 - [x] T3.6 Cancel between nodes gives CANCELLED. No node starts after CANCEL_REQUESTED.
 - [x] T3.7 Approval timeout gives EXPIRED.
-- [ ] T3.8 Replay with pinned versions produces identical output hashes.
+- [x] T3.8 Replay with pinned versions produces identical output hashes.
 
 **Integration (fake adapters)**
 - [ ] T3.9 Fake ZIP → fake CSV and JSON branches → compare → report runs end to end and matches the expected output.

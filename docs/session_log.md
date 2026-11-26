@@ -318,6 +318,16 @@ PR **#80** (stacked on #79).
 - Mutation checks: the between-node check, the queued-cancel check, `>` vs `>=`, the state guard, and recording `state_since` each fail 1–11 tests.
 - `uv run pytest -q`: **1392 passed**. ruff is clean.
 
+PR **#81** (stacked on #80). Answered the frontend's 401 note on #76 (7203186020): refresh is a CSRF-protected POST, and refreshes must be single-flight because the token rotates.
+
+**P3.7, replay** (`app/core/engine/replay.py`, `tests/unit/test_engine_replay.py`; collection failed first).
+- `start_replay(definition, inputs, now)` takes a **saved** version only (otherwise `ValueError`) and the new files, each a `ReplayInput(ref, columns)`.
+- Each file is checked against its input contract. A different artifact type gives `INPUT_TYPE_MISMATCH`, and missing expected columns give `INPUT_COLUMNS_MISSING`; extra columns are fine. A mismatch gives NEEDS_REVIEW with the issues. Otherwise the run is AWAITING_APPROVAL and still needs its own approval (S‑11).
+- Two new `run_codes`, mirrored in `RunIssueCode`.
+- **T3.8:** two replays of the same pinned version on the same content give identical output hashes.
+- Mutation checks: each of the five rules fails 1–3 tests.
+- `uv run pytest -q`: **1398 passed**. ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 
