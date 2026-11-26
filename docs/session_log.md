@@ -44,7 +44,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 **Both owners:** decide on a `LICENSE`. |
 | Next step | 1) **#41 and #42 changes are done (Session 15).** They wait on the frontend's re-review. #41 is now `7790f9e` and #42 is `f125e7c` (rebased on it). Both are CI green.
 
-2) **Stack heads:** #40 `6dcabef` (approved), #41 `7790f9e`, #42 `f125e7c`. After #40 merges, retarget #41 to `main` and rebase with `--onto origin/main 6dcabef`. Then rebase #42 with `--onto <new #41 head> 7790f9e`.
+2) **Stack: #40 merged (`d45be72`, Session 15).** #41 now targets `main`, rebased to **`8f0a159`** (range-diff `=`, CI green), and waits on the frontend's re-approval (asked on #41, 7186862641). #42 is rebased on it, **`1a9e27b`** (range-diff `=`). After #41 merges: `gh pr edit 42 --base main`, then `git rebase --onto origin/main 8f0a159`, regenerate, range-diff, push and ask for a re-approval. Every rebase push dismisses the approval (`dismiss_stale_reviews_on_push`).
 
 3) **#40 follow-ups (before G8, answered on #1 7186123958):** `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED` (P1.5). `RunEvent.payload` becomes a discriminated union on `type`.
 
