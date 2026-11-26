@@ -7,7 +7,17 @@ function readCsrfCookie(): string | undefined {
     ?.slice(COOKIE_NAME.length + 1);
 }
 
-let inFlight: Promise<string> | null = null;
+function fetchCsrfToken(): Promise<string> {
+  return fetch("/api/v1/auth/csrf", { credentials: "same-origin" }).then(() => {
+    const token = readCsrfCookie();
+    if (!token) {
+      throw new Error("GET /auth/csrf did not set the replora_csrf cookie");
+    }
+    return token;
+  });
+}
+
+let ensureInFlight: Promise<string> | null = null;
 
 /**
  * Returns the readable `replora_csrf` cookie's value, fetching it first
@@ -20,17 +30,24 @@ export async function ensureCsrfToken(): Promise<string> {
   const existing = readCsrfCookie();
   if (existing) return existing;
 
-  inFlight ??= fetch("/api/v1/auth/csrf", { credentials: "same-origin" })
-    .then(() => {
-      const token = readCsrfCookie();
-      if (!token) {
-        throw new Error("GET /auth/csrf did not set the replora_csrf cookie");
-      }
-      return token;
-    })
-    .finally(() => {
-      inFlight = null;
-    });
+  ensureInFlight ??= fetchCsrfToken().finally(() => {
+    ensureInFlight = null;
+  });
 
-  return inFlight;
+  return ensureInFlight;
+}
+
+let refreshInFlight: Promise<string> | null = null;
+
+/**
+ * Always re-fetches `GET /auth/csrf`, bypassing the cached cookie, for
+ * recovery after a 403 `CSRF_FAILED`. Single-flight like `ensureCsrfToken`,
+ * but its own flight: this is a deliberate refresh, not a bootstrap.
+ */
+export async function refreshCsrfToken(): Promise<string> {
+  refreshInFlight ??= fetchCsrfToken().finally(() => {
+    refreshInFlight = null;
+  });
+
+  return refreshInFlight;
 }
