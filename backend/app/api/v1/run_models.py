@@ -1,7 +1,6 @@
 """Request and response bodies for the §7 runs lifecycle (docs/api_contract.md)."""
 
 from datetime import datetime
-from enum import StrEnum
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
@@ -9,23 +8,21 @@ from pydantic import Field
 
 from app.api.models import ApiModel, Page
 from app.api.v1.draft_models import Issue, WorkflowDefinition
+from app.core.run_state import RunState
 
-
-class RunState(StrEnum):
-    """The 12 run states. The allowed transitions are the P1.5 table, locked at G1."""
-
-    DRAFT = "DRAFT"
-    VALIDATED = "VALIDATED"
-    AWAITING_APPROVAL = "AWAITING_APPROVAL"
-    QUEUED = "QUEUED"
-    RUNNING = "RUNNING"
-    NEEDS_REVIEW = "NEEDS_REVIEW"
-    SUCCEEDED = "SUCCEEDED"
-    PARTIAL = "PARTIAL"
-    FAILED = "FAILED"
-    CANCEL_REQUESTED = "CANCEL_REQUESTED"
-    CANCELLED = "CANCELLED"
-    EXPIRED = "EXPIRED"
+__all__ = [
+    "ApproveRequest",
+    "Run",
+    "RunCounts",
+    "RunEvent",
+    "RunEvents",
+    "RunFromDraft",
+    "RunFromWorkflow",
+    "RunNode",
+    "RunState",
+    "RunSummary",
+    "RunSummaryPage",
+]
 
 
 PlanHash = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$", description="Lowercase hex SHA-256")]
