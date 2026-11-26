@@ -15,7 +15,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 **Phase 1:** 7/7 steps, T1.1–T1.6, S‑10, S‑11 (Phase 1 part; T3.1 at G3).
 **Phase 2:** 6/6 steps, T2.1–T2.8, S‑12. End-of-phase run on the top of the stack: 1196 backend + 186 frontend tests, no drift, no leaks.
 
-**Open backend stack (merge in this order, each rebased onto `main` after the one before; don't merge #68–#71 before the frontend reviews them):** #68 P1.5 → #69 P1.5b (contract) → #70 P1.6 (contract) → #71 P1.7/S‑10/G1 → #72 P2.1 → #73 P2.2+P2.5 → #74 P2.3 → `feat/p2.4-validator-limits` (P2.4, P2.6, G2 record).
+**Merged:** #68 P1.5 (`1eb5085`). **Open backend stack (merge in order; after each merge, rebase the next onto `main`, show the range-diff and ping the frontend to re-approve):** #69 P1.5b (contract; rebased, head `06c1568`, waiting for re-approval) → #70 P1.6 (contract) → #71 P1.7/S‑10/G1 → #72 P2.1 → #73 P2.2+P2.5 → #74 P2.3 → `feat/p2.4-validator-limits` (P2.4, P2.6, G2 record).
 
 **Frontend PRs:** #63 re-approved at `e5e5b27`; #66 has a change request (RTL numeric alignment), a fix is coming. |
 | Last gate passed | **G1** (2026-11-26, Developer A, `decisions.md`). **G2 is ready and awaiting Developer A.** |
@@ -250,6 +250,8 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 | frontend lint · format:check · typecheck · test | clean · clean · clean · **186 passed** (on this stack's base; the frontend's newer merges are on `main`) |
 | `pnpm audit --audit-level=high` | no known vulnerabilities |
 | `gitleaks git .` | no leaks found |
+
+**Merges after the frontend's review (#1, 7201202275):** they approved #68–#71 at their heads and asked for in-order merges with a ping after each rebase (a push dismisses approvals). **#68 merged** (`1eb5085`). **#69** was rebased with `git rebase --onto origin/main f552b36` (range-diff `a3bf12e = 06c1568`) and retargeted to `main`. On the rebased branch: 795 passed, no drift, and the frontend typecheck plus 367 tests pass with their merged PRs. Pinged on #69 (7201289845). **#66** re-approved at `f80642e` (the RTL fix is right).
 
 **Gate G2: Phase 2 is complete and waiting for Developer A's approval.** Developer A's instruction was to finish Phase 2, not to go past it. So Phase 3 doesn't start until G2 is approved.
 
