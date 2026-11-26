@@ -23,7 +23,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Waiting on | **Developer A:** **approve G3** (or not), then Phase 4 can start.
 
 **Frontend:** re-approve #70 so the stack can keep merging; review the Phase 2 and 3 PRs (the shared files are `error-codes.json` → `run_codes` and `planner_codes`, `.env.example`); add the i18n keys `templates.{reconcile,merge}.{title,description}` and `plans.{reconcile,merge}`. |
-| Next step | 0) **Resume:** Phase 4 is at P4.6 (done, top of the stack). Next: T4.8 job claim, P4.7 Postgres CI, then G4 and Phase 5.
+| Next step | 0) **Resume:** Phase 4 is done and G4 is recorded (#94). Next: the contract PR for the frontend requests, then **Phase 5** (P5.1 onward). G5 stops for Developer A, and it is also I1 with the frontend.
 1) **Phase 4** (persistence: SQLAlchemy, Alembic, workspace-scoped repositories; P4.6 persists runs, run_nodes, artifacts and the idempotency ledger).
 2) Merge the stack in order as the frontend approves it (recipe in the notes below and in memory).
 3) Phase 7 registers the real operations under the ids the templates use: `parse_csv`, `parse_json`, `compare`, `report_csv`, `append_rows`, `export_csv`.
@@ -52,7 +52,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 1 Contracts | 7/7 | 6/6 | 2/2 (S‑11 re-checked at G3) | ☑ G1 2026-11-26 (Developer A; stack merging) |
 | 2 Validator | 6/6 | 8/8 | 1/1 | ☑ G2 2026-11-26 (Developer A; stack merging) |
 | 3 Engine | 9/9 | 11/11 | 1/1 (S‑13 timeouts at T17.6) | ☑ G3 2026-11-26 (Developer A; stack merging) |
-| 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
+| 4 Persistence | 7/7 | 8/8 | 2/2 | ☑ G4 2026-11-27 (pre-approved by Developer A; stack merging) |
 | 5 Auth | 0/11 | 0/15 | 0/10 | ☐ |
 | 6 Files | 0/7 | 0/10 | 0/8 | ☐ |
 | 7 First pipeline | 0/6 | 0/12 | 0/1 | ☐ |
@@ -458,7 +458,13 @@ PR **#91** (stacked on #90).
   - `claim` leases the oldest due job in one atomic `UPDATE … WHERE id = (SELECT … LIMIT 1) RETURNING id`, with `FOR UPDATE SKIP LOCKED` on Postgres. An expired lease can be claimed again.
   - Two threads draining 40 jobs never share one. A naive select-then-update version made 65 claims for 40 jobs in 5 of 5 runs, so the test catches real double claims.
   - `uv run pytest -q`: **1667 passed**.
-**Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
+PR **#93** (stacked on #91).
+
+**P4.7, the Postgres 17 CI job** (#94). The `backend-postgres` job runs `uv run pytest` against a `postgres:17` service through `TEST_DATABASE_URL`. A shared `db_url` fixture gives every database test a fresh SQLite file, or the CI Postgres with its schema reset. The first run failed only on `test_repo_rules`, which requires every CI job to be a required check, so `.github/rulesets/main.json` now lists the new job. The admin applies it **after** #94 merges. **CI run 45909868665: all 5 jobs green, and 1667 tests pass on Postgres.**
+
+**Gate G4 passed** (pre-approved by Developer A, recorded in `decisions.md`). Phase 4: 7/7 steps, T4.1–T4.8, S‑14 and S‑15. **Next: the small contract PR** (`Limits.max_depth`, `max_fan_in`, `max_fan_out` and `Run.approval_expires_at`), **then Phase 5.**
+
+**Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
