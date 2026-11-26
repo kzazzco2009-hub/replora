@@ -447,6 +447,17 @@ PR **#90** (stacked on #89).
 - Mutation checks: the resume path, both checkpoints, and the input-hash check each fail a test.
 - `uv run pytest -q`: **1660 passed**.
 
+PR **#91** (stacked on #90).
+
+## Session 17 — 2026-11-27: the stack starts merging, T4.8
+- The frontend approved the whole stack up to #85 (#1, 7203581422 and 7203609353). **#70 merged** (`c5b735d`). I rebased #71–#91 locally in one pass (`git rebase --onto origin/main b1d1ae2 --update-refs`): all 21 commits are `=` in the range-diff. On the rebased top: 1660 backend and 396 frontend tests pass, no drift. Only **#71** was pushed (`e828fa5`) and pinged. The others are rebased one at a time, because every squash merge forces the next rebase (adjacent log and plan edits).
+- I offered the frontend **option B**: squash-merge an approved contiguous range through its top PR (#1, 7205287647). A stays the default until they agree.
+- **Frontend requests (additive contract):** `Limits.max_depth`, `max_fan_in` and `max_fan_out`, and `Run.approval_expires_at`. I promised one small contract PR on top of the stack.
+- Reviewed and approved the frontend's **#92** (refresh and CSRF retry). The Phase 5 promises are recorded there: `GET /auth/csrf` always sets a fresh cookie, and a reused refresh token gives 401 `UNAUTHENTICATED` and revokes the family.
+- **T4.8 and the rest of T4.7** (`app/db/jobs.py`, `tests/integration/test_jobs.py`; collection failed first):
+  - `claim` leases the oldest due job in one atomic `UPDATE … WHERE id = (SELECT … LIMIT 1) RETURNING id`, with `FOR UPDATE SKIP LOCKED` on Postgres. An expired lease can be claimed again.
+  - Two threads draining 40 jobs never share one. A naive select-then-update version made 65 claims for 40 jobs in 5 of 5 runs, so the test catches real double claims.
+  - `uv run pytest -q`: **1667 passed**.
 **Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
