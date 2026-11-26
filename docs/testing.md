@@ -55,8 +55,8 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 **Unit**
 - [ ] T1.1 Every model round-trips: `model_validate(model_dump())` is identical, for all golden fixtures.
 - [ ] T1.2 Extra fields are rejected (`extra="forbid"`) on every model.
-- [ ] T1.3 `plan_hash` is identical for semantically equal definitions with different key order or whitespace (property test with hypothesis).
-- [ ] T1.4 `plan_hash` changes when any node param, edge or version changes (property test).
+- [x] T1.3 `plan_hash` is identical for semantically equal definitions with different key order or whitespace (property test with hypothesis).
+- [x] T1.4 `plan_hash` changes when any node param, edge or version changes (property test).
 - [ ] T1.5 The `RunState` transition table rejects every pair not listed (exhaustive test over all 12×12 pairs).
 - [ ] T1.6 The exported JSON Schemas validate the valid fixtures and reject the invalid fixtures.
 
