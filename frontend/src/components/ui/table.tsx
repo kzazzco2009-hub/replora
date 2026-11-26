@@ -31,6 +31,10 @@ const ALIGN_CLASS: Record<"start" | "end", string> = {
   end: "text-end",
 };
 
+function columnAlign(column: TableColumn): "start" | "end" {
+  return column.align ?? (column.numeric ? "end" : "start");
+}
+
 /**
  * Presentational only: cells, the empty state and the loading state are
  * all caller-supplied nodes, so this never depends on StatusChip, Skeleton
@@ -52,10 +56,10 @@ export function Table<K extends string = string>({
       role="region"
       aria-labelledby={captionId}
       tabIndex={0}
+      dir={dir}
       className="overflow-x-auto rounded-control border border-line"
     >
       <table
-        dir={dir}
         aria-busy={loading ? true : undefined}
         className="w-full border-collapse text-sm"
       >
@@ -71,7 +75,7 @@ export function Table<K extends string = string>({
               <th
                 key={column.key}
                 scope="col"
-                className={`border-b border-line px-3 py-2 font-medium text-ink-muted ${ALIGN_CLASS[column.align ?? "start"]}`}
+                className={`border-b border-line px-3 py-2 font-medium text-ink-muted ${ALIGN_CLASS[columnAlign(column)]}`}
               >
                 {column.header}
               </th>
@@ -95,9 +99,7 @@ export function Table<K extends string = string>({
             rows.map((row) => (
               <tr key={row.id}>
                 {columns.map((column) => {
-                  const align =
-                    column.align ?? (column.numeric ? "end" : "start");
-                  const className = `border-b border-line px-3 py-2 ${ALIGN_CLASS[align]}`;
+                  const className = `border-b border-line px-3 py-2 ${ALIGN_CLASS[columnAlign(column)]}`;
                   const content = row.cells[column.key];
                   return column.rowHeader ? (
                     <th key={column.key} scope="row" className={className}>

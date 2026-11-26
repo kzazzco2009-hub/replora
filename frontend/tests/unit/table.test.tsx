@@ -58,6 +58,28 @@ describe.each(["ltr", "rtl"] as const)("Table (dir=%s)", (dir) => {
     expect(screen.getByText("120.00").getAttribute("dir")).toBe("ltr");
   });
 
+  it("gives a numeric column's header the same alignment class as its cells", () => {
+    render(
+      <Table caption="Invoices" columns={COLUMNS} rows={ROWS} dir={dir} />,
+    );
+
+    const header = screen.getByRole("columnheader", { name: "Amount" });
+    const cell = screen.getByText("120.00");
+    expect(header.className).toContain("text-end");
+    expect(cell.className).toContain("text-end");
+  });
+
+  it("puts dir on the scroll container, not the table", () => {
+    render(
+      <Table caption="Invoices" columns={COLUMNS} rows={ROWS} dir={dir} />,
+    );
+
+    expect(
+      screen.getByRole("region", { name: "Invoices" }).getAttribute("dir"),
+    ).toBe(dir);
+    expect(screen.getByRole("table").getAttribute("dir")).toBeNull();
+  });
+
   it("shows the empty state only when there are no rows and it is not loading", () => {
     render(
       <Table
