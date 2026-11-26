@@ -31,7 +31,7 @@ def test_a_failed_optional_branch_gives_partial_with_a_warning():
     result = run_it(diamond(), spy)
     assert result.run.state is RunState.PARTIAL
     assert summary(result) == [(R.NODE_FAILED, "b", "nodes/2")]
-    assert result.issues[0].params == {"error": "CSV_UNREADABLE", "row": 3}
+    assert result.issues[0].params == {"error": "CSV_UNREADABLE", "attempts": 1, "row": 3}
     assert spy.calls == ["a", "c", "b", "d"]
     assert "result" in result.outputs
 
