@@ -277,5 +277,19 @@
     "INPUT_COLUMNS_MISSING": {
       "description": "Replay: a new file lacks columns the workflow version expects, so the run stops as NEEDS_REVIEW (path inputs/<i>, params.input, params.missing). Extra columns are fine."
     }
+  },
+  "planner_codes": {
+    "KEY_NOT_FOUND": {
+      "description": "Draft warning: no column is in both files and unique in both, so the key is left for the user to pick (path nodes/<i>/params/key)."
+    },
+    "KEY_AMBIGUOUS": {
+      "description": "Draft warning: several columns could be the key, so it is left for the user to pick (path nodes/<i>/params/key, params.candidates)."
+    },
+    "VALUE_NOT_FOUND": {
+      "description": "Draft warning: no numeric column is in both files, so the value to compare is left for the user to pick (path nodes/<i>/params/value)."
+    },
+    "VALUE_AMBIGUOUS": {
+      "description": "Draft warning: several numeric columns could be the value, so it is left for the user to pick (path nodes/<i>/params/value, params.candidates)."
+    }
   }
 }

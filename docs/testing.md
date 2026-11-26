@@ -89,7 +89,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 **Integration (fake adapters)**
 - [x] T3.9 Fake ZIP → fake CSV and JSON branches → compare → report runs end to end and matches the expected output.
 - [x] T3.10 Retry, idempotency, cancel, failure and replay scenarios (original S1.4) all pass.
-- [ ] T3.11 TemplatePlanner:
+- [x] T3.11 TemplatePlanner:
   - the "reconcile" template on the acceptance files picks `order_id` as the key and `amount` as the value;
   - with no shared key column it returns a draft with a `KEY_NOT_FOUND` warning (never a guess);
   - the output is deterministic (same input gives the same plan_hash);
