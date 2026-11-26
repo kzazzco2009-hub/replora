@@ -8,20 +8,22 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 1 — Core contracts (B1), Session 15.** G0 passed on 2026-11-26 (both developers, #51 `a1a7bb3`). `main` is at **`a1a7bb3`**, CI green. Developer A is the gate approver for G1.
+| Current phase | **Phase 1 — Core contracts (B1), Session 15.** G0 passed on 2026-11-26 (both developers, #51 `a1a7bb3`). `main` is at **`8cf1c1b`** (#52, P1.1), CI green. Developer A is the gate approver for G1.
 
 **Phase 0:** done. 11/11 steps, T0.1–T0.7 and S‑01…S‑05 re-run on `main` `8e8b24b` (Session 15 log).
 
-**Phase 1 steps:** 1/7. **P1.1** is done in the open PR `feat/p1.1-core-contracts`.
+**Phase 1 steps:** 1/7. **P1.1** is merged (#52, `8cf1c1b`).
 
-**Open PRs:** `feat/p1.1-core-contracts` (P1.1). The frontend's #49 is merged (`bc2c173`). |
+**Open PRs:** **#55** `chore/license` (the `LICENSE`, waiting on the frontend), and the frontend's **#54** (Toast, waiting on the backend review). The frontend's #49 (`bc2c173`) and #53 (`d5bfee2`) are merged. |
 | Last gate passed | **G0** (2026-11-26, both developers, #1). Before it: planning approved (plan v1.1, D1–D14). |
-| Waiting on | **Frontend:** review the P1.1 PR. Their own docs PR ticks P9.4 and their F0 gate line (`docs/frontend/plan.md:107`).
+| Waiting on | **Frontend:** approve #55 (`LICENSE`). Their own docs PR ticks P9.4 and their F0 gate line (`docs/frontend/plan.md:107`). Delete their 20 merged branches, turn on "Automatically delete head branches", and say whether to close #1 (all asked on #55, 7191219916).
 
 **Developer A (backend):** `pre-commit install` on the **other machine** too (done on this one, Session 15). Check that `git config --global user.email` is the `noreply` address there as well.
 
-**Both owners:** decide on a `LICENSE`. |
-| Next step | 1) **Merge the P1.1 PR** after the frontend approves it. Then **P1.2**: `Node`, `Edge` and `WorkflowDefinition` in `app/core/` on `ContractModel` (frozen, `extra="forbid"`). One small PR per step.
+**Developer A:** review #54 (Toast).
+
+**Both owners:** `LICENSE` = proprietary, "All rights reserved" (Developer A chose it on 2026-11-26; #55 needs the frontend's approval). |
+| Next step | 1) **P1.2**: `Node`, `Edge` and `WorkflowDefinition` in `app/core/` on `ContractModel` (frozen, `extra="forbid"`). One small PR per step. Before every push to a PR, check its reviews, because a push dismisses an approval.
 
 2) **#40 follow-ups in Phase 1 (answered on #1 7186123958):** `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED` (P1.5). `RunEvent.payload` becomes a discriminated union on `type`.
 
