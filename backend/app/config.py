@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     debug: bool = False
     openrouter_api_key: SecretStr | None = None
+    app_url: str = "http://localhost:3000"
+    """P5.4: where emailed links point (the frontend)."""
     allowed_origins: list[str] = ["http://localhost:3000"]
     """P5.3: an unsafe request that sends `Origin` must come from one of these (S-25)."""
     jwt_secret: SecretStr | None = None

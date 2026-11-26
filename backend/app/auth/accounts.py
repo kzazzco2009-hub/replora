@@ -30,11 +30,12 @@ def find_user(session: Session, email: str) -> m.User | None:
 
 def register(
     session: Session, email: str, password: str, display_name: str, locale: str
-) -> m.User | None:
-    """The new user, owner of a new personal workspace; None when the email is taken."""
+) -> tuple[m.User, bool]:
+    """The user and whether it is new. A new user owns a new personal workspace."""
     hashed = hash_password(password)
-    if find_user(session, email) is not None:
-        return None
+    existing = find_user(session, email)
+    if existing is not None:
+        return existing, False
     user = m.User(email=normal_email(email), password_hash=hashed, display_name=display_name,
                   locale=locale)  # fmt: skip
     session.add(user)
@@ -43,7 +44,7 @@ def register(
     session.add(space)
     session.flush()
     session.add(m.Membership(workspace_id=space.id, user_id=user.id, role="owner"))
-    return user
+    return user, True
 
 
 def authenticate(session: Session, email: str, password: str) -> m.User | None:
