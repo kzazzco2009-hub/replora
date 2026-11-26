@@ -10,7 +10,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|
 | Current phase | **Phase 0 — Foundation (B0), Session 15.** `main` is at **`8e8b24b`**, CI green. Merged in Session 15: #40 (`d45be72`), #44 (`cabb1d1`), #45 (`e86d475`), #41 (`f07e323`), **#42 (`8e8b24b`)**, and the frontend's #39, #46 and #48.
 
-**Steps:** 10/11 on `main`. **P0.8 is ticked on this branch (#43)**, so it shows on `main` once #43 merges. **P0.5** can be ticked now that #42 has merged. The tick, with evidence from `8e8b24b`, is in the `docs/g0-readiness` PR, which also moves `openapi-fetch` to P9.6 (#1, 7187542043).
+**Steps: 11/11.** P0.8 is ticked in #43 and P0.5 in the `docs/g0-readiness` PR, so both show on `main` once those two merge. The P0.5 evidence is from `main` `8e8b24b`: 402 passed, no drift, `gen:api` with no diff. `openapi-fetch` moves to P9.6 (#1, 7187542043). **Phase 0 is complete, and G0 has been asked of both developers on #1. No Phase 1 work starts before it.**
 
 **Ticked in Session 14:** P9.2 and P9.3 in `plan.md`. Owners: **both developers** (#45, merged).
 
@@ -34,7 +34,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 - check the `noreply` git email on both machines.
 
 **Both owners:** decide on a `LICENSE`. |
-| Next step | 1) **Merge #43, then the `docs/g0-readiness` PR** (after the frontend approves). That PR ticks P0.5, so Phase 0 is then 11/11 on `main`. Once #43 merges, rebase `docs/g0-readiness` onto `main` (`git rebase --onto origin/main 78780e6`).
+| Next step | 1) **Merge #43, then the `docs/g0-readiness` PR** (after the frontend approves). That PR ticks P0.5, so Phase 0 is then 11/11 on `main`. Once #43 merges, rebase `docs/g0-readiness` onto `main` (`git rebase --onto origin/main origin/docs/session-14-final`, run before that branch is deleted).
 
 2) **#42 merged** (`8e8b24b`, Session 15).
 
@@ -65,7 +65,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 10/11 | 7/7 | 5/5 | ☐ |
+| 0 Foundation | 11/11 | 7/7 | 5/5 | ☐ (asked, #1) |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -183,7 +183,77 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **#47** (7187754869): a signed-in locale or theme switch must also `PATCH /auth/me`, because `User.locale` drives the emails; the query string is dropped on switch (the #41 preview filters); full language names as accessible names.
 - **#48** (7187755689): a caller's `aria-describedby` overrides the error link; `duration-*` without `transition-*`; merging `className`.
 
-**P0.5 not ticked:** it waits on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
+**G0 readiness check on `main` `f07e323`** (detached in the main clone, the tree clean before and after; `pnpm install --frozen-lockfile` and `uv sync --locked`):
+
+| Check | Command | Result |
+|---|---|---|
+| Backend lint | `uv run ruff check .` · `ruff format --check .` | clean · 40 files formatted |
+| Backend tests | `uv run pytest -q` | **377 passed** |
+| Contract drift | `uv run python -m app.export_openapi --check` | exit 0 |
+| Backend audit | `uv run pip-audit` | no known vulnerabilities |
+| Frontend | `pnpm -C frontend lint` · `typecheck` · `format:check` | all exit 0 |
+| Frontend tests | `pnpm -C frontend test` | **14 files, 123 passed** |
+| Frontend build | `pnpm -C frontend build` | exit 0 |
+| Frontend audit | `pnpm audit --audit-level=high` | no known vulnerabilities |
+| Secrets | `gitleaks git .` | no leaks |
+| **T0.4, re-proven** | one byte appended to `openapi.json`, then `--check` | exit 1 "is out of date", restored |
+| **T0.5, re-proven** | a fake `sk-or-v1-<64 hex>` in an empty temp dir, `gitleaks dir --config .gitleaks.toml` | `leaks found: 1` (`openrouter-api-key`), exit 1, probe removed |
+| **T0.3 lint gate, re-proven locally** | a probe file with `className="ml-2"`, then `eslint` | `local/no-physical-direction` error, exit 1, probe removed |
+
+**G0 gate report (posted on #1, 7189613742, with the G0 request to both developers; PR #50 opened, stacked on #43):**
+
+| Item | State | Evidence |
+|---|---|---|
+| P0.1–P0.4, P0.6, P0.7, P0.9–P0.11 | ✅ | #2, #6, #14, #19, #25, #26 and the earlier sessions |
+| P0.5 contract and types | ✅ | §2 #8 · §3 #10, #27 · §4 #11, #32 · §5 #28 · §6 #34 · §7 #40, #41 · §8 #42 · `gen:api` on `main` `8e8b24b` (402 passed, no drift). `openapi-fetch` → P9.6 |
+| P0.8 governance | ✅ | ruleset `main` live (Session 15), CODEOWNERS, PR template |
+| Tests T0.1–T0.7 | ✅ 7/7 | T0.3–T0.5 re-proven above |
+| Security S‑01–S‑05 | ✅ 5/5 | `security.md` Phase 0; S‑05 Session 15 |
+| api_contract.md draft | ✅ | agreed on #1; §2–§8 stubbed in `openapi.json`; §2 fixtures #44 |
+| Frontend F0 | ✅ steps | P0.4, P0.5 (types) and T0.2 are ticked in `docs/frontend/plan.md`. Their F0 gate line (line 107) is theirs to tick |
+| Open owner items | — | `LICENSE` (both); confirming fork-PR approval and secret scanning in Settings (frontend) |
+
+The G0 decision needs **both developers**. No Phase 1 work starts before it.
+
+**Housekeeping:** 11 merged local branches deleted after checking them:
+- 8 had tips equal to their PR's final head;
+- `feat/p0.5-workspace-codes` was #27 before its rebase (range-diff `=` in Session 14);
+- `feat/p0.5-file-stubs` held an old log line that `main` supersedes;
+- `backend/setup` held only the initial commit, already in `main`.
+
+`feat/p0.5-workflows-stubs` (#42, now merged) was kept. The merged remote branches #40, #41, #42, #44 and #45 are for Developer A to delete (Claude can't).
+
+**P0.5 ticked** (`plan.md` and `backend_plan.md`) after #42 merged. The evidence is on `main` `8e8b24b`, in a scratch worktree (`pnpm install --frozen-lockfile`, `uv sync --locked`):
+
+| Check | Command | Result |
+|---|---|---|
+| Lint | `uv run ruff check .` | all checks passed |
+| Backend tests | `uv run pytest -q` | **402 passed** |
+| Contract drift | `uv run python -m app.export_openapi --check` | exit 0 |
+| TS types | `pnpm -C frontend gen:api`, then `git status --porcelain frontend/src/lib/api` | no diff |
+| Frontend | `pnpm -C frontend typecheck` · `test` | exit 0 · **21 files, 147 passed** |
+
+§2–§8 are all stubbed (#8, #10, #11, #27, #28, #32, #34, #40, #41, #42). `openapi-fetch` is P9.6 in the frontend's plan. Earlier note: P0.5 waited on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
+
+**T0 and S‑01…S‑05 re-run on `main` `8e8b24b`** (scratch worktree, `--frozen-lockfile` and `--locked`, Developer A asked):
+
+| Item | Command | Result |
+|---|---|---|
+| T0.1 | `uv run pytest -q tests/unit/test_health.py` | 1 passed |
+| T0.2 | `pnpm -C frontend test home` · `pnpm -C frontend build` | 3 passed · exit 0 |
+| T0.3 | a probe `import os` with `ruff check`, a probe `className="ml-2"` with `eslint`; CI on `main` `8e8b24b` | exit 1 (F401), exit 1 (`local/no-physical-direction`); CI success |
+| T0.4 | one byte appended to `openapi.json`, then `export_openapi --check` | exit 1 "is out of date", then restored with exit 0 |
+| T0.5 | a fake `sk-or-v1-…` staged, then `pre-commit run gitleaks` | **Failed**, `RuleID: openrouter-api-key`, exit 1 |
+| T0.6 | `git check-ignore -v .env` | `.gitignore:2:.env` |
+| T0.7 | `uv run pytest -q tests/unit/test_observability.py` | 19 passed |
+| All backend tests | `uv run pytest -q` | 402 passed |
+| S‑01 | T0.5, T0.6; `git ls-files` shows only `.env.example`; `gitleaks git .` | no leaks |
+| S‑02 | `pytest tests/unit/test_config.py`; `APP_ENV=production` without the key / with `DEBUG=true` / clean | 10 passed; "production needs: openrouter_api_key" / "debug must be off in production" / builds |
+| S‑03 | lockfiles tracked; CI `uv sync --locked`, `pnpm install --frozen-lockfile` (ci.yml:63, 83) | both pass locally |
+| S‑04 | `uv run pip-audit` · `pnpm audit --audit-level=high` · `dependabot.yml` | no known vulnerabilities · none · uv, npm and actions weekly |
+| S‑05 | `gh api …/rules/branches/main` · repo settings · `CODEOWNERS` | deletion, non_fast_forward, PR + 1 approval with stale-review dismissal, 3 required checks, squash only · public, no merge or rebase merges · owners per path |
+
+**Found:** the gitleaks pre-commit hook **was not installed in this clone** (`.git/hooks/pre-commit` missing), so a probe commit with the fake key went through. It landed only on the detached scratch worktree, was reset, and was never pushed. The hook config works (T0.5 above), and CI still scans the full history. Fix, per clone, on both machines: `pre-commit install` (`.pre-commit-config.yaml` line 1).
 
 **Stray `plan.md` line:** an uncommitted blank line at the end of `docs/plan.md` was there on arrival. Developer A said to drop it (`git restore docs/plan.md`).
 
