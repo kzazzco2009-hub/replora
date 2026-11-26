@@ -56,7 +56,7 @@ Earlier steps: Before merging, a trial merge of #44 and #45 together onto `d45be
 
 4) **Merge the stack** #40 → #41 → #42, rebasing each one onto `main` after the one below it merges (see above).
 
-5) **When #42 is merged and `openapi-fetch` is decided:** tick **P0.5**, and align the P0.5 text in `plan.md` if `openapi-fetch` is dropped. Phase 0 is then 11/11.
+5) **When #42 is merged:** continue on branch **`docs/g0-readiness`** (pushed, stacked on this PR, no PR yet; `git switch docs/g0-readiness; git pull --ff-only`). It holds the G0 check evidence on `main` `f07e323` (377 and 123 passed, T0.3–T0.5 re-proven), the G0 report draft, the P0.5 text fix (`openapi-fetch` → P9.6) and the B0 S‑01…S‑05 tick. Its own log has the finishing steps. Phase 0 is then 11/11, and we ask both developers for G0.
 
 4) **G0 gate:** stop, report and ask **both** developers for approval before Phase 1. **No Phase 1 work starts before that.** All remaining Phase 0 backend work is done or in review.
 
