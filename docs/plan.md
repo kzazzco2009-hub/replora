@@ -225,7 +225,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] P4.1 SQLAlchemy 2 engine and session from `DATABASE_URL`. SQLite uses WAL and `foreign_keys=ON`. Postgres uses psycopg 3, and `NullPool` is configured for serverless.
 - [x] P4.2 Models: `users`, `workspaces`, `memberships`, `sessions`, `files`, `artifacts`, `workflows`, `workflow_versions`, `drafts`, `runs`, `run_nodes`, `jobs`, `audit_events`, `rate_limits`. All IDs are UUIDv7 and all timestamps are UTC.
 - [x] P4.3 **Indexes on every table** (see §6 below). They are verified by a test that inspects the metadata.
-- [ ] P4.4 Alembic setup (`render_as_batch=True` for SQLite). The initial migration. `upgrade` and `downgrade` are tested.
+- [x] P4.4 Alembic setup (`render_as_batch=True` for SQLite). The initial migration. `upgrade` and `downgrade` are tested.
 - [ ] P4.5 Repositories: every query function takes a `workspace_id` and filters by it. No unscoped query is possible.
 - [ ] P4.6 Persist engine state: runs, run_nodes and artifacts are saved after each node (checkpointing for serverless).
 - [ ] P4.7 CI job: run the full backend suite against **Postgres 17** (service container) in addition to SQLite.

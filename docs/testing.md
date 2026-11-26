@@ -97,8 +97,8 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 
 ## Phase 4 — Persistence
 **Integration (SQLite and Postgres)**
-- [ ] T4.1 `alembic upgrade head`, then `downgrade base`, then `upgrade head` succeeds on both databases.
-- [ ] T4.2 Autogenerate shows no diff between models and migrations (no drift).
+- [x] T4.1 `alembic upgrade head`, then `downgrade base`, then `upgrade head` succeeds on both databases.
+- [x] T4.2 Autogenerate shows no diff between models and migrations (no drift).
 - [ ] T4.3 Repository scoping: a query in workspace A never returns rows of workspace B (seeded with 2 workspaces).
 - [ ] T4.4 Engine checkpointing: kill the process after node 2 of 4, then resume. Nodes 1–2 are not re-executed.
 - [x] T4.5 UUIDv7 ordering and UTC timestamps round-trip on both databases.
