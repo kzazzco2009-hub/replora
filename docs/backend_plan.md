@@ -39,7 +39,7 @@
 - [x] Write the **api_contract.md draft** together with Developer B *(agreed at G0 in issue #1; `docs/api_contract.md`)*
 - [x] Commit `contracts/error-codes.json` v0 *(#16)*
 - [x] §2 auth fixtures in `contracts/fixtures/auth/`, validated against `openapi.json` and `error-codes.json` *(#44; agreed in issue #1, api_contract.md §10)*
-- [x] Tests: [x] T0.1 · [x] T0.3 (backend job) · [x] T0.4 · [x] T0.5 · [x] T0.6
+- [x] Tests: [x] T0.1 · [x] T0.3 (backend job) · [x] T0.4 · [x] T0.5 · [x] T0.6 · [x] T0.7
 - [x] Security S‑01…S‑05 verified *(S‑02 in #33; S‑05 once the ruleset went live, Session 15)*
 - [ ] **Gate G0** (shared: both tracks green)
 
