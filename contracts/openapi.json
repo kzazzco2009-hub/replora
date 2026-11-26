@@ -7521,6 +7521,21 @@
             "title": "Max Nodes",
             "description": "Most nodes in one workflow"
           },
+          "max_depth": {
+            "type": "integer",
+            "title": "Max Depth",
+            "description": "Most nodes on one path through a workflow"
+          },
+          "max_fan_in": {
+            "type": "integer",
+            "title": "Max Fan In",
+            "description": "Most edges into one node"
+          },
+          "max_fan_out": {
+            "type": "integer",
+            "title": "Max Fan Out",
+            "description": "Most edges out of one node"
+          },
           "workspace_quota": {
             "type": "integer",
             "title": "Workspace Quota",
@@ -7533,6 +7548,9 @@
           "max_file_size",
           "max_files_per_run",
           "max_nodes",
+          "max_depth",
+          "max_fan_in",
+          "max_fan_out",
           "workspace_quota"
         ],
         "title": "Limits",
@@ -8559,6 +8577,19 @@
               }
             ],
             "title": "Approved At"
+          },
+          "approval_expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Expires At",
+            "description": "When an `AWAITING_APPROVAL` run expires (`APPROVAL_TTL_HOURS`); else null"
           },
           "created_at": {
             "type": "string",

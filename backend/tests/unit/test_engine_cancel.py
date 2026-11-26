@@ -9,7 +9,7 @@ from validator_samples import REGISTRY
 
 from app.config import Settings
 from app.core.engine.executor import execute
-from app.core.engine.run import expire_if_stale, new_run, transition
+from app.core.engine.run import approval_expires_at, expire_if_stale, new_run, transition
 from app.core.engine.store import ArtifactStore
 from app.core.run_state import RunAction, RunState
 
@@ -76,3 +76,9 @@ def test_only_a_run_awaiting_approval_can_expire(state):
 def test_the_ttl_is_configurable_and_defaults_to_24_hours():
     assert Settings(_env_file=None).approval_ttl == TTL
     assert Settings(_env_file=None, approval_ttl_hours=2).approval_ttl == timedelta(hours=2)
+
+
+def test_the_approval_deadline_is_known_only_while_awaiting_approval():
+    assert approval_expires_at(awaiting(), TTL) == NOW + TTL
+    assert approval_expires_at(new_run(diamond(), NOW), TTL) is None
+    assert approval_expires_at(queued(diamond()), TTL) is None

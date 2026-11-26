@@ -1507,6 +1507,21 @@ export interface components {
              */
             max_nodes: number;
             /**
+             * Max Depth
+             * @description Most nodes on one path through a workflow
+             */
+            max_depth: number;
+            /**
+             * Max Fan In
+             * @description Most edges into one node
+             */
+            max_fan_in: number;
+            /**
+             * Max Fan Out
+             * @description Most edges out of one node
+             */
+            max_fan_out: number;
+            /**
              * Workspace Quota
              * @description Bytes of storage per workspace
              */
@@ -1958,6 +1973,11 @@ export interface components {
             approved_by?: string | null;
             /** Approved At */
             approved_at?: string | null;
+            /**
+             * Approval Expires At
+             * @description When an `AWAITING_APPROVAL` run expires (`APPROVAL_TTL_HOURS`); else null
+             */
+            approval_expires_at?: string | null;
             /**
              * Created At
              * Format: date-time

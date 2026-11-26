@@ -109,7 +109,7 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 
 `OperationContract = {id, version, title_key, inputs: [Port], outputs: [Port], params_schema (JSON Schema)}` · `Port = {name, artifact_type, required}`
 `artifact_type` is one of the 11 kinds (P1.1): `RawFile`, `ArchiveManifest`, `TabularArtifact`, `TextDocumentArtifact`, `PagedArtifact`, `PresentationArtifact`, `ImageArtifact`, `StructuredObjectArtifact`, `ValidationReport`, `ComparisonReport`, `OutputFile`. Ports connect only when the types match exactly.
-`Limits = {max_file_size, max_files_per_run, max_nodes, workspace_quota}` (bytes and counts). The frontend reads limits from here and never hard-codes them.
+`Limits = {max_file_size, max_files_per_run, max_nodes, max_depth, max_fan_in, max_fan_out, workspace_quota}` (bytes and counts; today 50 MiB, 10, 30, 10, 10, 10, and the quota). The frontend reads limits from here and never hard-codes them.
 
 **Supported `params_schema` subset** (so the frontend can render a form from it): `string`, `integer`, `boolean`, `enum`, and `array` of strings. Decimals are `string` with a `pattern`. `x-replora-widget: "column"` means "pick a column from an input port". No `oneOf`, `anyOf` or `$ref`.
 
@@ -151,7 +151,7 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 | GET | `/workspaces/{ws}/runs/{id}/outputs/{artifact_id}/download` | — | `{url, expires_at}` |
 | GET | `/workspaces/{ws}/runs/{id}/outputs/{artifact_id}/rows/{row}/lineage` | — | `Lineage` |
 
-`Run = {id, state, plan_hash, definition, nodes: [{node_id, operation_id, state, attempt, started_at, finished_at, error_code?, warnings[]}], summary?: {matched, value_diff, missing_left, missing_right}, approved_by?, approved_at?, created_at, finished_at?, review_issues: [Issue]}`
+`Run = {id, state, plan_hash, definition, nodes: [{node_id, operation_id, state, attempt, started_at, finished_at, error_code?, warnings[]}], summary?: {matched, value_diff, missing_left, missing_right}, approved_by?, approved_at?, approval_expires_at?, created_at, finished_at?, review_issues: [Issue]}`. `approval_expires_at` is set only while `AWAITING_APPROVAL` (`state_since + APPROVAL_TTL_HOURS`, default 24 h); after it the run is `EXPIRED`.
 `state ∈ DRAFT | VALIDATED | AWAITING_APPROVAL | QUEUED | RUNNING | NEEDS_REVIEW | SUCCEEDED | PARTIAL | FAILED | CANCEL_REQUESTED | CANCELLED | EXPIRED`
 **State rules:**
 - `POST /runs` from a draft whose `validation.valid` is `false` returns 422 `DRAFT_INVALID` with the validation issues in `errors`. No run is created.

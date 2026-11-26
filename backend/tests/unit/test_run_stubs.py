@@ -135,8 +135,11 @@ def test_run_schemas_match_contract(schemas):
     assert set(schemas["RunState"]["enum"]) == STATES
     assert set(schemas["Run"]["properties"]) == {
         "id", "state", "plan_hash", "definition", "nodes", "summary", "approved_by",
-        "approved_at", "created_at", "finished_at", "review_issues",
+        "approved_at", "approval_expires_at", "created_at", "finished_at", "review_issues",
     }  # fmt: skip
+    expires = schemas["Run"]["properties"]["approval_expires_at"]
+    assert {kind.get("type") for kind in expires["anyOf"]} == {"string", "null"}
+    assert "approval_expires_at" not in schemas["Run"].get("required", [])
     assert set(schemas["ResolveRequest"]["properties"]) == {"plan_hash", "choices"}
     assert set(schemas["ReviewChoice"]["properties"]) == {"code", "path", "value"}
     assert set(schemas["RunNode"]["properties"]) == {

@@ -90,6 +90,10 @@ class Run(ApiModel):
     summary: RunCounts | None = None
     approved_by: UUID | None = None
     approved_at: datetime | None = None
+    approval_expires_at: datetime | None = Field(
+        default=None,
+        description="When an `AWAITING_APPROVAL` run expires (`APPROVAL_TTL_HOURS`); else null",
+    )
     created_at: datetime
     finished_at: datetime | None = None
     review_issues: list[Issue] = Field(
