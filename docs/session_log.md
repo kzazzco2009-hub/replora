@@ -235,6 +235,26 @@ The G0 decision needs **both developers**. No Phase 1 work starts before it.
 
 §2–§8 are all stubbed (#8, #10, #11, #27, #28, #32, #34, #40, #41, #42). `openapi-fetch` is P9.6 in the frontend's plan. Earlier note: P0.5 waited on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
 
+**T0 and S‑01…S‑05 re-run on `main` `8e8b24b`** (scratch worktree, `--frozen-lockfile` and `--locked`, Developer A asked):
+
+| Item | Command | Result |
+|---|---|---|
+| T0.1 | `uv run pytest -q tests/unit/test_health.py` | 1 passed |
+| T0.2 | `pnpm -C frontend test home` · `pnpm -C frontend build` | 3 passed · exit 0 |
+| T0.3 | a probe `import os` with `ruff check`, a probe `className="ml-2"` with `eslint`; CI on `main` `8e8b24b` | exit 1 (F401), exit 1 (`local/no-physical-direction`); CI success |
+| T0.4 | one byte appended to `openapi.json`, then `export_openapi --check` | exit 1 "is out of date", then restored with exit 0 |
+| T0.5 | a fake `sk-or-v1-…` staged, then `pre-commit run gitleaks` | **Failed**, `RuleID: openrouter-api-key`, exit 1 |
+| T0.6 | `git check-ignore -v .env` | `.gitignore:2:.env` |
+| T0.7 | `uv run pytest -q tests/unit/test_observability.py` | 19 passed |
+| All backend tests | `uv run pytest -q` | 402 passed |
+| S‑01 | T0.5, T0.6; `git ls-files` shows only `.env.example`; `gitleaks git .` | no leaks |
+| S‑02 | `pytest tests/unit/test_config.py`; `APP_ENV=production` without the key / with `DEBUG=true` / clean | 10 passed; "production needs: openrouter_api_key" / "debug must be off in production" / builds |
+| S‑03 | lockfiles tracked; CI `uv sync --locked`, `pnpm install --frozen-lockfile` (ci.yml:63, 83) | both pass locally |
+| S‑04 | `uv run pip-audit` · `pnpm audit --audit-level=high` · `dependabot.yml` | no known vulnerabilities · none · uv, npm and actions weekly |
+| S‑05 | `gh api …/rules/branches/main` · repo settings · `CODEOWNERS` | deletion, non_fast_forward, PR + 1 approval with stale-review dismissal, 3 required checks, squash only · public, no merge or rebase merges · owners per path |
+
+**Found:** the gitleaks pre-commit hook **was not installed in this clone** (`.git/hooks/pre-commit` missing), so a probe commit with the fake key went through. It landed only on the detached scratch worktree, was reset, and was never pushed. The hook config works (T0.5 above), and CI still scans the full history. Fix, per clone, on both machines: `pre-commit install` (`.pre-commit-config.yaml` line 1).
+
 **Stray `plan.md` line:** an uncommitted blank line at the end of `docs/plan.md` was there on arrival. Developer A said to drop it (`git restore docs/plan.md`).
 
 **End-of-session state check:**
