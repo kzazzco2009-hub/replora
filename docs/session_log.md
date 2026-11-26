@@ -480,6 +480,17 @@ PR **#96** (stacked on #95).
 - **Migration 0002:** `users.display_name` (NOT NULL, `server_default ''`, so existing users upgrade) and `used_refresh_tokens`. §6 is updated to 19 tables.
 - **Two bugs found and fixed.** Autogenerate added `display_name` as NOT NULL with no default, which would fail on a database that already has users; a test now upgrades one. Worse, **on SQLite a batch rebuild of `users` silently drops the expression index `uq_users_email`**, because reflection can't see it. 0002 now drops and recreates it around each rebuild, and a test checks case-insensitive uniqueness after every up and down. Mutation: without the guard, 3 tests fail. **Every future migration that rebuilds `users` must do the same.**
 - `uv run pytest -q`: **1714 passed**. No drift.
+PR **#97** (stacked on #96).
+
+**P5.2 part 2: the session endpoints** (`app/api/v1/auth.py`, `app/api/session.py`, `app/auth/accounts.py`, `tests/integration/test_auth_api.py`; 11 tests failed first). **P5.2 is done.**
+- `register`, `login`, `logout`, `refresh` and `GET /me` are real. Everything is read from the `Request`, so **`openapi.json` is unchanged**.
+- The app holds its sessions, JWT key and clock in `app.state`. `Settings.jwt_secret` is a production secret (`JWT_SECRET` in `.env.example`); outside production a random key is made at startup.
+- **Register:** always 202 with an empty body. The same argon2 cost is paid whether or not the email exists. A new user gets a **personal workspace with the owner role** (part of P5.5).
+- **Login:** a generic 401 `INVALID_CREDENTIALS` (unknown users are verified against a dummy hash) and a rehash on login. It sets `replora_access` (15 min) and `replora_refresh` (30 days): **HttpOnly, SameSite=Lax, Path=/, and Secure in production (T5.6)**.
+- **Refresh:** rotates the token. A reused token gives 401 and signs everyone out (T5.4 over HTTP). **Logout** revokes the session, after which its refresh token and even its **unexpired access token** are refused.
+- Test updates: the production config tests pass a `jwt_secret`; the observability test's 501 example is now `/auth/sessions`; and the stub test skips the 5 endpoints that are real.
+- Mutation checks: the revoked-session check (it survived at first, so a test now replays the access token after logout), Secure, HttpOnly and the password check are all caught.
+- `uv run pytest -q`: **1727 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

@@ -48,7 +48,13 @@ def test_auth_endpoint_is_documented_with_its_success_status(openapi, method, pa
     assert str(status) in operation["responses"]
 
 
-@pytest.mark.parametrize(("method", "path", "status", "body"), AUTH_ENDPOINTS)
+IMPLEMENTED = {"/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout",
+               "/api/v1/auth/refresh", ("get", "/api/v1/auth/me")}  # fmt: skip
+"""Phase 5 endpoints that are real now; the rest still answer 501."""
+STUBS = [e for e in AUTH_ENDPOINTS if e[1] not in IMPLEMENTED and (e[0], e[1]) not in IMPLEMENTED]
+
+
+@pytest.mark.parametrize(("method", "path", "status", "body"), STUBS)
 def test_auth_stub_answers_501_problem_json(client, method, path, status, body):
     response = client.request(method, path, json=body)
 
