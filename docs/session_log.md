@@ -276,6 +276,16 @@ PR **#77** (stacked on #75).
 - Mutation checks: reversing the tie-break, dropping the parents, skipping `START`, or ignoring the indegree each fails 1–3 tests.
 - `uv run pytest -q`: **1360 passed**. ruff is clean.
 
+PR **#78** (stacked on #77).
+
+**P3.4, failure semantics** (`executor.py` now has a small `_Runner`; `app/core/run_issue_codes.py`; `tests/unit/test_engine_failures.py`; the shared fakes moved to `tests/unit/engine_samples.py`; TDD: collection failed first).
+- Handlers now return `Result(outputs, warnings)`. A handler that raises `OperationError(code, **params)` fails its node (`NODE_FAILED`, `params.error` is the operation's code). A node whose required input came from a failed or skipped node is skipped (`NODE_SKIPPED`, with `params.port` and `params.source`).
+- The run ends `FAILED` when a workflow output is missing (`OUTPUT_MISSING`). It ends `PARTIAL` when something failed but every output exists. It stops at once as `NEEDS_REVIEW` when a node warns (for example `LOW_CONFIDENCE`) under `review_policy.on_warning = review`; under `continue`, the warning is kept and the run finishes.
+- **New `contracts/error-codes.json` → `run_codes`** (NODE_FAILED, NODE_SKIPPED, OUTPUT_MISSING, LOW_CONFIDENCE), mirrored by `RunIssueCode` with a parity test. `contracts/README.md` was updated. The frontend's parity test reads its sections by name, so it is unaffected.
+- **T3.3:** an optional branch → PARTIAL, a required branch → FAILED (the dependent node never runs), a failed output node → FAILED, low confidence → NEEDS_REVIEW and later nodes don't start, and the continue policy → SUCCEEDED with the warning.
+- Mutation checks: each of the five rules fails 1–3 tests when removed.
+- `uv run pytest -q`: **1367 passed**. ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 
