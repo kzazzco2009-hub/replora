@@ -8,13 +8,13 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0), end of Session 14.** `main` is at **`ef49ab3`**, CI green. Merged today: #27 (§3 codes), #30, #37, #38 (frontend P9.3), #31 (`allowBuilds`), **#32** (`rejection_codes`), **#33** (S‑02), **#34** (§6 drafts, merged by Developer A), **#35** (the ruleset as code) and #36 (log).
+| Current phase | **Phase 0 — Foundation (B0), Session 15.** `main` is at **`ef49ab3`**, CI green. Merged in Session 14: #27 (§3 codes), #30, #37, #38 (frontend P9.3), #31 (`allowBuilds`), **#32** (`rejection_codes`), **#33** (S‑02), **#34** (§6 drafts, merged by Developer A on their own go, after the frontend approved the same patch), **#35** (the ruleset as code) and #36 (log).
 
-**Steps:** 9/11. **P0.5:** every contract section §2–§8 is now stubbed. The last three are a stack of PRs; P0.5 is ticked when they merge and the `openapi-fetch` question is answered. **P0.8:** the files are in (#35); the admin applies them after the repo goes public (the go is on #1, 7172828609).
+**Steps:** 10/11. **P0.8 ticked (Session 15):** the repo is public and the ruleset is live (verified, see Session 15). **P0.5 is the last open step.** It needs (a) #40 → #41 → #42 merged, where #41 and #42 have change requests, and (b) the frontend's `openapi-fetch` answer (#25 question 1, promised in their next message).
 
 **Ticked in this PR:** P9.2 (#29) and P9.3 (#30, #37, #38) in `plan.md`. The frontend had marked them done in their own plan (P9.2 on `main`, P9.3 in #39). The tracker also counts T11.3, which #25 already ticked. Owners: **both developers** (#45).
 
-**Security:** 4/5 (S‑01 to S‑04). S‑05 waits on the ruleset being live.
+**Security:** 5/5 (S‑01 to S‑05). S‑05 was ticked in Session 15.
 
 **Open backend PRs.** It's a stack, and each one is CI green and rebased on `ef49ab3`:
 - **#40** `feat/p0.5-runs-stubs` → **`main`** (retargeted after #34), `6dcabef`: §7 runs lifecycle, `Idempotency-Key`, 4 new 409/422 codes.
@@ -31,21 +31,26 @@ Append a new entry per session (newest at the top). For each step record: what w
 4. Check with `git range-diff` that the patch is unchanged. |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | **Frontend:**
-- review **#45** (co-owners) and answer its open point on self-merge after approval;
-- review #40, #41 and #42 in order (each has 3 proposals in its description), **#44** (the auth fixtures for MSW), and this PR (it touches the root `.gitignore`);
-- **make the repo public** and run `.github/rulesets/README.md` steps 1–5, then post on #1;
-- the 4 open questions from #25, especially **`openapi-fetch`** (it blocks the P0.5 tick).
+- review this PR (#43);
+- re-review #41 and #42 after the requested changes;
+- confirm in the Settings UI that fork-PR approval and secret scanning are on (this account can't read them);
+- the **`openapi-fetch`** answer (#25 question 1). It blocks the P0.5 tick.
 
 **Developer A (backend):**
-- merge #40, #41 and #42 in order, and #44, #45 and this PR, after the frontend approves each one;
-- GitHub "Keep my email addresses private", plus the `noreply` git email.
+- go and merge for **#44** and **#45** (both approved, CI green) and **#40** (approved `6dcabef`). Then rebase #43 onto `main` (`decisions.md` conflicts with #45 at the last row);
+- post the approval on **#39** (frontend docs, read in Session 15, fine; Claude can't approve);
+- GitHub "Keep my email addresses private" is done (#1, 7185139284). Check the `noreply` git email on both machines.
 
 **Both owners:** decide on a `LICENSE`. |
-| Next step | 1) **Merge the stack** (#40 → #41 → #42), rebasing each one onto `main` after the one below it merges (see above).
+| Next step | 1) **#41 change:** `Preview.rows` becomes `[{row, status, cells}]`. `row` is the lineage row number, and `status` is `ReconcileStatus`. Document in `Column` that an `integer` cell stays within ±(2^53 − 1); larger values are a `decimal` column with string cells.
 
-2) **When the ruleset is live:** `gh api repos/kzazzco2009-hub/replora/rules/branches/main` should list `deletion`, `non_fast_forward`, `pull_request` and `required_status_checks`. Then tick **P0.8** and **S‑05**, and add the "repo public" row to `decisions.md`.
+2) **#42 change:** `WorkflowVersionCreate.mapping` becomes `dict[str, dict[str, str]]` (`{input: {expected: found}}`, keyed like `InputDrift.input`). An input left out is unchanged; an unknown input or column is a 422.
 
-3) **When #42 is merged and `openapi-fetch` is decided:** tick **P0.5**, and align the P0.5 text in `plan.md` if `openapi-fetch` is dropped. Phase 0 is then 11/11.
+3) **#40 follow-ups (before G8, answered on #1 7186123958):** `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED` (P1.5). `RunEvent.payload` becomes a discriminated union on `type`.
+
+4) **Merge the stack** #40 → #41 → #42, rebasing each one onto `main` after the one below it merges (see above).
+
+5) **When #42 is merged and `openapi-fetch` is decided:** tick **P0.5**, and align the P0.5 text in `plan.md` if `openapi-fetch` is dropped. Phase 0 is then 11/11.
 
 4) **G0 gate:** stop, report and ask **both** developers for approval before Phase 1. **No Phase 1 work starts before that.** All remaining Phase 0 backend work is done or in review.
 
@@ -79,7 +84,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Phase tracker
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
-| 0 Foundation | 9/11 | 7/7 | 4/5 | ☐ |
+| 0 Foundation | 10/11 | 7/7 | 5/5 | ☐ |
 | 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
@@ -158,6 +163,33 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 ---
 
+## Session 15 — 2026-11-26 (`D:\Projects\replora`, after Session 14 on the other machine)
+**Goal:** check that this machine matches Session 14, answer the frontend, and finalize P0.5 and P0.8.
+
+**Alignment:**
+- `docs/session-14-final` was `6c20595`, the same as `origin`. Every open PR head matched the log: #40 `6dcabef`, #41 `d138c28`, #42 `ceedd01`, #44 `8052294`, #45 `a73b4e2`. `main` was `ef49ab3` with CI green.
+- `pnpm install --frozen-lockfile` and `uv sync --locked` passed, and ruff was clean.
+- On this branch (based on `308f2f9`, one before #34): **254 passed**, no drift. On `origin/main` in a scratch worktree: **281 passed**, no drift.
+
+**New from the frontend (#1, 7185139284, 7185394516, 7185622268):**
+- The repo is public (a gitleaks full-history scan found 0 leaks), and the ruleset is live.
+- **Approved:** #44, #45 and #40, with two non-blocking questions on #40.
+- **Changes requested on #41** (row number and status per preview row, ints above 2^53) **and on #42** (mapping per input).
+- They asked us to correct "#34 merged by the owner". Developer A confirmed it was their own go, so the wording now names Developer A.
+
+**Answered on #1 (7186123958):** all of the above, as decided by Developer A (see Next step 1–3). `created_by` stays a UUID, and the UI resolves the name from the members endpoint.
+
+**P0.8 and S‑05 ticked.** Evidence from `gh api repos/kzazzco2009-hub/replora/rules/branches/main`:
+- `deletion` and `non_fast_forward`;
+- `pull_request`: `required_approving_review_count: 1`, `dismiss_stale_reviews_on_push: true`, `allowed_merge_methods: [squash]`;
+- `required_status_checks`: `Secret scan (gitleaks)`, `Backend (lint, test, audit)` and `Frontend (lint, typecheck, test, audit)`.
+
+`gh api repos/kzazzco2009-hub/replora` gives `allow_merge_commit: false` and `allow_rebase_merge: false`. Fork-PR approval (403) and secret scanning (field empty) need admin rights, so they're on the frontend's word until they confirm them in the UI.
+
+**P0.5 not ticked:** it waits on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
+
+**Not done:** an uncommitted blank line at the end of `docs/plan.md` was there on arrival. It's left out of the commit and is the owner's to keep or drop (`git restore docs/plan.md`).
+
 ## Session 14 — 2026-11-25 (first machine, after Session 13 on the other one)
 **Goal:** align this machine with the other machine, rebase #27, answer the frontend, then continue Phase 0 (P0.5 part 4, S‑02).
 
@@ -220,7 +252,7 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
   - `git range-diff` shows `=` for every code commit. CI is green on all four.
 - **Owner's decisions at the end:**
   - **`.gitignore`** now lists `replora_env_setup.txt`, on this PR's branch (`git check-ignore -v`: `.gitignore:51`).
-  - **#34 merged** by the owner, squash, `ef49ab3`, with `main` CI green. The frontend had approved `b52afbe`; the merged `97724a6` has an identical patch (range-diff `=`).
+  - **#34 merged** by Developer A on their own go, squash, `ef49ab3`, with `main` CI green. The frontend had approved `b52afbe`; the merged `97724a6` has an identical patch (range-diff `=`).
 - **Co-ownership (#45, `a73b4e2`).** The owner asked whether the frontend could be owner, then decided: **both are owners. GitHub stays as it is, and in a disagreement each developer sticks to their own side of development.**
   - The change is a new `decisions.md` row, plus forward-looking wording in `CLAUDE.md`, `plan.md` and `backend_plan.md` ("the owner" becomes "the gate approver", or "both owners" for P16.3 and P19.8).
   - Historical lines are kept: D1–D14 and P0.10 were approved by the owner of the time.
