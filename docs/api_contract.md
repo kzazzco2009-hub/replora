@@ -218,8 +218,9 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 contracts/
 ├── openapi.json            generated from the backend route stubs (B0 onward), committed, CI drift check
 ├── error-codes.json        every error code (frontend translates each one; parity test)
-├── schemas/                JSON Schemas for domain models (Phase 1)
+├── schemas/                JSON Schemas for domain models, generated (P1.6), CI drift check
 └── fixtures/
+    ├── domain/*.json       valid / invalid golden cases per schema (P1.6)
     ├── auth/*.json         request/response pairs
     ├── files/*.json
     ├── drafts/*.json

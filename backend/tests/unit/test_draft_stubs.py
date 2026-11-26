@@ -9,7 +9,7 @@ DRAFTS = "/api/v1/workspaces/{ws_id}/drafts"
 DRAFT = f"{DRAFTS}/{{draft_id}}"
 PROBLEM = {"application/problem+json": {"schema": {"$ref": "#/components/schemas/ProblemDetails"}}}
 CREATE = {"file_ids": [UUID], "prompt": "", "planner": "template", "template_id": "reconcile"}
-UPDATE = {"definition": {"nodes": [], "edges": []}}
+UPDATE = {"definition": {"nodes": [], "edges": [], "inputs": [], "outputs": []}}
 
 # (method, OpenAPI path, success status, sample valid body) — docs/api_contract.md §6.
 ENDPOINTS = [
@@ -130,7 +130,20 @@ def test_draft_schema_matches_contract(schemas):
     assert set(schemas["AiDisclosure"]["properties"]) == {"sent_fields", "samples_sent"}
     assert set(schemas["ValidationReport"]["properties"]) == {"valid", "errors", "warnings"}
     assert set(schemas["Issue"]["properties"]) == {"code", "path", "node_id", "params"}
-    assert schemas["WorkflowDefinition"]["type"] == "object"
+    assert set(schemas["WorkflowDefinition"]["properties"]) == {
+        "workflow_id", "workflow_version", "schema_version", "nodes", "edges", "inputs", "outputs",
+        "resource_policy", "review_policy",
+    }  # fmt: skip
+    assert schemas["WorkflowDefinition"]["additionalProperties"] is False
+
+
+def test_a_draft_update_must_be_a_typed_definition(client):
+    url = DRAFT.format(**IDS)
+    headers = {"If-Match": '"1"'}
+
+    for definition in ({}, {"nodes": [], "edges": []}, UPDATE["definition"] | {"code": "x"}):
+        response = client.patch(url, json={"definition": definition}, headers=headers)
+        assert response.status_code == 422
 
 
 def test_template_schema_matches_contract(schemas):

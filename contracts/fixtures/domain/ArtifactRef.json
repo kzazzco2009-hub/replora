@@ -1,0 +1,35 @@
+{
+  "valid": {
+    "upload": {
+      "id": "01937a5e-7f00-7000-8000-000000000010",
+      "type": "RawFile",
+      "format": "csv",
+      "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "workspace_id": "01937a5e-7f00-7000-8000-000000000002",
+      "lineage": {}
+    },
+    "produced": {
+      "id": "01937a5e-7f00-7000-8000-000000000011",
+      "type": "ComparisonReport",
+      "format": "xlsx",
+      "sha256": "60303ae22b998861bce3b28f33eec1be758a213c86c93c076dbe9f558c11c752",
+      "workspace_id": "01937a5e-7f00-7000-8000-000000000002",
+      "lineage": {
+        "run_id": "01937a5e-7f00-7000-8000-000000000020",
+        "node_id": "compare",
+        "operation": {"id": "reconcile", "version": 1},
+        "parents": ["01937a5e-7f00-7000-8000-000000000010"]
+      }
+    }
+  },
+  "invalid": {
+    "uppercase_sha256": {"id": "01937a5e-7f00-7000-8000-000000000010", "type": "RawFile", "format": "csv", "sha256": "9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08", "workspace_id": "01937a5e-7f00-7000-8000-000000000002", "lineage": {}},
+    "uppercase_format": {"id": "01937a5e-7f00-7000-8000-000000000010", "type": "RawFile", "format": "CSV", "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", "workspace_id": "01937a5e-7f00-7000-8000-000000000002", "lineage": {}},
+    "unknown_type": {"id": "01937a5e-7f00-7000-8000-000000000010", "type": "Spreadsheet", "format": "csv", "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", "workspace_id": "01937a5e-7f00-7000-8000-000000000002", "lineage": {}},
+    "missing_workspace": {"id": "01937a5e-7f00-7000-8000-000000000010", "type": "RawFile", "format": "csv", "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", "lineage": {}}
+  },
+  "invalid_backend_only": {
+    "run_without_node": {"id": "01937a5e-7f00-7000-8000-000000000011", "type": "ComparisonReport", "format": "xlsx", "sha256": "60303ae22b998861bce3b28f33eec1be758a213c86c93c076dbe9f558c11c752", "workspace_id": "01937a5e-7f00-7000-8000-000000000002", "lineage": {"run_id": "01937a5e-7f00-7000-8000-000000000020"}},
+    "upload_with_parents": {"id": "01937a5e-7f00-7000-8000-000000000010", "type": "RawFile", "format": "csv", "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", "workspace_id": "01937a5e-7f00-7000-8000-000000000002", "lineage": {"parents": ["01937a5e-7f00-7000-8000-000000000011"]}}
+  }
+}

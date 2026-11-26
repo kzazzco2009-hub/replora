@@ -1,0 +1,23 @@
+{
+  "valid": {
+    "template_planner": {
+      "definition": {"nodes": [{"id": "orders", "operation": {"id": "parse_csv", "version": 1}}], "edges": [], "inputs": [], "outputs": []},
+      "explanation": {"key": "templates.reconcile.explain", "params": {"left": "orders"}},
+      "warnings": [{"code": "COLUMN_RENAMED", "path": "nodes/0/params/column", "node_id": "orders", "params": {"from": "amt", "to": "amount"}}]
+    },
+    "ai_planner": {
+      "definition": {"nodes": [], "edges": [], "inputs": [], "outputs": []},
+      "explanation": {"text": "سأقرأ الملفين ثم أطابق الطلبات مع المدفوعات"}
+    }
+  },
+  "invalid": {
+    "missing_explanation": {"definition": {"nodes": [], "edges": [], "inputs": [], "outputs": []}},
+    "extra_field": {"definition": {"nodes": [], "edges": [], "inputs": [], "outputs": []}, "explanation": {"text": "x"}, "code": "import os"},
+    "definition_not_an_object": {"definition": "nodes: []", "explanation": {"text": "x"}}
+  },
+  "invalid_backend_only": {
+    "explanation_key_and_text": {"definition": {"nodes": [], "edges": [], "inputs": [], "outputs": []}, "explanation": {"key": "k", "text": "t"}},
+    "explanation_empty": {"definition": {"nodes": [], "edges": [], "inputs": [], "outputs": []}, "explanation": {}},
+    "params_without_key": {"definition": {"nodes": [], "edges": [], "inputs": [], "outputs": []}, "explanation": {"text": "t", "params": {"x": 1}}}
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "valid": {
+    "reconcile_draft": {
+      "nodes": [
+        {"id": "orders", "operation": {"id": "parse_csv", "version": 1}, "label": "الطلبات"},
+        {"id": "payments", "operation": {"id": "parse_json", "version": 1}},
+        {
+          "id": "compare",
+          "operation": {"id": "reconcile", "version": 1},
+          "params": {"key": "order_id", "amount_column": "amount", "tolerance": "0.01"}
+        }
+      ],
+      "edges": [
+        {"source": {"node_id": "orders", "port": "table"}, "target": {"node_id": "compare", "port": "left"}},
+        {"source": {"node_id": "payments", "port": "table"}, "target": {"node_id": "compare", "port": "right"}}
+      ],
+      "inputs": [
+        {
+          "name": "orders_file",
+          "label": "ملف الطلبات",
+          "artifact_type": "RawFile",
+          "columns": ["order_id", "amount"],
+          "targets": [{"node_id": "orders", "port": "file"}]
+        },
+        {"name": "payments_file", "artifact_type": "RawFile", "targets": [{"node_id": "payments", "port": "file"}]}
+      ],
+      "outputs": [
+        {"name": "report", "artifact_type": "ComparisonReport", "source": {"node_id": "compare", "port": "report"}}
+      ]
+    },
+    "saved_version": {
+      "workflow_id": "01937a5e-7f00-7000-8000-000000000001",
+      "workflow_version": 3,
+      "schema_version": 1,
+      "nodes": [{"id": "orders", "operation": {"id": "parse_csv", "version": 2}, "params": {}}],
+      "edges": [],
+      "inputs": [],
+      "outputs": [],
+      "resource_policy": {"max_files": 2, "max_file_size": 1048576, "node_timeout_seconds": 60, "run_timeout_seconds": 300},
+      "review_policy": {"on_warning": "continue"}
+    },
+    "empty_shape": {"nodes": [], "edges": [], "inputs": [], "outputs": []}
+  },
+  "invalid": {
+    "extra_field": {"nodes": [], "edges": [], "inputs": [], "outputs": [], "code": "print(1)"},
+    "missing_nodes": {"edges": [], "inputs": [], "outputs": []},
+    "node_id_with_space": {"nodes": [{"id": "parse orders", "operation": {"id": "parse_csv", "version": 1}}], "edges": [], "inputs": [], "outputs": []},
+    "operation_without_version": {"nodes": [{"id": "orders", "operation": {"id": "parse_csv"}}], "edges": [], "inputs": [], "outputs": []},
+    "schema_version_2": {"schema_version": 2, "nodes": [], "edges": [], "inputs": [], "outputs": []},
+    "node_timeout_over_limit": {"nodes": [], "edges": [], "inputs": [], "outputs": [], "resource_policy": {"node_timeout_seconds": 121}},
+    "unknown_review_policy": {"nodes": [], "edges": [], "inputs": [], "outputs": [], "review_policy": {"on_warning": "ignore"}},
+    "unknown_artifact_type": {"nodes": [], "edges": [], "inputs": [], "outputs": [{"name": "out", "artifact_type": "Spreadsheet", "source": {"node_id": "a", "port": "b"}}]}
+  },
+  "invalid_backend_only": {
+    "id_without_version": {"workflow_id": "01937a5e-7f00-7000-8000-000000000001", "nodes": [], "edges": [], "inputs": [], "outputs": []}
+  }
+}

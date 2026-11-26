@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RunState.schema.json",
+  "description": "The 12 run states. The allowed transitions are the P1.5 table, locked at G1.",
+  "enum": [
+    "DRAFT",
+    "VALIDATED",
+    "AWAITING_APPROVAL",
+    "QUEUED",
+    "RUNNING",
+    "NEEDS_REVIEW",
+    "SUCCEEDED",
+    "PARTIAL",
+    "FAILED",
+    "CANCEL_REQUESTED",
+    "CANCELLED",
+    "EXPIRED"
+  ],
+  "title": "RunState",
+  "type": "string"
+}

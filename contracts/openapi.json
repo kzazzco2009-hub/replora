@@ -6980,6 +6980,24 @@
         "title": "DraftUpdate",
         "description": "The **full** definition; the server re-validates it and computes the new `plan_hash`."
       },
+      "Edge": {
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/PortRef"
+          },
+          "target": {
+            "$ref": "#/components/schemas/PortRef"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "source",
+          "target"
+        ],
+        "title": "Edge",
+        "description": "Data flows from an output port to an input port."
+      },
       "EmailRequest": {
         "properties": {
           "email": {
@@ -7282,6 +7300,54 @@
         ],
         "title": "Health",
         "description": "Liveness status and the running backend version."
+      },
+      "InputContract": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Name"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "artifact_type": {
+            "$ref": "#/components/schemas/ArtifactType"
+          },
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Columns",
+            "default": []
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/PortRef"
+            },
+            "type": "array",
+            "title": "Targets"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "artifact_type",
+          "targets"
+        ],
+        "title": "InputContract",
+        "description": "A file the workflow needs, its expected columns (for replay drift) and the ports it feeds."
       },
       "InputDrift": {
         "properties": {
@@ -7782,6 +7848,46 @@
         "title": "MfaRequired",
         "description": "Login succeeded, but the MFA challenge (`/auth/mfa/challenge`) must be passed first."
       },
+      "Node": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Id"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/OperationRef"
+          },
+          "params": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "type": "object",
+            "title": "Params",
+            "default": {}
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "operation"
+        ],
+        "title": "Node",
+        "description": "One step: a pinned operation version and its parameters."
+      },
       "OperationContract": {
         "properties": {
           "id": {
@@ -7903,6 +8009,42 @@
         ],
         "title": "OutputArtifact"
       },
+      "OutputContract": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Name"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "artifact_type": {
+            "$ref": "#/components/schemas/ArtifactType"
+          },
+          "source": {
+            "$ref": "#/components/schemas/PortRef"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "artifact_type",
+          "source"
+        ],
+        "title": "OutputContract",
+        "description": "A result the workflow gives, taken from one node's output port."
+      },
       "PasswordRequest": {
         "properties": {
           "password": {
@@ -7941,6 +8083,28 @@
           "required"
         ],
         "title": "Port"
+      },
+      "PortRef": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Node Id"
+          },
+          "port": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Port"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "node_id",
+          "port"
+        ],
+        "title": "PortRef",
+        "description": "One port of one node."
       },
       "Preview": {
         "properties": {
@@ -8258,6 +8422,42 @@
         "title": "ResolveRequest",
         "description": "Answer a `NEEDS_REVIEW` run. `plan_hash` is the plan the user reviewed."
       },
+      "ResourcePolicy": {
+        "properties": {
+          "max_files": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Files",
+            "default": 10
+          },
+          "max_file_size": {
+            "type": "integer",
+            "maximum": 52428800.0,
+            "minimum": 1.0,
+            "title": "Max File Size",
+            "default": 52428800
+          },
+          "node_timeout_seconds": {
+            "type": "integer",
+            "maximum": 120.0,
+            "minimum": 1.0,
+            "title": "Node Timeout Seconds",
+            "default": 120
+          },
+          "run_timeout_seconds": {
+            "type": "integer",
+            "maximum": 900.0,
+            "minimum": 1.0,
+            "title": "Run Timeout Seconds",
+            "default": 900
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ResourcePolicy",
+        "description": "Per-run limits. The defaults are the platform maximums (D8, P19.3)."
+      },
       "ReviewChoice": {
         "properties": {
           "code": {
@@ -8281,6 +8481,23 @@
         ],
         "title": "ReviewChoice",
         "description": "The user's answer to one of the run's `review_issues`, picked from its `params.options`."
+      },
+      "ReviewPolicy": {
+        "properties": {
+          "on_warning": {
+            "type": "string",
+            "enum": [
+              "continue",
+              "review"
+            ],
+            "title": "On Warning",
+            "default": "review"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ReviewPolicy",
+        "description": "What a run does when a node reports warnings: carry on, or stop as NEEDS_REVIEW."
       },
       "Run": {
         "properties": {
@@ -9136,10 +9353,91 @@
         "description": "Save a draft as version 1 of a new workflow."
       },
       "WorkflowDefinition": {
-        "additionalProperties": true,
+        "properties": {
+          "workflow_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workflow Id"
+          },
+          "workflow_version": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workflow Version"
+          },
+          "schema_version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Schema Version",
+            "default": 1
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/Node"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/Edge"
+            },
+            "type": "array",
+            "title": "Edges"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/InputContract"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "outputs": {
+            "items": {
+              "$ref": "#/components/schemas/OutputContract"
+            },
+            "type": "array",
+            "title": "Outputs"
+          },
+          "resource_policy": {
+            "$ref": "#/components/schemas/ResourcePolicy",
+            "default": {
+              "max_files": 10,
+              "max_file_size": 52428800,
+              "node_timeout_seconds": 120,
+              "run_timeout_seconds": 900
+            }
+          },
+          "review_policy": {
+            "$ref": "#/components/schemas/ReviewPolicy",
+            "default": {
+              "on_warning": "review"
+            }
+          }
+        },
+        "additionalProperties": false,
         "type": "object",
+        "required": [
+          "nodes",
+          "edges",
+          "inputs",
+          "outputs"
+        ],
         "title": "WorkflowDefinition",
-        "description": "The typed workflow. An object until the Phase 1 JSON Schema (`contracts/schemas/`)."
+        "description": "The typed workflow that is approved, hashed (P1.4) and run.\n\nA draft has no `workflow_id` or `workflow_version`. A saved version has both."
       },
       "WorkflowDetail": {
         "properties": {
