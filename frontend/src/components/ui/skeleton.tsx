@@ -21,6 +21,7 @@ export function Skeleton({
 }: SkeletonProps) {
   return (
     <div
+      role="status"
       aria-busy="true"
       aria-label={ariaLabel}
       className="flex flex-col gap-2"

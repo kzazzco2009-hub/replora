@@ -3,16 +3,27 @@ import { describe, expect, it } from "vitest";
 import { Skeleton } from "../../src/components/ui/skeleton";
 
 describe.each(["ltr", "rtl"] as const)("Skeleton (dir=%s)", (dir) => {
-  it("renders the requested number of text lines, aria-busy", () => {
+  it("has role=status so its label is announced, plus aria-busy", () => {
+    render(
+      <div dir={dir}>
+        <Skeleton variant="text" aria-label="Loading summary" />
+      </div>,
+    );
+
+    const root = screen.getByRole("status", { name: "Loading summary" });
+    expect(root.getAttribute("aria-busy")).toBe("true");
+  });
+
+  it("renders the requested number of text lines", () => {
     render(
       <div dir={dir}>
         <Skeleton variant="text" count={4} aria-label="Loading summary" />
       </div>,
     );
 
-    const root = screen.getByLabelText("Loading summary");
-    expect(root.getAttribute("aria-busy")).toBe("true");
-    expect(root.children.length).toBe(4);
+    expect(
+      screen.getByRole("status", { name: "Loading summary" }).children.length,
+    ).toBe(4);
   });
 
   it("renders a single card block", () => {
@@ -22,7 +33,9 @@ describe.each(["ltr", "rtl"] as const)("Skeleton (dir=%s)", (dir) => {
       </div>,
     );
 
-    expect(screen.getByLabelText("Loading card").children.length).toBe(1);
+    expect(
+      screen.getByRole("status", { name: "Loading card" }).children.length,
+    ).toBe(1);
   });
 
   it("renders rows x columns for table-rows", () => {
@@ -37,7 +50,7 @@ describe.each(["ltr", "rtl"] as const)("Skeleton (dir=%s)", (dir) => {
       </div>,
     );
 
-    const root = screen.getByLabelText("Loading table");
+    const root = screen.getByRole("status", { name: "Loading table" });
     expect(root.children.length).toBe(3);
     expect(root.children[0]?.children.length).toBe(5);
   });
@@ -49,7 +62,9 @@ describe.each(["ltr", "rtl"] as const)("Skeleton (dir=%s)", (dir) => {
       </div>,
     );
 
-    const block = screen.getByLabelText("Loading").firstElementChild;
+    const block = screen.getByRole("status", {
+      name: "Loading",
+    }).firstElementChild;
     expect(block?.className).toContain("motion-reduce:animate-none");
   });
 });
