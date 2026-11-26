@@ -49,7 +49,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
-| 1 Contracts | 1/7 | 0/6 | 0/2 | ☐ |
+| 1 Contracts | 2/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
@@ -156,6 +156,22 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
   2. there's no `Retry-After` on 429 and no `X-Request-ID`;
   3. a typo in a scenario name gives an unclear 500.
 - Idea: a parity test of fixtures ↔ `ENDPOINTS` ↔ `openapi.json`.
+
+**#52 merged** (`8cf1c1b`, P1.1) on Developer A's go. **Backend review of the frontend's #54** (Toast, `799fd09`, 7191428081). Nothing blocking:
+- the installed `sonner` container `<section>` is already `aria-live="polite"`, so the `role="status"`/`role="alert"` inside it is a nested live region, which some screen readers announce twice;
+- error toasts could show the API's `correlation_id`.
+
+**P1.2: `app/core/workflow.py`** (branch `feat/p1.2-workflow-definition`):
+- `PortRef(node_id, port)`, `Node(id, operation: OperationRef, params: dict[str, JsonValue], label?)` and `Edge(source, target)`.
+- `InputContract(name, artifact_type, columns, targets)`: the expected columns feed replay drift (P13.2).
+- `OutputContract(name, artifact_type, source)`.
+- `ResourcePolicy`: defaults and maximums are 10 files, 50 MiB per file, 120 s per node and 900 s per run (D8, P19.3).
+- `ReviewPolicy(on_warning: continue | review)`, default `review`.
+- `WorkflowDefinition(workflow_id?, workflow_version?, schema_version: 1, nodes, edges, inputs, outputs, resource_policy, review_policy)`. A draft has neither ID nor version; a saved version has both.
+- Names (node IDs, ports, IO names) match `^[A-Za-z0-9_-]{1,64}$`. A label is free Unicode, up to 100 characters.
+- **Shapes only.** Unique IDs, known ports, no cycles and the limits belong to the P2 validator, which returns a report. So an empty workflow is a valid shape.
+- **The API's `WorkflowDefinition` placeholder (an object) is not replaced yet.** That changes `openapi.json` and the frontend's types, so it goes with the JSON Schema export in P1.6, as the placeholder's docstring says. The drift check passes.
+- **TDD:** `test_core_workflow.py` was red first (no module), then 29 passed. Checks: ruff clean (51 files), **453 passed**, no drift.
 
 ## Session 15 — 2026-11-26 (`D:\Projects\replora`, after Session 14 on the other machine)
 **Goal:** check that this machine matches Session 14, answer the frontend, and finalize P0.5 and P0.8.
