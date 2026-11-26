@@ -12,15 +12,15 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|
 | Current phase | **Phase 1 — Core contracts (B1), Session 16.** `main` is at **`881de20`** (#60 P1.4), CI green, 491 passed. Developer A is the gate approver for G1.
 
-**Phase 1 steps:** 5/7. Merged: P1.1 #52, P1.2 #56 + #59, P1.3 #57, P1.4 #60. **P1.5** is in the open PR `feat/p1.5-run-state` (T1.5 ticked there). Tests 3/6 (T1.3–T1.5). Security 0/2.
+**Phase 1 steps:** 5/7. Merged: P1.1 #52, P1.2 #56 + #59, P1.3 #57, P1.4 #60. **P1.5** is in #68 (T1.5 ticked there); the resolve endpoint (P1.5b) is in `feat/p1.5b-resolve-review`, stacked on it. Tests 3/6 (T1.3–T1.5). Security 0/2.
 
-**Open PRs:** `feat/p1.5-run-state` (P1.5). Frontend: #58, #61–#65 approved by Developer A (theirs to merge); **#66** has a change request (numeric column alignment in RTL). |
+**Open PRs:** #68 (P1.5), `feat/p1.5b-resolve-review` (P1.5b). Frontend: #58, #61–#65, #67 approved by Developer A (theirs to merge); **#66** has a change request (numeric column alignment in RTL). |
 | Last gate passed | **G0** (2026-11-26, both developers, #1). |
-| Waiting on | **Frontend:** review the P1.5 PR; fix #66; merge #58 and #61–#65; the #53/#54 follow-ups; the `CSRF_FAILED` retry; close #1.
+| Waiting on | **Frontend:** review #68 and the P1.5b PR (a contract change: `schema.d.ts`); fix #66; merge #58 and #61–#65; the #53/#54 follow-ups; the `CSRF_FAILED` retry; close #1.
 
 **Developer A:** on this machine, `pre-commit install` and `git config --global user.email "143901646+khaledhagar@users.noreply.github.com"` (both blocked for Claude). |
-| Next step | 1) Merge the P1.5 PR after the frontend approves it.
-2) **P1.5b**: the `NEEDS_REVIEW` resolution endpoint (`api_contract.md` §7 says it is specified with the P1.5 table at G1). Contract change, frontend review.
+| Next step | 1) Merge #68, then the P1.5b PR (rebase it onto `main` first), after the frontend approves each.
+2) P1.5b is done in its PR (see the Session 16 log).
 3) **P1.6**: JSON Schemas in `contracts/schemas/` plus valid and invalid golden fixtures (T1.6). It replaces the API's `WorkflowDefinition` placeholder, so `openapi.json` and `schema.d.ts` change.
 4) **P1.7** audit (T1.1, T1.2 for every model), **S‑10** (semgrep ban in CI), **S‑11**, then the end-of-phase test run and **G1**.
 5) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). Not Phase 1. |
@@ -147,7 +147,15 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **TDD:** `test_run_state.py` was red first (collection error, no module), then **297 passed**. **T1.5:** all 144 pairs are checked against an `ALLOWED` set written out by hand from §7, plus all 144 `(state, action)` pairs against the table. Also: approve only in `AWAITING_APPROVAL`, the cancel rules, resolve, terminal states have no way out, every state is reachable from `DRAFT`, the table can't be changed at runtime, and the API reuses the core enum.
 - **The tests bite:** making `NEEDS_REVIEW` cancel go to `CANCEL_REQUESTED` fails 3, and allowing `FAILED → RUNNING` fails 2. Restored, 297 pass.
 - Checks: ruff clean (58 files), **788 passed**, no drift.
-- **P1.5 and T1.5 ticked.**
+- **P1.5 and T1.5 ticked.** Opened as **#68**. Also approved the frontend's new **#67** (error-code mapper, `41ac63d`): its `PROBLEM_CODES` equals the 26 `problem_codes`.
+
+**P1.5b: the `NEEDS_REVIEW` resolution endpoint** (branch `feat/p1.5b-resolve-review`, stacked on #68). `api_contract.md` §7 said it is specified with the P1.5 table at G1.
+- `POST /workspaces/{ws}/runs/{id}/resolve` (`runs_resolve`): body `ResolveRequest {plan_hash, choices: [ReviewChoice {code, path, value}]}` (1–100 choices), a required `Idempotency-Key`, and 200 `Run` back. It's a 501 stub until Phase 8.
+- `Run.review_issues: [Issue]` (default `[]`): the open questions. Each issue lists its allowed answers in `params.options`.
+- The cancel docstring now says `NEEDS_REVIEW` stops at once. `api_contract.md` §7 has the resolve row, `review_issues`, the cancel rule and the **transition table**.
+- **TDD:** 9 red (the path, the idempotency key, the 422 bodies, the schema fields), then 30 passed in `test_run_stubs.py`.
+- **The contract change only adds:** a script comparing `HEAD` and the new `openapi.json` shows schemas added `JsonValue`, `ResolveRequest`, `ReviewChoice`, none removed; the path added is `…/resolve`, no path changed; `Run` gains only the optional `review_issues` (`required` unchanged). `schema.d.ts` regenerated.
+- Checks: ruff clean (58 files), **795 passed**, no drift, frontend typecheck clean and **186 passed**.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.

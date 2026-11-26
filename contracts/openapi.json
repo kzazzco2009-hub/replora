@@ -4692,13 +4692,149 @@
         }
       }
     },
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/resolve": {
+      "post": {
+        "tags": [
+          "runs"
+        ],
+        "summary": "Resolve",
+        "description": "Answer the review questions: a new `plan_hash`, waiting again in `AWAITING_APPROVAL`.\n\nOnly from `NEEDS_REVIEW`; otherwise 409 `INVALID_STATE_TRANSITION`.\n409 `PLAN_HASH_MISMATCH` if the plan changed since it was reviewed.",
+        "operationId": "runs_resolve",
+        "parameters": [
+          {
+            "name": "ws_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ws Id"
+            }
+          },
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "One per user action, reused on retry. A reuse with another body is 409",
+              "title": "Idempotency-Key"
+            },
+            "description": "One per user action, reused on retry. A reuse with another body is 409"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`UNAUTHENTICATED` (no session, or it expired): go to sign-in",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`CSRF_FAILED`, `EMAIL_NOT_VERIFIED`, or not allowed in this workspace",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (`code: VALIDATION_FAILED`, details in `errors`)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`RATE_LIMITED` (see `Retry-After`)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not implemented yet (contract stub)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not yours",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/workspaces/{ws_id}/runs/{run_id}/cancel": {
       "post": {
         "tags": [
           "runs"
         ],
         "summary": "Cancel",
-        "description": "Ask to stop. From `AWAITING_APPROVAL`, `QUEUED` or `RUNNING`; else 409.",
+        "description": "Ask to stop (`AWAITING_APPROVAL`, `QUEUED`, `RUNNING`); `NEEDS_REVIEW` stops at once.",
         "operationId": "runs_cancel",
         "parameters": [
           {
@@ -7301,6 +7437,7 @@
         ],
         "title": "Issue"
       },
+      "JsonValue": {},
       "Limits": {
         "properties": {
           "max_file_size": {
@@ -8094,6 +8231,57 @@
         ],
         "title": "ResetPasswordRequest"
       },
+      "ResolveRequest": {
+        "properties": {
+          "plan_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Plan Hash",
+            "description": "Lowercase hex SHA-256"
+          },
+          "choices": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewChoice"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Choices"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_hash",
+          "choices"
+        ],
+        "title": "ResolveRequest",
+        "description": "Answer a `NEEDS_REVIEW` run. `plan_hash` is the plan the user reviewed."
+      },
+      "ReviewChoice": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "value": {
+            "$ref": "#/components/schemas/JsonValue"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "path",
+          "value"
+        ],
+        "title": "ReviewChoice",
+        "description": "The user's answer to one of the run's `review_issues`, picked from its `params.options`."
+      },
       "Run": {
         "properties": {
           "id": {
@@ -8170,6 +8358,15 @@
               }
             ],
             "title": "Finished At"
+          },
+          "review_issues": {
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": "array",
+            "title": "Review Issues",
+            "description": "What the user must decide while the run is `NEEDS_REVIEW`",
+            "default": []
           }
         },
         "additionalProperties": false,

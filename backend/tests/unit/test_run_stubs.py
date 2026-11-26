@@ -11,6 +11,7 @@ IDEMPOTENT = {"Idempotency-Key": UUID}
 FROM_DRAFT = {"draft_id": UUID}
 FROM_WORKFLOW = {"workflow_id": UUID, "version": 1, "file_ids": [UUID]}
 APPROVE = {"plan_hash": "a" * 64}
+RESOLVE = APPROVE | {"choices": [{"code": "DATE_AMBIGUOUS", "path": "nodes/0", "value": "DMY"}]}
 STATES = {
     "DRAFT", "VALIDATED", "AWAITING_APPROVAL", "QUEUED", "RUNNING", "NEEDS_REVIEW", "SUCCEEDED",
     "PARTIAL", "FAILED", "CANCEL_REQUESTED", "CANCELLED", "EXPIRED",
@@ -20,6 +21,7 @@ STATES = {
 ENDPOINTS = [
     ("post", RUNS, 201, FROM_DRAFT, "runs_create"),
     ("post", f"{RUN}/approve", 202, APPROVE, "runs_approve"),
+    ("post", f"{RUN}/resolve", 200, RESOLVE, "runs_resolve"),
     ("post", f"{RUN}/cancel", 202, None, "runs_cancel"),
     ("get", RUNS, 200, None, "runs_list"),
     ("get", RUN, 200, None, "runs_get"),
@@ -60,9 +62,10 @@ def test_lifecycle_paths_are_all_documented(openapi):
     assert documented == {(method, path) for method, path, *_ in ENDPOINTS}
 
 
-@pytest.mark.parametrize("path", [RUNS, f"{RUN}/approve"])
-def test_create_and_approve_require_an_idempotency_key(client, openapi, path):
-    body = FROM_DRAFT if path == RUNS else APPROVE
+@pytest.mark.parametrize(
+    ("path", "body"), [(RUNS, FROM_DRAFT), (f"{RUN}/approve", APPROVE), (f"{RUN}/resolve", RESOLVE)]
+)
+def test_state_changing_actions_require_an_idempotency_key(client, openapi, path, body):
     response = client.post(path.format(**IDS), json=body)
     header = next(
         param
@@ -98,6 +101,21 @@ def test_approve_needs_a_sha256_plan_hash(client, plan_hash):
     assert client.post(url, json={"plan_hash": plan_hash}, headers=IDEMPOTENT).status_code == 422
 
 
+@pytest.mark.parametrize(
+    "body",
+    [
+        {"choices": RESOLVE["choices"]},
+        APPROVE,
+        APPROVE | {"choices": []},
+        APPROVE | {"choices": [{"code": "DATE_AMBIGUOUS", "path": "nodes/0"}]},
+    ],
+)
+def test_resolve_needs_the_reviewed_plan_hash_and_one_choice_or_more(client, body):
+    url = f"{RUN}/resolve".format(**IDS)
+
+    assert client.post(url, json=body, headers=IDEMPOTENT).status_code == 422
+
+
 def test_list_is_a_cursor_page_filtered_by_state(client, openapi, schemas):
     listing = operation(openapi, "get", RUNS)
 
@@ -117,8 +135,10 @@ def test_run_schemas_match_contract(schemas):
     assert set(schemas["RunState"]["enum"]) == STATES
     assert set(schemas["Run"]["properties"]) == {
         "id", "state", "plan_hash", "definition", "nodes", "summary", "approved_by",
-        "approved_at", "created_at", "finished_at",
+        "approved_at", "created_at", "finished_at", "review_issues",
     }  # fmt: skip
+    assert set(schemas["ResolveRequest"]["properties"]) == {"plan_hash", "choices"}
+    assert set(schemas["ReviewChoice"]["properties"]) == {"code", "path", "value"}
     assert set(schemas["RunNode"]["properties"]) == {
         "node_id", "operation_id", "state", "attempt", "started_at", "finished_at", "error_code",
         "warnings",
