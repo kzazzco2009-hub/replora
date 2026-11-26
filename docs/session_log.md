@@ -42,9 +42,9 @@ Append a new entry per session (newest at the top). For each step record: what w
 - GitHub "Keep my email addresses private" is done (#1, 7185139284). Check the `noreply` git email on both machines.
 
 **Both owners:** decide on a `LICENSE`. |
-| Next step | 1) **#41 change:** `Preview.rows` becomes `[{row, status, cells}]`. `row` is the lineage row number, and `status` is `ReconcileStatus`. Document in `Column` that an `integer` cell stays within ±(2^53 − 1); larger values are a `decimal` column with string cells.
+| Next step | 1) **#41 and #42 changes are done (Session 15).** They wait on the frontend's re-review. #41 is now `7790f9e` and #42 is `f125e7c` (rebased on it). Both are CI green.
 
-2) **#42 change:** `WorkflowVersionCreate.mapping` becomes `dict[str, dict[str, str]]` (`{input: {expected: found}}`, keyed like `InputDrift.input`). An input left out is unchanged; an unknown input or column is a 422.
+2) **Stack heads:** #40 `6dcabef` (approved), #41 `7790f9e`, #42 `f125e7c`. After #40 merges, retarget #41 to `main` and rebase with `--onto origin/main 6dcabef`. Then rebase #42 with `--onto <new #41 head> 7790f9e`.
 
 3) **#40 follow-ups (before G8, answered on #1 7186123958):** `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED` (P1.5). `RunEvent.payload` becomes a discriminated union on `type`.
 
@@ -185,6 +185,17 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - `required_status_checks`: `Secret scan (gitleaks)`, `Backend (lint, test, audit)` and `Frontend (lint, typecheck, test, audit)`.
 
 `gh api repos/kzazzco2009-hub/replora` gives `allow_merge_commit: false` and `allow_rebase_merge: false`. Fork-PR approval (403) and secret scanning (field empty) need admin rights, so they're on the frontend's word until they confirm them in the UI.
+
+**#41 change (`7790f9e`, a new commit so the delta is easy to review):**
+- `Preview.rows` is `PreviewRow[]` = `{row ≥ 0, status: ReconcileStatus | null, cells}`. `status` is null outside a reconciliation, which the frontend's proposal didn't cover.
+- An `integer` cell is limited to ±(2^53 − 1) in the type, so it shows as `minimum`/`maximum` in `openapi.json`.
+- TDD: 2 red, then **327 passed**. Ruff, drift, `tsc` and prettier clean, CI green. Commented on #41 (7186468639).
+
+**#42 rebase and change:**
+- `git rebase --onto 7790f9e d138c28` was clean. Regenerating changed nothing, and range-diff shows `=` (`7dbec8e`), with 350 passed.
+- Then `f125e7c`: `mapping: dict[str, dict[str, str]]` (`{input: {expected: found}}`). The docstring says an input left out keeps its columns and an unknown one is a 422. The §7 and §8 stub notes in `api_contract.md` are updated.
+- TDD: 4 red, then **352 passed**. All checks clean, CI green. Pushed with `--force-with-lease`. Commented on #42 (7186470568).
+- The work was done in a scratch worktree, so the uncommitted `plan.md` line in the main clone wasn't touched.
 
 **P0.5 not ticked:** it waits on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
 
