@@ -11,15 +11,35 @@ from app.db.models.identity import (
     User,
     Workspace,
 )
+from app.db.models.work import (
+    Artifact,
+    Draft,
+    File,
+    Job,
+    Run,
+    RunEvent,
+    RunNode,
+    Workflow,
+    WorkflowVersion,
+)
 
 __all__ = [
+    "Artifact",
     "AuditEvent",
     "AuthToken",
+    "Draft",
+    "File",
     "Invitation",
+    "Job",
     "Membership",
     "MfaRecoveryCode",
     "RateLimit",
+    "Run",
+    "RunEvent",
+    "RunNode",
     "Session",
     "User",
+    "Workflow",
+    "WorkflowVersion",
     "Workspace",
 ]

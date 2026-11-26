@@ -40,6 +40,10 @@ def test_every_table_is_documented_in_plan_section_6():
     assert set(Base.metadata.tables) <= set(DOCUMENTED)
 
 
+def test_every_plan_section_6_table_exists():
+    assert set(DOCUMENTED) <= set(Base.metadata.tables)
+
+
 @pytest.mark.parametrize("name", sorted(models.__all__))
 def test_every_documented_index_exists(name):
     table = getattr(models, name).__table__
@@ -109,3 +113,58 @@ def test_a_user_is_in_a_workspace_once(db):
 def test_foreign_keys_are_enforced(db):
     with pytest.raises(IntegrityError, match="FOREIGN KEY"), db.begin() as session:
         session.add(models.Workspace(name="x", owner_id=uuid7()))
+
+
+def seeded(session):
+    """A user, their workspace, a saved workflow version and a run of it."""
+    owner = user()
+    session.add(owner)
+    session.flush()
+    space = models.Workspace(name="Salma", owner_id=owner.id, personal=True)
+    session.add(space)
+    session.flush()
+    flow = models.Workflow(workspace_id=space.id, name="Reconcile", created_by=owner.id)
+    session.add(flow)
+    session.flush()
+    version = models.WorkflowVersion(workflow_id=flow.id, version=1, definition={},
+                                     plan_hash="a" * 64)  # fmt: skip
+    session.add(version)
+    session.flush()
+    run = models.Run(workspace_id=space.id, workflow_version_id=version.id, state="QUEUED",
+                     plan_hash="a" * 64, idempotency_key="k1")  # fmt: skip
+    session.add(run)
+    session.flush()
+    return space, flow, run
+
+
+@pytest.mark.parametrize(
+    "duplicate",
+    [
+        lambda s, space, flow, run: models.Run(workspace_id=space.id, state="QUEUED",
+                                               plan_hash="a" * 64, idempotency_key="k1"),
+        lambda s, space, flow, run: models.WorkflowVersion(workflow_id=flow.id, version=1,
+                                                           definition={}, plan_hash="b" * 64),
+        lambda s, space, flow, run: models.RunNode(run_id=run.id, node_id="a", state="DONE"),
+        lambda s, space, flow, run: models.RunEvent(run_id=run.id, seq=1, type="x", payload={}),
+    ],
+    ids=["run idempotency key", "workflow version", "run node", "run event seq"],
+)  # fmt: skip
+def test_work_uniques_are_enforced(db, duplicate):
+    with db.begin() as session:
+        space, flow, run = seeded(session)
+        session.add(models.RunNode(run_id=run.id, node_id="a", state="DONE"))
+        session.add(models.RunEvent(run_id=run.id, seq=1, type="x", payload={}))
+    with pytest.raises(IntegrityError), db.begin() as session:
+        session.add(duplicate(session, space, flow, run))
+
+
+def test_json_documents_round_trip(db):
+    definition = {"nodes": [{"id": "a", "label": "رقم الطلب"}], "edges": []}
+    with db.begin() as session:
+        space, flow, run = seeded(session)
+        session.add(models.WorkflowVersion(workflow_id=flow.id, version=2,
+                                           definition=definition, plan_hash="c" * 64))  # fmt: skip
+    with db() as session:
+        stored = session.scalars(select(models.WorkflowVersion).where(
+            models.WorkflowVersion.version == 2)).one()  # fmt: skip
+    assert stored.definition == definition
