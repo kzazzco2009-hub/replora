@@ -2,7 +2,17 @@
 
 from fastapi import APIRouter
 
-from app.api.v1 import auth, drafts, files, health, operations, outputs, runs, workspaces
+from app.api.v1 import (
+    auth,
+    drafts,
+    files,
+    health,
+    operations,
+    outputs,
+    runs,
+    workflows,
+    workspaces,
+)
 
 router = APIRouter(prefix="/api/v1")
 router.include_router(health.router)
@@ -15,3 +25,4 @@ router.include_router(drafts.templates)
 router.include_router(drafts.drafts)
 router.include_router(runs.router)
 router.include_router(outputs.router)
+router.include_router(workflows.router)

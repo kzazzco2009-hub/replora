@@ -92,6 +92,10 @@
       "status": 409,
       "description": "The Idempotency-Key was already used with a different request (client bug)."
     },
+    "BASE_VERSION_STALE": {
+      "status": 409,
+      "description": "A newer workflow version exists. Reload the workflow, then map again from the latest version."
+    },
     "INTERNAL_ERROR": {
       "status": 500,
       "description": "Unexpected server error. Show the correlation_id so support can find it."
