@@ -15,5 +15,18 @@
   },
   "home": {
     "title": "Replora"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "newRun": "تشغيل جديد",
+    "runs": "التشغيلات",
+    "workflows": "مسارات العمل",
+    "files": "الملفات",
+    "settings": "الإعدادات",
+    "more": "المزيد"
+  },
+  "shell": {
+    "primaryNav": "التنقل الرئيسي",
+    "skipToContent": "تخطي إلى المحتوى الرئيسي"
   }
 }

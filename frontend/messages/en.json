@@ -15,5 +15,18 @@
   },
   "home": {
     "title": "Replora"
+  },
+  "nav": {
+    "home": "Home",
+    "newRun": "New run",
+    "runs": "Runs",
+    "workflows": "Workflows",
+    "files": "Files",
+    "settings": "Settings",
+    "more": "More"
+  },
+  "shell": {
+    "primaryNav": "Primary navigation",
+    "skipToContent": "Skip to main content"
   }
 }
