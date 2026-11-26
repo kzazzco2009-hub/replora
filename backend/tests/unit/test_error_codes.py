@@ -64,6 +64,11 @@ def test_validation_codes_are_exactly_what_the_api_emits(error_codes):
         # §1 optimistic concurrency on PATCH (drafts, workflows).
         ("PRECONDITION_FAILED", 412),
         ("PRECONDITION_REQUIRED", 428),
+        # §7 runs: state rules and idempotency.
+        ("DRAFT_INVALID", 422),
+        ("PLAN_HASH_MISMATCH", 409),
+        ("INVALID_STATE_TRANSITION", 409),
+        ("IDEMPOTENCY_KEY_MISMATCH", 409),
     ],
 )
 def test_agreed_problem_codes_are_listed(error_codes, code, status):
