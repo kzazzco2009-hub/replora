@@ -8,28 +8,34 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 1 — Core contracts (B1), Session 15.** G0 passed on 2026-11-26 (both developers, #51 `a1a7bb3`). `main` is at **`8cf1c1b`** (#52, P1.1), CI green. Developer A is the gate approver for G1.
+| Current phase | **Phase 1 — Core contracts (B1), Session 15.** G0 passed on 2026-11-26 (both developers, #51 `a1a7bb3`). `main` is at **`6190e52`**, CI green, 476 passed. Developer A is the gate approver for G1.
 
 **Phase 0:** done. 11/11 steps, T0.1–T0.7 and S‑01…S‑05 re-run on `main` `8e8b24b` (Session 15 log).
 
-**Phase 1 steps:** 1/7. **P1.1** is merged (#52, `8cf1c1b`).
+**Phase 1 steps:** 4/7.
+- Merged: **P1.1** #52 (`8cf1c1b`), **P1.2** #56 (`30b1025`) plus the IO labels #59 (`6190e52`), and **P1.3** #57 (`458c23b`).
+- **P1.4** `plan_hash` is in the open PR `feat/p1.4-plan-hash`. T1.3 and T1.4 are ticked there.
 
-**Open PRs:** **#55** `chore/license` (the `LICENSE`, waiting on the frontend), and the frontend's **#54** (Toast, waiting on the backend review). The frontend's #49 (`bc2c173`) and #53 (`d5bfee2`) are merged. |
+**Open PRs:** `feat/p1.4-plan-hash` (P1.4), and the frontend's **#58** (typed client, approved by Developer A at `2276713`, theirs to merge). `LICENSE` #55 (`3600675`) and the frontend's #54 (`961c56b`) are merged. |
 | Last gate passed | **G0** (2026-11-26, both developers, #1). Before it: planning approved (plan v1.1, D1–D14). |
-| Waiting on | **Frontend:** approve #55 (`LICENSE`). Their own docs PR ticks P9.4 and their F0 gate line (`docs/frontend/plan.md:107`). Delete their 20 merged branches, turn on "Automatically delete head branches", and say whether to close #1 (all asked on #55, 7191219916).
+| Waiting on | **Frontend** (all listed on #1, 7192116461):
+- review the P1.4 PR;
+- merge #58, then its points 2–4 (storage `PUT` off the client, retry once on `CSRF_FAILED`, reset the idempotency key on a body change);
+- the #53 and #54 follow-ups;
+- their docs PR (P9.4 and the F0 gate line, `docs/frontend/plan.md:107`);
+- delete their 21 merged branches;
+- close #1.
 
 **Developer A (backend):** `pre-commit install` on the **other machine** too (done on this one, Session 15). Check that `git config --global user.email` is the `noreply` address there as well.
 
-**Developer A:** review #54 (Toast).
-
-**Both owners:** `LICENSE` = proprietary, "All rights reserved" (Developer A chose it on 2026-11-26; #55 needs the frontend's approval). |
-| Next step | 1) **P1.2**: `Node`, `Edge` and `WorkflowDefinition` in `app/core/` on `ContractModel` (frozen, `extra="forbid"`). One small PR per step. Before every push to a PR, check its reviews, because a push dismisses an approval.
+**Owners:** `LICENSE` is done (proprietary, #55). Auto-delete of merged branches is on. |
+| Next step | 1) **Merge the P1.4 PR** after the frontend approves it. Then **P1.5**: the `RunState` enum and transition table as data. `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED`. T1.5 is the exhaustive 12×12 test. One small PR per step. Before every push to a PR, check its reviews, because a push dismisses an approval.
 
 2) **#40 follow-ups in Phase 1 (answered on #1 7186123958):** `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED` (P1.5). `RunEvent.payload` becomes a discriminated union on `type`.
 
 3) **If a §2 schema changes:** update the matching file in `contracts/fixtures/auth/` in the same PR (`test_auth_fixtures.py` fails until you do). |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
-1. `git fetch --all --prune; git switch main; git pull --ff-only` (if the P1.1 PR is still open: `git switch feat/p1.1-core-contracts; git pull --ff-only`). Then read "Current status".
+1. `git fetch --all --prune; git switch main; git pull --ff-only` (if the P1.4 PR is still open: `git switch feat/p1.4-plan-hash; git pull --ff-only`). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`. Once per clone: `pre-commit install`.
 3. Check: `git status` is clean. Then `cd backend; uv run pytest -q; uv run python -m app.export_openapi --check; cd ..`. On `main` `8e8b24b`: 402 passed, no drift (later commits are docs or frontend only).
 4. **Old local branches:** every Phase 0 branch is merged. Check each one's PR is `MERGED`, then `git branch -D <name>`. Merged remote branches are for their author to delete.
@@ -49,7 +55,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
-| 1 Contracts | 3/7 | 0/6 | 0/2 | ☐ |
+| 1 Contracts | 4/7 | 2/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
@@ -188,6 +194,24 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
   - `Explanation` is either a `key` (with optional `params`) or a `text`.
 - **New `WorkflowDraft(definition, explanation, warnings=[])`**: what a planner returns. It's never trusted, because the validator re-checks it (P12.3).
 - **TDD:** `test_core_draft.py` was red first (no module), then 20 passed. Checks: ruff clean (54 files), **473 passed**, no drift.
+
+**Merges (Developer A's go, each with the frontend's approval on its final head and CI 4/4):** #56 P1.2 (`30b1025`), #57 P1.3 (`458c23b`, rebased on `main`) and #59 IO labels (`6190e52`). The combined `main` gives **476 passed**, no drift. Also merged: the frontend's #54. **Developer A approved the frontend's #58** at `2276713`. Its new commit (a non-JSON error falls back to `INTERNAL_ERROR`, with 3 tests) was read before approving.
+
+**P1.4: `app/core/plan_hash.py`** (branch `feat/p1.4-plan-hash`):
+- `canonical_json(value)` is `json.dumps(sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)` in UTF-8.
+- **Numbers are normalized:** an integral float within ±(2^53 − 1) is written as an int, so `2.0 → 2` and `-0.0 → 0`. JSON, and so the browser, can't tell those apart. Other floats keep their shortest round-trip form (`0.1`, `1e+300`). NaN and ±inf raise `ValueError`.
+- `plan_hash(definition)` = lowercase hex SHA-256 of `canonical_json(definition.model_dump(mode="json"))`. The whole definition counts, including the workflow version and the policies.
+- Strings are hashed as given, with no Unicode normalization (two different column names must never collide). List order counts.
+- **New dev dependency `hypothesis` 6.170.17** (MPL-2.0, released 2026-11-20, pip-audit clean), with `uv add --dev hypothesis`.
+- **Tests** (`test_plan_hash.py`, 15):
+  - a **golden hash** for a fixed definition with an Arabic label and `2.0`. Its canonical bytes were checked by eye, and `sha256sum` on those bytes gave the same `0edcdef6…08e0`;
+  - the canonical form, number normalization, and NaN/inf rejected;
+  - **T1.3** (hypothesis): random key order plus indented JSON gives the same hash;
+  - **T1.4** (hypothesis): adding or changing a node param, adding an edge, or bumping an operation version or the workflow version changes the hash.
+- **The tests bite:** with `sort_keys=False`, 3 fail. With number normalization off, 4 fail. Restored, 15 pass.
+- ruff caught `Random(seed)` (S311), so the test uses hypothesis `st.randoms()`.
+- Checks: ruff clean (56 files), **491 passed**, no drift.
+- **P1.4, T1.3 and T1.4 ticked.** S‑11 stays open, because it also needs T3.1 (the approver ID and time).
 
 ## Session 15 — 2026-11-26 (`D:\Projects\replora`, after Session 14 on the other machine)
 **Goal:** check that this machine matches Session 14, answer the frontend, and finalize P0.5 and P0.8.
