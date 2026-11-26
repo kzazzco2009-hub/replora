@@ -219,10 +219,10 @@ Goal: frozen domain models that both developers rely on.
 - [x] P3.7 Replay: re-run a pinned workflow version on new inputs. A contract mismatch leads to NEEDS_REVIEW.
 - [x] P3.8 `MockPlanner` plus fake adapters (fake ZIP with fake CSV and JSON branches). This is the integration test for the original S1.4. **The MockPlanner is test-only.**
 - [x] P3.9 `TemplatePlanner` (user-facing, deterministic). Templates such as "Reconcile two files on a key" and "Merge files with the same columns" are filled from file metadata (column-name matching). This is what MVP users get before the AI planner exists, and it remains the fallback afterwards.
-- [ ] Tests T3.* pass · Security S‑13 verified · **Gate G3 (equivalent of original Sprint 1 exit)**
+- [x] Tests T3.* pass · Security S‑13 verified · **Gate G3 (equivalent of original Sprint 1 exit)**
 
 ### Phase 4 — Persistence layer (SQLite locally, Postgres-ready) (M)
-- [ ] P4.1 SQLAlchemy 2 engine and session from `DATABASE_URL`. SQLite uses WAL and `foreign_keys=ON`. Postgres uses psycopg 3, and `NullPool` is configured for serverless.
+- [x] P4.1 SQLAlchemy 2 engine and session from `DATABASE_URL`. SQLite uses WAL and `foreign_keys=ON`. Postgres uses psycopg 3, and `NullPool` is configured for serverless.
 - [ ] P4.2 Models: `users`, `workspaces`, `memberships`, `sessions`, `files`, `artifacts`, `workflows`, `workflow_versions`, `drafts`, `runs`, `run_nodes`, `jobs`, `audit_events`, `rate_limits`. All IDs are UUIDv7 and all timestamps are UTC.
 - [ ] P4.3 **Indexes on every table** (see §6 below). They are verified by a test that inspects the metadata.
 - [ ] P4.4 Alembic setup (`render_as_batch=True` for SQLite). The initial migration. `upgrade` and `downgrade` are tested.

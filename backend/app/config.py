@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     debug: bool = False
     openrouter_api_key: SecretStr | None = None
+    database_url: str = f"sqlite:///{(REPO_ROOT / '.data' / 'replora.db').as_posix()}"
+    """P4.1: SQLite under `.data/` locally; the Supabase pooler URL in production (Phase 18)."""
     approval_ttl_hours: Annotated[int, Field(ge=1)] = 24
     """P3.6: a run awaiting approval for longer than this expires."""
 
