@@ -3,53 +3,33 @@
 **Read this file first at the start of every session.** Then continue from "Next step".
 Append a new entry per session (newest at the top). For each step record: what was done, the commands run, the results (pass or fail counts), and the decisions made.
 
-> **Start here (Session 16, the other machine):**
-> 1. Run `D:\Projects\replora_handover.md` Parts 1–5 (memory, sync, setup, checks, GitHub).
-> 2. **Approve the frontend's #58** at `75528d1`. It's re-reviewed (7192378154), but Claude's approval was blocked:
->    `gh pr review 58 -R kzazzco2009-hub/replora --approve -b "Re-approved 75528d1 (see 7192378154)."`
->    If its head has moved, read the new commits first.
-> 3. **#60 (P1.4):** check the frontend's review on the current head (`gh api repos/kzazzco2009-hub/replora/pulls/60/reviews`) and CI 4/4. Then merge on the user's go: `gh pr merge 60 -R kzazzco2009-hub/replora --squash`.
-> 4. Then **P1.5** (see "Next step").
+> **Start here (next session):** read "Current status" and "Next step". Session 16 is finishing Phase 1 one PR per step; open PRs are listed below.
 
 ---
 
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 1 — Core contracts (B1), Session 15.** G0 passed on 2026-11-26 (both developers, #51 `a1a7bb3`). `main` is at **`6190e52`**, CI green, 476 passed. Developer A is the gate approver for G1.
+| Current phase | **Phase 1 — Core contracts (B1), Session 16.** `main` is at **`881de20`** (#60 P1.4), CI green, 491 passed. Developer A is the gate approver for G1.
 
-**Phase 0:** done. 11/11 steps, T0.1–T0.7 and S‑01…S‑05 re-run on `main` `8e8b24b` (Session 15 log).
+**Phase 1 steps:** 5/7. Merged: P1.1 #52, P1.2 #56 + #59, P1.3 #57, P1.4 #60. **P1.5** is in the open PR `feat/p1.5-run-state` (T1.5 ticked there). Tests 3/6 (T1.3–T1.5). Security 0/2.
 
-**Phase 1 steps:** 4/7.
-- Merged: **P1.1** #52 (`8cf1c1b`), **P1.2** #56 (`30b1025`) plus the IO labels #59 (`6190e52`), and **P1.3** #57 (`458c23b`).
-- **P1.4** `plan_hash` is in the open PR `feat/p1.4-plan-hash`. T1.3 and T1.4 are ticked there.
+**Open PRs:** `feat/p1.5-run-state` (P1.5). Frontend: #58, #61–#65 approved by Developer A (theirs to merge); **#66** has a change request (numeric column alignment in RTL). |
+| Last gate passed | **G0** (2026-11-26, both developers, #1). |
+| Waiting on | **Frontend:** review the P1.5 PR; fix #66; merge #58 and #61–#65; the #53/#54 follow-ups; the `CSRF_FAILED` retry; close #1.
 
-**Open PRs:** `feat/p1.4-plan-hash` (P1.4), and the frontend's **#58** (typed client, approved by Developer A at `2276713`, theirs to merge). `LICENSE` #55 (`3600675`) and the frontend's #54 (`961c56b`) are merged. |
-| Last gate passed | **G0** (2026-11-26, both developers, #1). Before it: planning approved (plan v1.1, D1–D14). |
-| Waiting on | **Frontend** (all listed on #1, 7192116461):
-- review the P1.4 PR;
-- merge #58, then its points 2–4 (storage `PUT` off the client, retry once on `CSRF_FAILED`, reset the idempotency key on a body change);
-- the #53 and #54 follow-ups;
-- their docs PR (P9.4 and the F0 gate line, `docs/frontend/plan.md:107`);
-- delete their 21 merged branches;
-- close #1.
-
-**Developer A (backend):**
-- **approve #58 at `75528d1`** (re-reviewed, comment 7192378154; the permission check blocked Claude's approval);
-- on the **other machine**, follow `D:\Projects\replora_handover.md` (Session 15 end). It covers `pre-commit install`, the `noreply` git email and the Claude memory files.
-
-**Owners:** `LICENSE` is done (proprietary, #55). Auto-delete of merged branches is on. |
-| Next step | 1) **Merge the P1.4 PR** after the frontend approves it. Then **P1.5**: the `RunState` enum and transition table as data. `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED`. T1.5 is the exhaustive 12×12 test. One small PR per step. Before every push to a PR, check its reviews, because a push dismisses an approval.
-
-2) **#40 follow-ups in Phase 1 (answered on #1 7186123958):** `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED` (P1.5). `RunEvent.payload` becomes a discriminated union on `type`.
-
-3) **If a §2 schema changes:** update the matching file in `contracts/fixtures/auth/` in the same PR (`test_auth_fixtures.py` fails until you do). |
+**Developer A:** on this machine, `pre-commit install` and `git config --global user.email "143901646+khaledhagar@users.noreply.github.com"` (both blocked for Claude). |
+| Next step | 1) Merge the P1.5 PR after the frontend approves it.
+2) **P1.5b**: the `NEEDS_REVIEW` resolution endpoint (`api_contract.md` §7 says it is specified with the P1.5 table at G1). Contract change, frontend review.
+3) **P1.6**: JSON Schemas in `contracts/schemas/` plus valid and invalid golden fixtures (T1.6). It replaces the API's `WorkflowDefinition` placeholder, so `openapi.json` and `schema.d.ts` change.
+4) **P1.7** audit (T1.1, T1.2 for every model), **S‑10** (semgrep ban in CI), **S‑11**, then the end-of-phase test run and **G1**.
+5) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). Not Phase 1. |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
-1. `git fetch --all --prune; git switch main; git pull --ff-only` (if the P1.4 PR is still open: `git switch feat/p1.4-plan-hash; git pull --ff-only`). Then read "Current status".
+1. `git fetch --all --prune; git switch main; git pull --ff-only` (if a log PR is still open, switch to its branch and pull). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`. Once per clone: `pre-commit install`.
-3. Check: `git status` is clean. Then `cd backend; uv run pytest -q; uv run python -m app.export_openapi --check; cd ..`. On `main` `8e8b24b`: 402 passed, no drift (later commits are docs or frontend only).
+3. Check: `git status` is clean. Then `cd backend; uv run pytest -q; uv run python -m app.export_openapi --check; cd ..`. See "Current status" for the expected count.
 4. **Old local branches:** every Phase 0 branch is merged. Check each one's PR is `MERGED`, then `git branch -D <name>`. Merged remote branches are for their author to delete.
-5. GitHub: `gh pr list -R kzazzco2009-hub/replora --state all --limit 20` and the new #1 comments (id > 7190303587).
+5. GitHub: `gh pr list -R kzazzco2009-hub/replora --state all --limit 20` and the new #1 comments (id > 7200405319).
 6. The Claude Code memory on each machine is local and may be stale. **This log is the source of truth.**
 
 **Notes:**
@@ -65,7 +45,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
-| 1 Contracts | 4/7 | 2/6 | 0/2 | ☐ |
+| 1 Contracts | 5/7 | 3/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
@@ -142,6 +122,32 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 **After the owner's installs (same session):** gitleaks 8.30.1 · pnpm 12.23.0 · Node 26.13.1 · uv 0.13.9 · Python 3.14 (uv-managed) · pre-commit 4.7.0. git 2.49 and gh 2.102 kept as they are.
 
 ---
+
+## Session 16 — 2026-11-26 (other machine, `D:\Projects\replora`): finish Phase 1
+**Goal (Developer A):** finish Phase 1 without stopping for permission between steps. Check for frontend replies at every step and post the state.
+
+**Setup:** ran handover Parts 1–5. 12 merged local branches were deleted (each PR `MERGED`, #27–#45), and the memory notes were restored. On `feat/p1.4-plan-hash` `5570037`: ruff clean (56 files), **491 passed**, no drift, pip-audit clean, frontend lint/typecheck/test **186 passed** (26 files), gitleaks no leaks. Not done here: `pre-commit install` and the `noreply` email in global git config (blocked for Claude, left to Developer A).
+
+**Merges and reviews:**
+- **#60 (P1.4) merged** as `881de20` (frontend approval at `5570037`, CI 4/4, Developer A's standing go).
+- **Developer A's approvals** on the frontend's PRs, each delta read first: **#58** `75528d1`, **#61** `6d19d8d` (docs), **#62** Select `99f0a68`, **#63** Tabs `7c3f520`, **#64** StatusChip + Skeleton `8771fa1` (the 12 states match `api_contract.md:154`), **#65** EmptyState + ErrorState `65f60ce`.
+- **#66 Table `44d097a`: changes requested in a comment.** In RTL, a numeric `<td dir="ltr">` resolves `text-end` to the right, while its `<th>` resolves it to the left. The test compares class names only. Suggested fix: keep the `<td>` in the table direction and wrap the digits in `<span dir="ltr">`.
+- State posted on #1 (7200405319).
+
+**P1.5: `app/core/run_state.py`** (branch `feat/p1.5-run-state`):
+- `RunState` (12, moved from `run_models.py` with the same docstring, so **`openapi.json` is unchanged**) and `RunAction` (12 actions).
+- `TRANSITIONS`: a read-only `(state, action) → state` table with **16 entries**:
+  - `DRAFT →validate→ VALIDATED →request_approval→ AWAITING_APPROVAL`, and `VALIDATED →request_review→ NEEDS_REVIEW`;
+  - `AWAITING_APPROVAL`: `approve → QUEUED`, `expire → EXPIRED`, `cancel → CANCEL_REQUESTED`;
+  - `NEEDS_REVIEW`: `resolve → AWAITING_APPROVAL` (a new `plan_hash`, approved again), and `cancel → CANCELLED` straight away (#1, 7186123958);
+  - `QUEUED`: `start → RUNNING`, `cancel → CANCEL_REQUESTED`;
+  - `RUNNING`: `succeed`, `finish_partial`, `fail`, `request_review → NEEDS_REVIEW` (a low-confidence result or replay drift, P3.4 and P13.2), `cancel → CANCEL_REQUESTED`;
+  - `CANCEL_REQUESTED →confirm_cancel→ CANCELLED` (the worker checks between nodes, P3.6).
+- `TERMINAL_STATES` (`SUCCEEDED`, `PARTIAL`, `FAILED`, `CANCELLED`, `EXPIRED`) is derived from the table. `next_state()` raises `InvalidTransitionError` with `params = {from, action}`, which is the 409 `INVALID_STATE_TRANSITION` body. `can_move(source, target)` answers for a pair.
+- **TDD:** `test_run_state.py` was red first (collection error, no module), then **297 passed**. **T1.5:** all 144 pairs are checked against an `ALLOWED` set written out by hand from §7, plus all 144 `(state, action)` pairs against the table. Also: approve only in `AWAITING_APPROVAL`, the cancel rules, resolve, terminal states have no way out, every state is reachable from `DRAFT`, the table can't be changed at runtime, and the API reuses the core enum.
+- **The tests bite:** making `NEEDS_REVIEW` cancel go to `CANCEL_REQUESTED` fails 3, and allowing `FAILED → RUNNING` fails 2. Restored, 297 pass.
+- Checks: ruff clean (58 files), **788 passed**, no drift.
+- **P1.5 and T1.5 ticked.**
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
