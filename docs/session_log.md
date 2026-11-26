@@ -395,6 +395,16 @@ PR **#85** (stacked on #84).
 - `make_engine`: SQLite runs `PRAGMA journal_mode=WAL` and `foreign_keys=ON` on every connection. Postgres gets the psycopg 3 driver (a plain `postgres://` URL from Supabase is normalized) and `NullPool`. `make_sessions` uses `expire_on_commit=False`.
 - `uv run pytest -q`: **1440 passed**. ruff is clean, pip-audit clean, no drift, no leaks.
 
+PR **#86** (stacked on #85).
+
+**P4.2 and P4.3 part 1: the base and the identity tables** (`app/db/base.py`, `app/db/models/identity.py`, `tests/unit/test_db_models.py`). The models came first here. The tests were then mutation-checked: dropping an index, the case-insensitive email index, the UTC conversion, the naive-timestamp refusal, or the foreign-keys pragma each fails 2–3 tests.
+- **Base:** UUIDv7 primary keys (`uuid.uuid7`). `UtcDateTime` stores and returns UTC and refuses a naive datetime. JSON becomes JSONB on Postgres. A naming convention covers PK, FK and check constraints; indexes are named by hand, as §6 lists them.
+- **Tables:** users (`uq_users_email` on `lower(email)`), workspaces (plus `personal`), memberships, sessions, auth_tokens, invitations, mfa_recovery_codes, audit_events (the actor is SET NULL on user deletion, so the entry is anonymized; S‑29) and rate_limits.
+- **T4.6 (part):** the test parses `plan.md` §6 (18 tables). Every table is documented, every documented index exists, and every FK column leads an index. §6 gains `ix_invitations_invited_by` and `workspaces.personal`.
+- **T4.5:** IDs are v7 and sort in creation order; a +03:00 time round-trips as UTC.
+- **T4.7 (part):** a duplicate email in different case → IntegrityError; a duplicate membership → IntegrityError; FKs are enforced.
+- `uv run pytest -q`: **1469 passed**. ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 
