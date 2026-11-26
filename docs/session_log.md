@@ -8,26 +8,26 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation: done. Gate G0 passed (2026-11-26, both developers).** `main` is at **`3932c3a`** (#50), CI green. Merged in Session 15: #40, #41, #42, #44, #45, **#43** (`ff55103`) and **#50** (`3932c3a`), plus the frontend's #39, #46, #47 and #48.
+| Current phase | **Phase 1 — Core contracts (B1), Session 15.** G0 passed on 2026-11-26 (both developers, #51 `a1a7bb3`). `main` is at **`a1a7bb3`**, CI green. Developer A is the gate approver for G1.
 
-**Phase 0:** 11/11 steps, T0.1–T0.7 and S‑01…S‑05, all re-run on `main` `8e8b24b` (Session 15 log). G0 approvals: Developer A 7189738362 and Developer B 7190193580 on #1, conditional on #43 and #50, which are both merged. Recorded in `decisions.md` by this PR.
+**Phase 0:** done. 11/11 steps, T0.1–T0.7 and S‑01…S‑05 re-run on `main` `8e8b24b` (Session 15 log).
 
-**Phase 1 (Contracts) starts after this PR merges.** Developer A is the gate approver for G1.
+**Phase 1 steps:** 1/7. **P1.1** is done in the open PR `feat/p1.1-core-contracts`.
 
-**Open PRs:** this one (`docs/g0-gate`), and the frontend's **#49** (Dialog and Sheet, `b3ab133`, approved by Developer A, theirs to merge). |
+**Open PRs:** `feat/p1.1-core-contracts` (P1.1). The frontend's #49 is merged (`bc2c173`). |
 | Last gate passed | **G0** (2026-11-26, both developers, #1). Before it: planning approved (plan v1.1, D1–D14). |
-| Waiting on | **Frontend:** review this PR. Their own docs PR ticks P9.4 and their F0 gate line (`docs/frontend/plan.md:107`).
+| Waiting on | **Frontend:** review the P1.1 PR. Their own docs PR ticks P9.4 and their F0 gate line (`docs/frontend/plan.md:107`).
 
 **Developer A (backend):** `pre-commit install` on the **other machine** too (done on this one, Session 15). Check that `git config --global user.email` is the `noreply` address there as well.
 
 **Both owners:** decide on a `LICENSE`. |
-| Next step | 1) **Merge this PR** after the frontend approves it. Then start **Phase 1 — Contracts** (`docs/plan.md`, `docs/backend_plan.md` B1), one small PR per step, starting at P1.1.
+| Next step | 1) **Merge the P1.1 PR** after the frontend approves it. Then **P1.2**: `Node`, `Edge` and `WorkflowDefinition` in `app/core/` on `ContractModel` (frozen, `extra="forbid"`). One small PR per step.
 
 2) **#40 follow-ups in Phase 1 (answered on #1 7186123958):** `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED` (P1.5). `RunEvent.payload` becomes a discriminated union on `type`.
 
 3) **If a §2 schema changes:** update the matching file in `contracts/fixtures/auth/` in the same PR (`test_auth_fixtures.py` fails until you do). |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
-1. `git fetch --all --prune; git switch main; git pull --ff-only` (if this PR is still open: `git switch docs/g0-gate; git pull --ff-only`). Then read "Current status".
+1. `git fetch --all --prune; git switch main; git pull --ff-only` (if the P1.1 PR is still open: `git switch feat/p1.1-core-contracts; git pull --ff-only`). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`. Once per clone: `pre-commit install`.
 3. Check: `git status` is clean. Then `cd backend; uv run pytest -q; uv run python -m app.export_openapi --check; cd ..`. On `main` `8e8b24b`: 402 passed, no drift (later commits are docs or frontend only).
 4. **Old local branches:** every Phase 0 branch is merged. Check each one's PR is `MERGED`, then `git branch -D <name>`. Merged remote branches are for their author to delete.
@@ -47,7 +47,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
-| 1 Contracts | 0/7 | 0/6 | 0/2 | ☐ |
+| 1 Contracts | 1/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
@@ -124,6 +124,28 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 **After the owner's installs (same session):** gitleaks 8.30.1 · pnpm 12.23.0 · Node 26.13.1 · uv 0.13.9 · Python 3.14 (uv-managed) · pre-commit 4.7.0. git 2.49 and gh 2.102 kept as they are.
 
 ---
+
+## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
+**Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
+
+**Design:** `app/core/` is now the single source of these types (plan §3: pure, no I/O):
+- `model.py`: `ContractModel` (`extra="forbid"`, `frozen=True`; P1.7 for these models).
+- `artifact_type.py`: `ArtifactType` (11 kinds). It's its own module so that `artifacts` and `operations` don't import each other.
+- `operations.py`: `Port`, `OperationContract` and `OperationRef`.
+- `artifacts.py`:
+  - `ArtifactRef` = `id`, `type`, `format` (`^[a-z0-9]{1,16}$`), `sha256` (64 lowercase hex), `workspace_id` (the owner scope) and `lineage`.
+  - `ArtifactLineage`: an upload has no run, node, operation or parents. A produced artifact has `run_id`, `node_id` and `operation` together, plus its `parents`.
+- The API modules (`operation_models.py`, `output_models.py`) now re-export these classes and keep the same names and docstrings. So **`openapi.json` is unchanged**: the drift check exits 0, and the frontend's types are untouched. `OperationRef` moved from `output_models.py` to core.
+
+**TDD:** `tests/unit/test_core_contracts.py` was red first (collection error, no `app.core`), then **22 passed**. It covers the 11 kinds, round-trips (dict and JSON), extra fields rejected, frozen, the `sha256` and `format` patterns, the lineage rules, an unknown artifact type rejected, and the API reusing the core classes.
+
+| Check | Result |
+|---|---|
+| `uv run ruff check .` · `ruff format --check .` | clean · 49 files formatted |
+| `uv run pytest -q` | **424 passed** |
+| `uv run python -m app.export_openapi --check` | exit 0, no drift |
+
+**P1.1 ticked.** T1.1 and T1.2 are covered for these models, but stay open until P1.2–P1.5 add theirs.
 
 ## Session 15 — 2026-11-26 (`D:\Projects\replora`, after Session 14 on the other machine)
 **Goal:** check that this machine matches Session 14, answer the frontend, and finalize P0.5 and P0.8.

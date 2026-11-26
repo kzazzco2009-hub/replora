@@ -7,7 +7,8 @@ from uuid import UUID
 from pydantic import Field
 
 from app.api.models import ApiModel
-from app.api.v1.operation_models import ArtifactType
+from app.core.artifact_type import ArtifactType
+from app.core.operations import OperationRef
 
 ReconcileStatus = Literal["matched", "value_diff", "missing_left", "missing_right"]
 MAX_SAFE_INTEGER = 2**53 - 1
@@ -59,11 +60,6 @@ class LineageSource(ApiModel):
     member_path: str | None = None
     row: int
     page: int | None = None
-
-
-class OperationRef(ApiModel):
-    id: str
-    version: int
 
 
 class Lineage(ApiModel):
