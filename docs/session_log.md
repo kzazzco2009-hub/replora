@@ -44,7 +44,11 @@ Append a new entry per session (newest at the top). For each step record: what w
 **Both owners:** decide on a `LICENSE`. |
 | Next step | 1) **#41 and #42 changes are done (Session 15).** They wait on the frontend's re-review. #41 is now `7790f9e` and #42 is `f125e7c` (rebased on it). Both are CI green.
 
-2) **Merged in Session 15 (owner's go):** #40 (`d45be72`), #44 (`cabb1d1`) and #45 (`e86d475`). `main` = **`e86d475`**. Before merging, a trial merge of #44 and #45 together onto `d45be72` gave 358 passed and no drift. #43 was rebased onto `e86d475`. The one conflict, at the last row of `decisions.md`, was resolved by keeping all three rows: the ruleset row, the #45 co-owner row and the 2026-11-26 row.
+2) **Merged in Session 15 (owner's go):** #40 (`d45be72`), #44 (`cabb1d1`), #45 (`e86d475`) and **#41 (`f07e323`)**. `main` = **`f07e323`**.
+
+**#42 is retargeted to `main` and rebased (`--onto origin/main 8f0a159`) → `84f588b`.** Range-diff shows `=` for both commits, 402 passed, no drift, and CI is green (run 45790068558). It waits on the frontend's re-approval (asked on #42). **When it merges:** tick P0.5 and change its `plan.md` text (`openapi-fetch` → P9.6, proposed on #1, 7187542043) in a small docs PR. Then Phase 0 is 11/11, and we stop for G0.
+
+Earlier steps: Before merging, a trial merge of #44 and #45 together onto `d45be72` gave 358 passed and no drift. #43 was rebased onto `e86d475`. The one conflict, at the last row of `decisions.md`, was resolved by keeping all three rows: the ruleset row, the #45 co-owner row and the 2026-11-26 row.
 
 **Stack:** #41 now targets `main`, rebased to **`8f0a159`** (range-diff `=`, CI green), and waits on the frontend's re-approval (asked on #41, 7186862641). #42 is rebased on it, **`1a9e27b`** (range-diff `=`). After #41 merges: `gh pr edit 42 --base main`, then `git rebase --onto origin/main 8f0a159`, regenerate, range-diff, push and ask for a re-approval. Every rebase push dismisses the approval (`dismiss_stale_reviews_on_push`).
 
