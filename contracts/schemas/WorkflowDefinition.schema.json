@@ -1,0 +1,351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "WorkflowDefinition.schema.json",
+  "$defs": {
+    "ArtifactType": {
+      "description": "The 11 artifact kinds a port can carry (P1.1). Ports match exactly, with no conversion.",
+      "enum": [
+        "RawFile",
+        "ArchiveManifest",
+        "TabularArtifact",
+        "TextDocumentArtifact",
+        "PagedArtifact",
+        "PresentationArtifact",
+        "ImageArtifact",
+        "StructuredObjectArtifact",
+        "ValidationReport",
+        "ComparisonReport",
+        "OutputFile"
+      ],
+      "title": "ArtifactType",
+      "type": "string"
+    },
+    "Edge": {
+      "additionalProperties": false,
+      "description": "Data flows from an output port to an input port.",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/PortRef"
+        },
+        "target": {
+          "$ref": "#/$defs/PortRef"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "Edge",
+      "type": "object"
+    },
+    "InputContract": {
+      "additionalProperties": false,
+      "description": "A file the workflow needs, its expected columns (for replay drift) and the ports it feeds.",
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z0-9_-]{1,64}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "artifact_type": {
+          "$ref": "#/$defs/ArtifactType"
+        },
+        "columns": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "targets": {
+          "items": {
+            "$ref": "#/$defs/PortRef"
+          },
+          "title": "Targets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "artifact_type",
+        "targets"
+      ],
+      "title": "InputContract",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "Node": {
+      "additionalProperties": false,
+      "description": "One step: a pinned operation version and its parameters.",
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9_-]{1,64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "operation": {
+          "$ref": "#/$defs/OperationRef"
+        },
+        "params": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "default": {},
+          "title": "Params",
+          "type": "object"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "id",
+        "operation"
+      ],
+      "title": "Node",
+      "type": "object"
+    },
+    "OperationRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "title": "OperationRef",
+      "type": "object"
+    },
+    "OutputContract": {
+      "additionalProperties": false,
+      "description": "A result the workflow gives, taken from one node's output port.",
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z0-9_-]{1,64}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "artifact_type": {
+          "$ref": "#/$defs/ArtifactType"
+        },
+        "source": {
+          "$ref": "#/$defs/PortRef"
+        }
+      },
+      "required": [
+        "name",
+        "artifact_type",
+        "source"
+      ],
+      "title": "OutputContract",
+      "type": "object"
+    },
+    "PortRef": {
+      "additionalProperties": false,
+      "description": "One port of one node.",
+      "properties": {
+        "node_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,64}$",
+          "title": "Node Id",
+          "type": "string"
+        },
+        "port": {
+          "pattern": "^[A-Za-z0-9_-]{1,64}$",
+          "title": "Port",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "port"
+      ],
+      "title": "PortRef",
+      "type": "object"
+    },
+    "ResourcePolicy": {
+      "additionalProperties": false,
+      "description": "Per-run limits. The defaults are the platform maximums (D8, P19.3).",
+      "properties": {
+        "max_files": {
+          "default": 10,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Max Files",
+          "type": "integer"
+        },
+        "max_file_size": {
+          "default": 52428800,
+          "maximum": 52428800,
+          "minimum": 1,
+          "title": "Max File Size",
+          "type": "integer"
+        },
+        "node_timeout_seconds": {
+          "default": 120,
+          "maximum": 120,
+          "minimum": 1,
+          "title": "Node Timeout Seconds",
+          "type": "integer"
+        },
+        "run_timeout_seconds": {
+          "default": 900,
+          "maximum": 900,
+          "minimum": 1,
+          "title": "Run Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "ResourcePolicy",
+      "type": "object"
+    },
+    "ReviewPolicy": {
+      "additionalProperties": false,
+      "description": "What a run does when a node reports warnings: carry on, or stop as NEEDS_REVIEW.",
+      "properties": {
+        "on_warning": {
+          "default": "review",
+          "enum": [
+            "continue",
+            "review"
+          ],
+          "title": "On Warning",
+          "type": "string"
+        }
+      },
+      "title": "ReviewPolicy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The typed workflow that is approved, hashed (P1.4) and run.\n\nA draft has no `workflow_id` or `workflow_version`. A saved version has both.",
+  "properties": {
+    "workflow_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Workflow Id"
+    },
+    "workflow_version": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Workflow Version"
+    },
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/Node"
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/Edge"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "inputs": {
+      "items": {
+        "$ref": "#/$defs/InputContract"
+      },
+      "title": "Inputs",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/OutputContract"
+      },
+      "title": "Outputs",
+      "type": "array"
+    },
+    "resource_policy": {
+      "$ref": "#/$defs/ResourcePolicy",
+      "default": {
+        "max_files": 10,
+        "max_file_size": 52428800,
+        "node_timeout_seconds": 120,
+        "run_timeout_seconds": 900
+      }
+    },
+    "review_policy": {
+      "$ref": "#/$defs/ReviewPolicy",
+      "default": {
+        "on_warning": "review"
+      }
+    }
+  },
+  "required": [
+    "nodes",
+    "edges",
+    "inputs",
+    "outputs"
+  ],
+  "title": "WorkflowDefinition",
+  "type": "object"
+}

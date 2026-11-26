@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "OperationContract.schema.json",
+  "$defs": {
+    "ArtifactType": {
+      "description": "The 11 artifact kinds a port can carry (P1.1). Ports match exactly, with no conversion.",
+      "enum": [
+        "RawFile",
+        "ArchiveManifest",
+        "TabularArtifact",
+        "TextDocumentArtifact",
+        "PagedArtifact",
+        "PresentationArtifact",
+        "ImageArtifact",
+        "StructuredObjectArtifact",
+        "ValidationReport",
+        "ComparisonReport",
+        "OutputFile"
+      ],
+      "title": "ArtifactType",
+      "type": "string"
+    },
+    "Port": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "artifact_type": {
+          "$ref": "#/$defs/ArtifactType"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "artifact_type",
+        "required"
+      ],
+      "title": "Port",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A known operation. The frontend renders its parameter form from `params_schema`.",
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "version": {
+      "title": "Version",
+      "type": "integer"
+    },
+    "title_key": {
+      "description": "i18n key for the operation's name",
+      "title": "Title Key",
+      "type": "string"
+    },
+    "inputs": {
+      "items": {
+        "$ref": "#/$defs/Port"
+      },
+      "title": "Inputs",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/Port"
+      },
+      "title": "Outputs",
+      "type": "array"
+    },
+    "params_schema": {
+      "additionalProperties": true,
+      "description": "JSON Schema, limited to the subset in docs/api_contract.md §5: string, integer, boolean, enum and array of strings; no oneOf, anyOf or $ref",
+      "title": "Params Schema",
+      "type": "object"
+    }
+  },
+  "required": [
+    "id",
+    "version",
+    "title_key",
+    "inputs",
+    "outputs",
+    "params_schema"
+  ],
+  "title": "OperationContract",
+  "type": "object"
+}

@@ -1,0 +1,15 @@
+{
+  "valid": {
+    "valid_with_warning": {"valid": true, "errors": [], "warnings": [{"code": "COLUMN_RENAMED", "path": "nodes/0/params/column"}]},
+    "failed": {"valid": false, "errors": [{"code": "PORT_UNBOUND", "path": "nodes/0/inputs/file", "node_id": "orders"}], "warnings": []}
+  },
+  "invalid": {
+    "missing_valid": {"errors": [], "warnings": []},
+    "issue_without_code": {"valid": false, "errors": [{"path": "nodes/0"}], "warnings": []},
+    "extra_field": {"valid": true, "errors": [], "warnings": [], "score": 1}
+  },
+  "invalid_backend_only": {
+    "valid_with_errors": {"valid": true, "errors": [{"code": "PORT_UNBOUND", "path": "nodes/0"}], "warnings": []},
+    "invalid_without_errors": {"valid": false, "errors": [], "warnings": []}
+  }
+}

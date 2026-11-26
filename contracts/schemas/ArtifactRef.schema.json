@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ArtifactRef.schema.json",
+  "$defs": {
+    "ArtifactLineage": {
+      "additionalProperties": false,
+      "description": "How an artifact came to be.\n\nAn uploaded file has no run, node, operation or parents. A produced artifact names the run,\nnode and operation version that made it, and the artifacts it was made from.",
+      "properties": {
+        "run_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        },
+        "node_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Node Id"
+        },
+        "operation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OperationRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "parents": {
+          "default": [],
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Parents",
+          "type": "array"
+        }
+      },
+      "title": "ArtifactLineage",
+      "type": "object"
+    },
+    "ArtifactType": {
+      "description": "The 11 artifact kinds a port can carry (P1.1). Ports match exactly, with no conversion.",
+      "enum": [
+        "RawFile",
+        "ArchiveManifest",
+        "TabularArtifact",
+        "TextDocumentArtifact",
+        "PagedArtifact",
+        "PresentationArtifact",
+        "ImageArtifact",
+        "StructuredObjectArtifact",
+        "ValidationReport",
+        "ComparisonReport",
+        "OutputFile"
+      ],
+      "title": "ArtifactType",
+      "type": "string"
+    },
+    "OperationRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "title": "OperationRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A reference to a stored artifact. It is owned by exactly one workspace.",
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "type": {
+      "$ref": "#/$defs/ArtifactType"
+    },
+    "format": {
+      "description": "File format, for example `csv`",
+      "pattern": "^[a-z0-9]{1,16}$",
+      "title": "Format",
+      "type": "string"
+    },
+    "sha256": {
+      "description": "Lowercase hex SHA-256",
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "workspace_id": {
+      "format": "uuid",
+      "title": "Workspace Id",
+      "type": "string"
+    },
+    "lineage": {
+      "$ref": "#/$defs/ArtifactLineage"
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "format",
+    "sha256",
+    "workspace_id",
+    "lineage"
+  ],
+  "title": "ArtifactRef",
+  "type": "object"
+}

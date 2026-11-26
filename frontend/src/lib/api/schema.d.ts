@@ -1262,6 +1262,14 @@ export interface components {
         DraftUpdate: {
             definition: components["schemas"]["WorkflowDefinition"];
         };
+        /**
+         * Edge
+         * @description Data flows from an output port to an input port.
+         */
+        Edge: {
+            source: components["schemas"]["PortRef"];
+            target: components["schemas"]["PortRef"];
+        };
         /** EmailRequest */
         EmailRequest: {
             /**
@@ -1385,6 +1393,24 @@ export interface components {
             status: "ok";
             /** Version */
             version: string;
+        };
+        /**
+         * InputContract
+         * @description A file the workflow needs, its expected columns (for replay drift) and the ports it feeds.
+         */
+        InputContract: {
+            /** Name */
+            name: string;
+            /** Label */
+            label?: string | null;
+            artifact_type: components["schemas"]["ArtifactType"];
+            /**
+             * Columns
+             * @default []
+             */
+            columns: string[];
+            /** Targets */
+            targets: components["schemas"]["PortRef"][];
         };
         /** InputDrift */
         InputDrift: {
@@ -1625,6 +1651,24 @@ export interface components {
             mfa_required: true;
         };
         /**
+         * Node
+         * @description One step: a pinned operation version and its parameters.
+         */
+        Node: {
+            /** Id */
+            id: string;
+            operation: components["schemas"]["OperationRef"];
+            /**
+             * Params
+             * @default {}
+             */
+            params: {
+                [key: string]: components["schemas"]["JsonValue"];
+            };
+            /** Label */
+            label?: string | null;
+        };
+        /**
          * OperationContract
          * @description A known operation. The frontend renders its parameter form from `params_schema`.
          */
@@ -1685,6 +1729,18 @@ export interface components {
              */
             created_at: string;
         };
+        /**
+         * OutputContract
+         * @description A result the workflow gives, taken from one node's output port.
+         */
+        OutputContract: {
+            /** Name */
+            name: string;
+            /** Label */
+            label?: string | null;
+            artifact_type: components["schemas"]["ArtifactType"];
+            source: components["schemas"]["PortRef"];
+        };
         /** PasswordRequest */
         PasswordRequest: {
             /** Password */
@@ -1697,6 +1753,16 @@ export interface components {
             artifact_type: components["schemas"]["ArtifactType"];
             /** Required */
             required: boolean;
+        };
+        /**
+         * PortRef
+         * @description One port of one node.
+         */
+        PortRef: {
+            /** Node Id */
+            node_id: string;
+            /** Port */
+            port: string;
         };
         /**
          * Preview
@@ -1823,6 +1889,32 @@ export interface components {
             choices: components["schemas"]["ReviewChoice"][];
         };
         /**
+         * ResourcePolicy
+         * @description Per-run limits. The defaults are the platform maximums (D8, P19.3).
+         */
+        ResourcePolicy: {
+            /**
+             * Max Files
+             * @default 10
+             */
+            max_files: number;
+            /**
+             * Max File Size
+             * @default 52428800
+             */
+            max_file_size: number;
+            /**
+             * Node Timeout Seconds
+             * @default 120
+             */
+            node_timeout_seconds: number;
+            /**
+             * Run Timeout Seconds
+             * @default 900
+             */
+            run_timeout_seconds: number;
+        };
+        /**
          * ReviewChoice
          * @description The user's answer to one of the run's `review_issues`, picked from its `params.options`.
          */
@@ -1832,6 +1924,18 @@ export interface components {
             /** Path */
             path: string;
             value: components["schemas"]["JsonValue"];
+        };
+        /**
+         * ReviewPolicy
+         * @description What a run does when a node reports warnings: carry on, or stop as NEEDS_REVIEW.
+         */
+        ReviewPolicy: {
+            /**
+             * On Warning
+             * @default review
+             * @enum {string}
+             */
+            on_warning: "continue" | "review";
         };
         /** Run */
         Run: {
@@ -2196,10 +2300,44 @@ export interface components {
         };
         /**
          * WorkflowDefinition
-         * @description The typed workflow. An object until the Phase 1 JSON Schema (`contracts/schemas/`).
+         * @description The typed workflow that is approved, hashed (P1.4) and run.
+         *
+         *     A draft has no `workflow_id` or `workflow_version`. A saved version has both.
          */
         WorkflowDefinition: {
-            [key: string]: unknown;
+            /** Workflow Id */
+            workflow_id?: string | null;
+            /** Workflow Version */
+            workflow_version?: number | null;
+            /**
+             * Schema Version
+             * @default 1
+             * @constant
+             */
+            schema_version: 1;
+            /** Nodes */
+            nodes: components["schemas"]["Node"][];
+            /** Edges */
+            edges: components["schemas"]["Edge"][];
+            /** Inputs */
+            inputs: components["schemas"]["InputContract"][];
+            /** Outputs */
+            outputs: components["schemas"]["OutputContract"][];
+            /**
+             * @default {
+             *       "max_files": 10,
+             *       "max_file_size": 52428800,
+             *       "node_timeout_seconds": 120,
+             *       "run_timeout_seconds": 900
+             *     }
+             */
+            resource_policy: components["schemas"]["ResourcePolicy"];
+            /**
+             * @default {
+             *       "on_warning": "review"
+             *     }
+             */
+            review_policy: components["schemas"]["ReviewPolicy"];
         };
         /** WorkflowDetail */
         WorkflowDetail: {

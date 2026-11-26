@@ -66,6 +66,8 @@ jobs:
       - run: uv run pytest
       - name: Contract drift check (contracts/openapi.json)
         run: uv run python -m app.export_openapi --check
+      - name: Domain JSON Schema drift check (contracts/schemas/)
+        run: uv run python -m app.export_schemas --check
       - run: uv run pip-audit
 
   frontend:

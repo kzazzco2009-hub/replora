@@ -12,16 +12,16 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|
 | Current phase | **Phase 1 — Core contracts (B1), Session 16.** `main` is at **`881de20`** (#60 P1.4), CI green, 491 passed. Developer A is the gate approver for G1.
 
-**Phase 1 steps:** 5/7. Merged: P1.1 #52, P1.2 #56 + #59, P1.3 #57, P1.4 #60. **P1.5** is in #68 (T1.5 ticked there); the resolve endpoint (P1.5b) is in `feat/p1.5b-resolve-review`, stacked on it. Tests 3/6 (T1.3–T1.5). Security 0/2.
+**Phase 1 steps:** 6/7. Merged: P1.1 #52, P1.2 #56 + #59, P1.3 #57, P1.4 #60. Open stack: **P1.5** #68 → **P1.5b** #69 → **P1.6** `feat/p1.6-json-schemas`. Tests 4/6 (T1.3–T1.6). Security 0/2.
 
-**Open PRs:** #68 (P1.5), `feat/p1.5b-resolve-review` (P1.5b). Frontend: #58, #61–#65, #67 approved by Developer A (theirs to merge); **#66** has a change request (numeric column alignment in RTL). |
+**Open PRs:** #68 (P1.5), #69 (P1.5b), and the P1.6 PR, stacked in that order. Frontend: #58, #61–#65, #67 approved by Developer A (theirs to merge); **#66** has a change request (numeric column alignment in RTL). |
 | Last gate passed | **G0** (2026-11-26, both developers, #1). |
 | Waiting on | **Frontend:** review #68 and the P1.5b PR (a contract change: `schema.d.ts`); fix #66; merge #58 and #61–#65; the #53/#54 follow-ups; the `CSRF_FAILED` retry; close #1.
 
 **Developer A:** on this machine, `pre-commit install` and `git config --global user.email "143901646+khaledhagar@users.noreply.github.com"` (both blocked for Claude). |
 | Next step | 1) Merge #68, then the P1.5b PR (rebase it onto `main` first), after the frontend approves each.
 2) P1.5b is done in its PR (see the Session 16 log).
-3) **P1.6**: JSON Schemas in `contracts/schemas/` plus valid and invalid golden fixtures (T1.6). It replaces the API's `WorkflowDefinition` placeholder, so `openapi.json` and `schema.d.ts` change.
+3) P1.6 is done in its PR (contract change: `WorkflowDefinition` is typed now).
 4) **P1.7** audit (T1.1, T1.2 for every model), **S‑10** (semgrep ban in CI), **S‑11**, then the end-of-phase test run and **G1**.
 5) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). Not Phase 1. |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
@@ -45,7 +45,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
-| 1 Contracts | 5/7 | 3/6 | 0/2 | ☐ |
+| 1 Contracts | 6/7 | 4/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
@@ -155,7 +155,16 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - The cancel docstring now says `NEEDS_REVIEW` stops at once. `api_contract.md` §7 has the resolve row, `review_issues`, the cancel rule and the **transition table**.
 - **TDD:** 9 red (the path, the idempotency key, the 422 bodies, the schema fields), then 30 passed in `test_run_stubs.py`.
 - **The contract change only adds:** a script comparing `HEAD` and the new `openapi.json` shows schemas added `JsonValue`, `ResolveRequest`, `ReviewChoice`, none removed; the path added is `…/resolve`, no path changed; `Run` gains only the optional `review_issues` (`required` unchanged). `schema.d.ts` regenerated.
-- Checks: ruff clean (58 files), **795 passed**, no drift, frontend typecheck clean and **186 passed**.
+- Checks: ruff clean (58 files), **795 passed**, no drift, frontend typecheck clean and **186 passed**. Opened as **#69** (base #68).
+
+**P1.6: domain JSON Schemas and golden fixtures** (branch `feat/p1.6-json-schemas`, stacked on #69):
+- `app/export_schemas.py` writes `contracts/schemas/<Name>.schema.json` (draft 2020-12, with `$schema` and `$id`) for `ArtifactRef`, `OperationContract`, `RunState`, `ValidationReport`, `WorkflowDefinition` and `WorkflowDraft`, via `TypeAdapter(...).json_schema()`. `--check` fails on drift or a stale file. **CI runs it** in the backend job (new step).
+- `contracts/fixtures/domain/<Name>.json`: `valid`, `invalid` and `invalid_backend_only` cases. The last group breaks a cross-field rule that JSON Schema can't express (workflow id without version, explanation key xor text, `valid` ⇔ no errors, lineage completeness), so only the backend model rejects it.
+- **The API's `WorkflowDefinition` placeholder is replaced** by the core model (`draft_models.py` re-exports it). `openapi.json` gains `Edge`, `InputContract`, `Node`, `OutputContract`, `PortRef`, `ResourcePolicy`, `ReviewPolicy`; only `WorkflowDefinition` changed, and no path changed (comparison script). `schema.d.ts` regenerated; the frontend typecheck and its 186 tests pass. The draft stub test's sample PATCH body is now a real definition, and a new test shows `{}`, a definition missing `inputs`/`outputs`, or one with an extra field gets 422.
+- **TDD:** `test_domain_schemas.py` was red first (no `app.export_schemas`), then **60 passed**: drift, schema ↔ fixture file parity, each schema is valid draft 2020-12, valid cases pass the schema and round-trip (dict and JSON, T1.1), invalid cases fail the schema and the model, backend-only cases pass the schema and fail the model (T1.6).
+- **The tests bite:** a typo in a valid fixture's `code` fails 1; `additionalProperties: true` in a committed schema fails the drift test. Restored, 60 pass.
+- Checks: ruff clean, **856 passed**, both drift checks exit 0, frontend typecheck, format and 186 tests pass.
+- **P1.6 and T1.6 ticked.**
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.

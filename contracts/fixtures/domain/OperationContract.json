@@ -1,0 +1,18 @@
+{
+  "valid": {
+    "parse_csv": {
+      "id": "parse_csv",
+      "version": 1,
+      "title_key": "operations.parse_csv.title",
+      "inputs": [{"name": "file", "artifact_type": "RawFile", "required": true}],
+      "outputs": [{"name": "table", "artifact_type": "TabularArtifact", "required": true}],
+      "params_schema": {"type": "object", "properties": {"delimiter": {"type": "string", "enum": [",", ";", "|"]}}}
+    }
+  },
+  "invalid": {
+    "fractional_version": {"id": "parse_csv", "version": 1.5, "title_key": "t", "inputs": [], "outputs": [], "params_schema": {}},
+    "missing_title_key": {"id": "parse_csv", "version": 1, "inputs": [], "outputs": [], "params_schema": {}},
+    "port_without_required": {"id": "parse_csv", "version": 1, "title_key": "t", "inputs": [{"name": "file", "artifact_type": "RawFile"}], "outputs": [], "params_schema": {}},
+    "extra_field": {"id": "parse_csv", "version": 1, "title_key": "t", "inputs": [], "outputs": [], "params_schema": {}, "handler": "os.system"}
+  }
+}

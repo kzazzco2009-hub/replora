@@ -1,0 +1,12 @@
+{
+  "valid": {
+    "awaiting_approval": "AWAITING_APPROVAL",
+    "needs_review": "NEEDS_REVIEW",
+    "cancel_requested": "CANCEL_REQUESTED"
+  },
+  "invalid": {
+    "unknown": "DONE",
+    "lowercase": "running",
+    "not_a_string": 3
+  }
+}

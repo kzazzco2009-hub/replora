@@ -1,15 +1,16 @@
 """Request and response bodies for §6 templates and drafts (docs/api_contract.md)."""
 
 from datetime import datetime
-from typing import Annotated, Any, Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import Field, RootModel
+from pydantic import Field
 
 from app.api.models import ApiModel
 from app.core.artifact_type import ArtifactType
 from app.core.draft import Explanation
 from app.core.validation import Issue, ValidationReport
+from app.core.workflow import WorkflowDefinition
 
 __all__ = [
     "AiDisclosure",
@@ -27,10 +28,6 @@ __all__ = [
 
 Planner = Literal["template", "ai"]
 """`mock` exists only in test builds and is never exposed."""
-
-
-class WorkflowDefinition(RootModel[dict[str, Any]]):
-    """The typed workflow. An object until the Phase 1 JSON Schema (`contracts/schemas/`)."""
 
 
 class TemplateInput(ApiModel):
