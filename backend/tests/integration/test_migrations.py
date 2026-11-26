@@ -17,8 +17,8 @@ BACKEND = Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture
-def url(tmp_path) -> str:
-    return f"sqlite:///{(tmp_path / 'm.db').as_posix()}"
+def url(db_url) -> str:
+    return db_url
 
 
 def alembic(url: str) -> Config:

@@ -42,8 +42,8 @@ def seed(session, name: str, minutes: int = 0):
 
 
 @pytest.fixture
-def db(tmp_path):
-    engine = make_engine(f"sqlite:///{(tmp_path / 'r.db').as_posix()}")
+def db(db_url):
+    engine = make_engine(db_url)
     Base.metadata.create_all(engine)
     sessions = make_sessions(engine)
     with sessions.begin() as session:

@@ -20,8 +20,8 @@ DOCUMENTED = {table: set(re.findall(r"`((?:ix|uq)_\w+)", cell)) for table, cell 
 
 
 @pytest.fixture
-def db(tmp_path):
-    engine = make_engine(f"sqlite:///{(tmp_path / 't.db').as_posix()}")
+def db(db_url):
+    engine = make_engine(db_url)
     Base.metadata.create_all(engine)
     return make_sessions(engine)
 
@@ -111,7 +111,7 @@ def test_a_user_is_in_a_workspace_once(db):
 
 
 def test_foreign_keys_are_enforced(db):
-    with pytest.raises(IntegrityError, match="FOREIGN KEY"), db.begin() as session:
+    with pytest.raises(IntegrityError, match="(?i)foreign key"), db.begin() as session:
         session.add(models.Workspace(name="x", owner_id=uuid7()))
 
 
