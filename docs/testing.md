@@ -77,7 +77,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 
 ## Phase 3 — Execution engine
 **Unit**
-- [ ] T3.1 Approval with a wrong `plan_hash` is rejected. Changing the plan after approval invalidates the approval.
+- [x] T3.1 Approval with a wrong `plan_hash` is rejected. Changing the plan after approval invalidates the approval.
 - [ ] T3.2 Executor order respects the topology (fan-out and fan-in graph).
 - [ ] T3.3 A failure in a required branch gives FAILED. A failure in an optional branch gives PARTIAL with a warning. Low confidence gives NEEDS_REVIEW.
 - [ ] T3.4 A transient error is retried at most 2 extra times. A non-transient error is never retried.

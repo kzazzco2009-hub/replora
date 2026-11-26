@@ -207,11 +207,11 @@ Goal: frozen domain models that both developers rely on.
 - [x] P2.4 Validator, limit checks: ≤ 30 nodes, depth ≤ 10, fan-in and fan-out ≤ 10, plus file count and size limits from the resource policy.
 - [x] P2.5 Validator, version checks: unknown or unpinned operation versions are rejected.
 - [x] P2.6 Every error returns a stable `code` (for example `DAG_CYCLE` or `PORT_TYPE_MISMATCH`) plus the node and port location. The frontend translates codes to AR/EN.
-- [ ] Tests T2.* pass · Security S‑12 verified · **Gate G2**
+- [x] Tests T2.* pass · Security S‑12 verified · **Gate G2**
 
 ### Phase 3 — Execution engine (in-memory, fake adapters) (M)
-- [ ] P3.1 State machine: `transition(run, event)` enforces the P1.5 table. Illegal transitions raise errors.
-- [ ] P3.2 Approval: `approve(run, plan_hash)` must match the current plan hash exactly. A changed plan invalidates the approval.
+- [x] P3.1 State machine: `transition(run, event)` enforces the P1.5 table. Illegal transitions raise errors.
+- [x] P3.2 Approval: `approve(run, plan_hash)` must match the current plan hash exactly. A changed plan invalidates the approval.
 - [ ] P3.3 In-memory executor: topological order, node-by-node execution, outputs stored as artifacts with lineage.
 - [ ] P3.4 Failure semantics: a failed required branch makes the run FAILED, a failed optional branch makes it PARTIAL with warnings, and a low-confidence result makes it NEEDS_REVIEW.
 - [ ] P3.5 Retry: only `TransientError`, at most 2 extra attempts with backoff. Idempotency key = `(run_id, node_id, input_hashes)`, so a node is never executed twice for the same inputs.
