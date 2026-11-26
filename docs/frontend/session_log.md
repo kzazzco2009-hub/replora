@@ -8,7 +8,7 @@ Append a new entry per session (newest first). Record what was done, the command
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | Phase 0, frontend half (F0). P0.1, P0.4 done. P0.5 implemented on branch `feat/p0.5-gen-api`, PR open — not ticked until merged. |
+| Current phase | Phase 0, frontend half (F0), done. P9.1-P9.3 done. P9.4 in progress (PR A #46, PR B #47). P0.5 is all contract sections stubbed on the backend side, waiting for merges. |
 | Last gate passed | Planning approved. G0 agreement confirmed by both sides in issue #1. The formal G0 gate (end of Phase 0) is still open. |
 | Next step | P9.3 done (#30, #37, #38 merged). Next: P9.4 app shell. |
 | Blockers | none |
@@ -181,9 +181,7 @@ Done:
   - `gitleaks git .` → no leaks found (104 commits scanned).
 - PR #29 opened against `main` (not merged). Diff ≈ 300 lines, under the 400 cap.
 
-Next step: wait for CI and review on PR #29, then P9.3 (`next-intl`, `[locale]` routing, RTL).
-
-Next step: P9.4 app shell.
+Next step: P9.4 app shell (PRs #46, #47), then F2 (P9.5 UI kit, P9.6 data layer with openapi-fetch).
 
 ---
 
