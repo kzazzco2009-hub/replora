@@ -147,6 +147,14 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 **P1.1 ticked.** T1.1 and T1.2 are covered for these models, but stay open until P1.2–P1.5 add theirs.
 
+**Backend review of the frontend's #53** (MSW auth handlers, `910d053`, comment 7190985110). Nothing blocking:
+- A script compared the PR's `ENDPOINTS` table with `openapi.json`: 19/19 `auth_*` operations match on method and path (only the path parameter names differ). All 19 fixtures have `ok`, and every case is `{status, body}`.
+- Non-blocking points:
+  1. errors are mocked as `application/json`, not `application/problem+json`;
+  2. there's no `Retry-After` on 429 and no `X-Request-ID`;
+  3. a typo in a scenario name gives an unclear 500.
+- Idea: a parity test of fixtures ↔ `ENDPOINTS` ↔ `openapi.json`.
+
 ## Session 15 — 2026-11-26 (`D:\Projects\replora`, after Session 14 on the other machine)
 **Goal:** check that this machine matches Session 14, answer the frontend, and finalize P0.5 and P0.8.
 
