@@ -8,34 +8,35 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0), Session 15.** `main` is at **`6f7eb5f`**, CI green. Merged in Session 15: #40 (`d45be72`), #44 (`cabb1d1`), #45 (`e86d475`), #41 (`f07e323`), and the frontend's #39, #46 and #48.
+| Current phase | **Phase 0 — Foundation (B0), Session 15.** `main` is at **`8e8b24b`**, CI green. Merged in Session 15: #40 (`d45be72`), #44 (`cabb1d1`), #45 (`e86d475`), #41 (`f07e323`), **#42 (`8e8b24b`)**, and the frontend's #39, #46 and #48.
 
-**Steps:** 10/11. **P0.5 is the last open step.** It needs #42 merged. The `openapi-fetch` part moves to P9.6 (proposed on #1, 7187542043, and done in `docs/g0-readiness`).
+**Steps:** 10/11 on `main`. **P0.8 is ticked on this branch (#43)**, so it shows on `main` once #43 merges. **P0.5** can be ticked now that #42 has merged. The tick, with evidence from `8e8b24b`, is in the `docs/g0-readiness` PR, which also moves `openapi-fetch` to P9.6 (#1, 7187542043).
 
 **Ticked in Session 14:** P9.2 and P9.3 in `plan.md`. Owners: **both developers** (#45, merged).
 
 **Security:** 5/5 (S‑01 to S‑05).
 
 **Open PRs:**
-- **#42** `feat/p0.5-workflows-stubs` → `main`, `84f588b`: §8 workflows and replay, `BASE_VERSION_STALE`, stub notes in `api_contract.md`. CI green and mergeable. The frontend approved it, then the rebase push dismissed that approval, so **it needs a re-approval**. No new rebase is needed: the ruleset has `strict_required_status_checks_policy: false`, and `main` changed nothing in `backend/`, `contracts/` or `api_contract.md` since `f07e323`.
-- **#43** `docs/session-14-final` → `main` (this branch): the log, plus `.gitignore` for `replora_env_setup.txt`. **The newest log is on this branch until it merges.**
-- **`docs/g0-readiness`** (`e832420`, stacked on #43, no PR yet): G0 evidence, the G0 report draft, the P0.5 text fix and the B0 security tick. Open its PR after #42 merges.
-- Frontend: **#47** (locale switch, head `708cbb9`; the frontend pushed after Developer A's approval on `bca2816`, so it needs a re-review) and **#49** (Dialog and Sheet, `2617c7d`, not reviewed yet). |
+- **#43** `docs/session-14-final` → `main` (this branch): the log, the P0.8 tick, plus `.gitignore` for `replora_env_setup.txt`. **The newest log is on this branch until it merges.**
+- **`docs/g0-readiness`** (stacked on #43): G0 evidence, the G0 report, the P0.5 text fix and tick, and the B0 security tick.
+- Frontend: **#47** (locale switch, `708cbb9`, re-reviewed: nothing blocking) and **#49** (Dialog and Sheet, `2617c7d`, reviewed: the Sheet slide doesn't run). |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | **Frontend:**
-- re-approve **#42**;
-- review **#43** (this log);
+- review **#43** (this log) and the `docs/g0-readiness` PR;
+- answer the #49 Sheet point (7189299199);
+- **G0 approval** (asked on #1);
 - confirm in the Settings UI that fork-PR approval and secret scanning are on (this account can't read them).
 
 **Developer A (backend):**
-- merge #42 after the re-approval;
-- re-review **#47** (`708cbb9`) and review **#49**;
+- approve **#47** (`708cbb9`). Approve **#49** after the Sheet fix or the frontend's reply;
+- **G0 approval**;
+- delete the merged remote branches of #40, #41, #42, #44 and #45;
 - check the `noreply` git email on both machines.
 
 **Both owners:** decide on a `LICENSE`. |
-| Next step | 1) **#42:** the frontend re-approves, then Developer A merges it (squash).
+| Next step | 1) **Merge #43, then the `docs/g0-readiness` PR** (after the frontend approves). That PR ticks P0.5, so Phase 0 is then 11/11 on `main`. Once #43 merges, rebase `docs/g0-readiness` onto `main` (`git rebase --onto origin/main 78780e6`).
 
-2) **Then on `docs/g0-readiness`** (`git switch docs/g0-readiness; git pull --ff-only`): rebase onto `main` when #43 merges, follow that branch's log to finish, and open the PR. It ticks P0.5 and changes the P0.5 text (`openapi-fetch` → P9.6). Phase 0 is then 11/11.
+2) **#42 merged** (`8e8b24b`, Session 15).
 
 3) **G0 gate:** stop, report and ask **both** developers for approval before Phase 1. **No Phase 1 work starts before that.**
 
@@ -47,8 +48,8 @@ Append a new entry per session (newest at the top). For each step record: what w
    `git fetch --all --prune; git switch docs/session-14-final; git pull --ff-only`
    (or, if #43 is merged: `git switch main; git pull --ff-only`). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`
-3. Check: `git status` is clean. Then `cd backend; uv run pytest -q; uv run python -m app.export_openapi --check; cd ..`. On `main` `f07e323`: 377 passed, no drift (the later `main` commits are frontend-only).
-4. Open backend branches: `feat/p0.5-workflows-stubs` (#42) and `docs/g0-readiness`. For each, `git switch <branch>; git pull --ff-only`. A missing local branch is created from `origin`. If a pull refuses (`diverged`), check that `git cherry origin/main <branch>` and a content diff show nothing that exists only locally, then `git reset --hard origin/<branch>`.
+3. Check: `git status` is clean. Then `cd backend; uv run pytest -q; uv run python -m app.export_openapi --check; cd ..`. For the count on `main` `8e8b24b`, see the P0.5 evidence in the `docs/g0-readiness` log.
+4. Open backend branch: `docs/g0-readiness`. For each, `git switch <branch>; git pull --ff-only`. A missing local branch is created from `origin`. If a pull refuses (`diverged`), check that `git cherry origin/main <branch>` and a content diff show nothing that exists only locally, then `git reset --hard origin/<branch>`.
 5. **Old local branches** are all merged: `feat/p0.5-runs-stubs`, `feat/p0.5-outputs-stubs`, `feat/b0-auth-fixtures`, `docs/co-owners`, plus the ones Session 14 listed (`feat/p0.5-file-stubs`, `feat/p0.5-auth-stubs`, `feat/p0.5-workspace-stubs`, `feat/p0.5-openapi-export`, `docs/original-plan`, `docs/phase0-ticks`, `feat/p0.5-workspace-codes`, `feat/p0.5-operations-stubs`, `feat/p0.5-rejection-codes`, `feat/s02-prod-config`, `feat/p0.5-drafts-stubs`, `chore/p0.8-ruleset`, `docs/session-14-state`). Check each PR's `MERGED` state, then `git branch -D <name>`.
 6. GitHub: `gh pr list -R kzazzco2009-hub/replora --state all --limit 20`, the new #1 comments (`gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7187542043 }`), and the reviews on #42, #43, #47 and #49 (`gh api repos/kzazzco2009-hub/replora/pulls/<n>/reviews`).
 7. The Claude Code memory on each machine is local and may be stale. **This log is the source of truth.**
@@ -192,6 +193,15 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - The ruleset has `strict_required_status_checks_policy: false`, so #42 doesn't need a rebase onto `6f7eb5f`.
 - #47 is now `708cbb9`, and Developer A's approval on `bca2816` was dismissed. #49 is new (`2617c7d`) and has no review.
 - The stale "Current status" cells (they still showed `ef49ab3` and listed merged PRs as open) are rewritten.
+- **#42 merged at 12:21** (`8e8b24b`, Developer A).
+- The BOM in the subject of `8079955` was removed by `--amend` and `--force-with-lease`, giving `78780e6` (same tree, no approvals dismissed). Developer A approved this. A detached commit, `006bf69`, was dropped and never pushed: it was a log edit read as ANSI from `main`'s old log, which gave mojibake.
+
+**Backend reviews (posted as PR comments; Developer A posts the approvals):**
+- **#47** `708cbb9` (7189297790): the `+`/`-` lines of `git diff c736a34 bca2816` and `git diff origin/main...708cbb9` are identical, and CI is green. Nothing blocking. Two notes from the first review are re-raised (query string dropped on switch, `aria-label` with the full language name).
+- **#49** `2617c7d` (7189299199):
+  - Proven from the `@radix-ui/react-presence` source (it waits only on `animationName`/`animationend`): the Sheet's `transition-transform` slide never runs. Suggested keyframe animations.
+  - The `rtl` test cases render in a portal outside the `<div dir>`, so they don't test RTL.
+  - Checked and fine: `aria-describedby={undefined}` is taken out before the props spread, so the description link stays.
 
 ## Session 14 — 2026-11-25 (first machine, after Session 13 on the other one)
 **Goal:** align this machine with the other machine, rebase #27, answer the frontend, then continue Phase 0 (P0.5 part 4, S‑02).
