@@ -8,75 +8,49 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 0 — Foundation (B0), Session 15.** `main` is at **`ef49ab3`**, CI green. Merged in Session 14: #27 (§3 codes), #30, #37, #38 (frontend P9.3), #31 (`allowBuilds`), **#32** (`rejection_codes`), **#33** (S‑02), **#34** (§6 drafts, merged by Developer A on their own go, after the frontend approved the same patch), **#35** (the ruleset as code) and #36 (log).
+| Current phase | **Phase 0 — Foundation (B0), Session 15.** `main` is at **`6f7eb5f`**, CI green. Merged in Session 15: #40 (`d45be72`), #44 (`cabb1d1`), #45 (`e86d475`), #41 (`f07e323`), and the frontend's #39, #46 and #48.
 
-**Steps:** 10/11. **P0.8 ticked (Session 15):** the repo is public and the ruleset is live (verified, see Session 15). **P0.5 is the last open step.** It needs (a) #40 → #41 → #42 merged, where #41 and #42 have change requests, and (b) the frontend's `openapi-fetch` answer (#25 question 1, promised in their next message).
+**Steps:** 10/11. **P0.5 is the last open step.** It needs #42 merged. The `openapi-fetch` part moves to P9.6 (proposed on #1, 7187542043, and done in `docs/g0-readiness`).
 
-**Ticked in this PR:** P9.2 (#29) and P9.3 (#30, #37, #38) in `plan.md`. The frontend had marked them done in their own plan (P9.2 on `main`, P9.3 in #39). The tracker also counts T11.3, which #25 already ticked. Owners: **both developers** (#45).
+**Ticked in Session 14:** P9.2 and P9.3 in `plan.md`. Owners: **both developers** (#45, merged).
 
-**Security:** 5/5 (S‑01 to S‑05). S‑05 was ticked in Session 15.
+**Security:** 5/5 (S‑01 to S‑05).
 
-**Open backend PRs.** It's a stack, and each one is CI green and rebased on `ef49ab3`:
-- **#40** `feat/p0.5-runs-stubs` → **`main`** (retargeted after #34), `6dcabef`: §7 runs lifecycle, `Idempotency-Key`, 4 new 409/422 codes.
-- **#41** `feat/p0.5-outputs-stubs` → #40, `d138c28`: §7 outputs (list, preview, download, lineage).
-- **#42** `feat/p0.5-workflows-stubs` → #41, `ceedd01`: §8 workflows and replay, `BASE_VERSION_STALE`, plus the stub notes in `api_contract.md`.
-- **#44** `feat/b0-auth-fixtures` → `main`, `8052294`: **§2 auth fixtures** (B0 deliverable, api_contract.md §10). 19 files and 48 scenarios in `contracts/fixtures/auth/`, validated against `openapi.json` and `error-codes.json` by `test_auth_fixtures.py` (new dev dependency `jsonschema` 4.26.0). Also brings the B0 checklist in `backend_plan.md` up to date. Independent of the stack.
-- **#45** `docs/co-owners` → `main`, `a73b4e2`: **both developers are co-owners**. Owner decisions need both; in a disagreement each decides within their own track, and shared files change only when both agree. GitHub stays as it is. Needs the frontend's approval.
-- **this PR** `docs/session-14-final` → `main`: this log, plus `.gitignore` for `replora_env_setup.txt`. **The newest log is on this branch until it merges.**
-
-**After each merge in the stack:**
-1. Retarget the next PR to `main`: `gh pr edit <n> -R kzazzco2009-hub/replora --base main`.
-2. `git rebase --onto origin/main <old base head> <branch>`.
-3. Regenerate `openapi.json` and `schema.d.ts`, rerun the checks, `git push --force-with-lease`.
-4. Check with `git range-diff` that the patch is unchanged. |
+**Open PRs:**
+- **#42** `feat/p0.5-workflows-stubs` → `main`, `84f588b`: §8 workflows and replay, `BASE_VERSION_STALE`, stub notes in `api_contract.md`. CI green and mergeable. The frontend approved it, then the rebase push dismissed that approval, so **it needs a re-approval**. No new rebase is needed: the ruleset has `strict_required_status_checks_policy: false`, and `main` changed nothing in `backend/`, `contracts/` or `api_contract.md` since `f07e323`.
+- **#43** `docs/session-14-final` → `main` (this branch): the log, plus `.gitignore` for `replora_env_setup.txt`. **The newest log is on this branch until it merges.**
+- **`docs/g0-readiness`** (`e832420`, stacked on #43, no PR yet): G0 evidence, the G0 report draft, the P0.5 text fix and the B0 security tick. Open its PR after #42 merges.
+- Frontend: **#47** (locale switch, head `708cbb9`; the frontend pushed after Developer A's approval on `bca2816`, so it needs a re-review) and **#49** (Dialog and Sheet, `2617c7d`, not reviewed yet). |
 | Last gate passed | Planning approved by owner (plan v1.1, D1–D14). **G0 agreement confirmed by both sides in issue #1** (2026-11-24). The formal G0 gate (end of Phase 0) is still open. |
 | Waiting on | **Frontend:**
-- review this PR (#43);
-- re-review #41 and #42 after the requested changes;
-- confirm in the Settings UI that fork-PR approval and secret scanning are on (this account can't read them);
-- the **`openapi-fetch`** answer (#25 question 1). It blocks the P0.5 tick.
+- re-approve **#42**;
+- review **#43** (this log);
+- confirm in the Settings UI that fork-PR approval and secret scanning are on (this account can't read them).
 
 **Developer A (backend):**
-- go and merge for **#44** and **#45** (both approved, CI green) and **#40** (approved `6dcabef`). Then rebase #43 onto `main` (`decisions.md` conflicts with #45 at the last row);
-- post the approval on **#39** (frontend docs, read in Session 15, fine; Claude can't approve);
-- GitHub "Keep my email addresses private" is done (#1, 7185139284). Check the `noreply` git email on both machines.
+- merge #42 after the re-approval;
+- re-review **#47** (`708cbb9`) and review **#49**;
+- check the `noreply` git email on both machines.
 
 **Both owners:** decide on a `LICENSE`. |
-| Next step | 1) **#41 and #42 changes are done (Session 15).** They wait on the frontend's re-review. #41 is now `7790f9e` and #42 is `f125e7c` (rebased on it). Both are CI green.
+| Next step | 1) **#42:** the frontend re-approves, then Developer A merges it (squash).
 
-2) **Merged in Session 15 (owner's go):** #40 (`d45be72`), #44 (`cabb1d1`), #45 (`e86d475`) and **#41 (`f07e323`)**. `main` = **`f07e323`**.
+2) **Then on `docs/g0-readiness`** (`git switch docs/g0-readiness; git pull --ff-only`): rebase onto `main` when #43 merges, follow that branch's log to finish, and open the PR. It ticks P0.5 and changes the P0.5 text (`openapi-fetch` → P9.6). Phase 0 is then 11/11.
 
-**#42 is retargeted to `main` and rebased (`--onto origin/main 8f0a159`) → `84f588b`.** Range-diff shows `=` for both commits, 402 passed, no drift, and CI is green (run 45790068558). It waits on the frontend's re-approval (asked on #42). **When it merges:** tick P0.5 and change its `plan.md` text (`openapi-fetch` → P9.6, proposed on #1, 7187542043) in a small docs PR. Then Phase 0 is 11/11, and we stop for G0.
+3) **G0 gate:** stop, report and ask **both** developers for approval before Phase 1. **No Phase 1 work starts before that.**
 
-Earlier steps: Before merging, a trial merge of #44 and #45 together onto `d45be72` gave 358 passed and no drift. #43 was rebased onto `e86d475`. The one conflict, at the last row of `decisions.md`, was resolved by keeping all three rows: the ruleset row, the #45 co-owner row and the 2026-11-26 row.
-
-**Stack:** #41 now targets `main`, rebased to **`8f0a159`** (range-diff `=`, CI green), and waits on the frontend's re-approval (asked on #41, 7186862641). #42 is rebased on it, **`1a9e27b`** (range-diff `=`). After #41 merges: `gh pr edit 42 --base main`, then `git rebase --onto origin/main 8f0a159`, regenerate, range-diff, push and ask for a re-approval. Every rebase push dismisses the approval (`dismiss_stale_reviews_on_push`).
-
-3) **#40 follow-ups (before G8, answered on #1 7186123958):** `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED` (P1.5). `RunEvent.payload` becomes a discriminated union on `type`.
-
-4) **Merge the stack** #40 → #41 → #42, rebasing each one onto `main` after the one below it merges (see above).
-
-5) **When #42 is merged:** continue on branch **`docs/g0-readiness`** (pushed, stacked on this PR, no PR yet; `git switch docs/g0-readiness; git pull --ff-only`). It holds the G0 check evidence on `main` `f07e323` (377 and 123 passed, T0.3–T0.5 re-proven), the G0 report draft, the P0.5 text fix (`openapi-fetch` → P9.6) and the B0 S‑01…S‑05 tick. Its own log has the finishing steps. Phase 0 is then 11/11, and we ask both developers for G0.
-
-4) **G0 gate:** stop, report and ask **both** developers for approval before Phase 1. **No Phase 1 work starts before that.** All remaining Phase 0 backend work is done or in review.
+4) **#40 follow-ups (before G8, answered on #1 7186123958):** `cancel` is also allowed from `NEEDS_REVIEW` and goes straight to `CANCELLED` (P1.5). `RunEvent.payload` becomes a discriminated union on `type`.
 
 5) **If a §2 schema changes:** update the matching file in `contracts/fixtures/auth/` in the same PR (`test_auth_fixtures.py` fails until you do). |
-| Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`). **Don't** start from `feat/p0.5-file-stubs` or any other old branch: those were merged and rebased, and they will diverge.
+| Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`). **Don't** start from an old feature branch: those were merged and rebased, and they will diverge.
 1. Get the newest log. While #43 is open it's on `docs/session-14-final`; after it merges, it's on `main`:
    `git fetch --all --prune; git switch docs/session-14-final; git pull --ff-only`
    (or, if #43 is merged: `git switch main; git pull --ff-only`). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`
-3. Check: `git status` is clean. Then `cd backend; uv run pytest -q; uv run python -m app.export_openapi --check; cd ..`. On `main` (`ef49ab3`): 281 passed, no drift.
-4. Open branches. For each, `git switch <branch>; git pull --ff-only`. A missing local branch is created from `origin`.
-   - `feat/p0.5-runs-stubs` (#40)
-   - `feat/p0.5-outputs-stubs` (#41)
-   - `feat/p0.5-workflows-stubs` (#42)
-   - `feat/b0-auth-fixtures` (#44)
-   - `docs/co-owners` (#45)
-
-   If a pull refuses (`diverged`), the branch was rebased on the other machine. Check that `git cherry origin/main <branch>` and a content diff show nothing that exists only locally, then `git reset --hard origin/<branch>`.
-5. **Old local branches** on the other machine (`feat/p0.5-file-stubs`, `feat/p0.5-auth-stubs`, `feat/p0.5-workspace-stubs`, `feat/p0.5-openapi-export`, `docs/original-plan`, `docs/phase0-ticks`, `feat/p0.5-workspace-codes`, `feat/p0.5-operations-stubs`, `feat/p0.5-rejection-codes`, `feat/s02-prod-config`, `feat/p0.5-drafts-stubs`, `chore/p0.8-ruleset`, `docs/session-14-state`) are all merged. Check each PR's `MERGED` state, then delete them with `git branch -D <name>`.
-6. GitHub: `gh pr list -R kzazzco2009-hub/replora --state all --limit 20`, `gh repo view kzazzco2009-hub/replora --json visibility`, the new #1 comments (`gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7174794670 }`), and the reviews on #40–#45 (`gh api repos/kzazzco2009-hub/replora/pulls/<n>/reviews`).
+3. Check: `git status` is clean. Then `cd backend; uv run pytest -q; uv run python -m app.export_openapi --check; cd ..`. On `main` `f07e323`: 377 passed, no drift (the later `main` commits are frontend-only).
+4. Open backend branches: `feat/p0.5-workflows-stubs` (#42) and `docs/g0-readiness`. For each, `git switch <branch>; git pull --ff-only`. A missing local branch is created from `origin`. If a pull refuses (`diverged`), check that `git cherry origin/main <branch>` and a content diff show nothing that exists only locally, then `git reset --hard origin/<branch>`.
+5. **Old local branches** are all merged: `feat/p0.5-runs-stubs`, `feat/p0.5-outputs-stubs`, `feat/b0-auth-fixtures`, `docs/co-owners`, plus the ones Session 14 listed (`feat/p0.5-file-stubs`, `feat/p0.5-auth-stubs`, `feat/p0.5-workspace-stubs`, `feat/p0.5-openapi-export`, `docs/original-plan`, `docs/phase0-ticks`, `feat/p0.5-workspace-codes`, `feat/p0.5-operations-stubs`, `feat/p0.5-rejection-codes`, `feat/s02-prod-config`, `feat/p0.5-drafts-stubs`, `chore/p0.8-ruleset`, `docs/session-14-state`). Check each PR's `MERGED` state, then `git branch -D <name>`.
+6. GitHub: `gh pr list -R kzazzco2009-hub/replora --state all --limit 20`, the new #1 comments (`gh api repos/kzazzco2009-hub/replora/issues/1/comments --paginate | ConvertFrom-Json | ForEach-Object { $_ } | Where-Object { $_.id -gt 7187542043 }`), and the reviews on #42, #43, #47 and #49 (`gh api repos/kzazzco2009-hub/replora/pulls/<n>/reviews`).
 7. The Claude Code memory on each machine is local and may be stale. **This log is the source of truth.**
 
 **Notes:**
@@ -84,7 +58,7 @@ Earlier steps: Before merging, a trial merge of #44 and #45 together onto `d45be
 - If gitleaks isn't found, reload PATH (root `CLAUDE.md`).
 - **Both machines** have a root `.env` with `OPENROUTER_API_KEY`. So `APP_ENV=production` starts locally; to see the S‑02 refusal, also set `DEBUG=true`.
 - Approving PRs and deleting remote branches are blocked for Claude by the permission check; Developer A runs those commands.
-- **Owners and merges:** both developers are co-owners (#45). A PR merges only after the other developer's approval. Whether the author may then merge it is the open point in #45. |
+- **Owners and merges:** both developers are co-owners (#45). A PR merges only after the other developer's approval. Every push dismisses approvals (`dismiss_stale_reviews_on_push`). |
 | Blockers | none. Work from **`D:\Projects\replora`** (Claude Code memory: `~/.claude/projects/D--Projects-replora/memory/`). |
 
 ## Phase tracker
@@ -210,7 +184,14 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 **P0.5 not ticked:** it waits on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
 
-**Not done:** an uncommitted blank line at the end of `docs/plan.md` was there on arrival. It's left out of the commit and is the owner's to keep or drop (`git restore docs/plan.md`).
+**Stray `plan.md` line:** an uncommitted blank line at the end of `docs/plan.md` was there on arrival. Developer A said to drop it (`git restore docs/plan.md`).
+
+**End-of-session state check:**
+- `origin/main` = `6f7eb5f`. The frontend's #39, #46 and #48 merged after `f07e323`. `git diff --name-only f07e323 origin/main` shows only `frontend/`, `docs/frontend/` and `pnpm-lock.yaml`.
+- #42 `84f588b`: mergeable, 4/4 checks green. The frontend approved it at 08:22, and the approval was dismissed at 08:43 by the rebase push.
+- The ruleset has `strict_required_status_checks_policy: false`, so #42 doesn't need a rebase onto `6f7eb5f`.
+- #47 is now `708cbb9`, and Developer A's approval on `bca2816` was dismissed. #49 is new (`2617c7d`) and has no review.
+- The stale "Current status" cells (they still showed `ef49ab3` and listed merged PRs as open) are rewritten.
 
 ## Session 14 — 2026-11-25 (first machine, after Session 13 on the other one)
 **Goal:** align this machine with the other machine, rebase #27, answer the frontend, then continue Phase 0 (P0.5 part 4, S‑02).
