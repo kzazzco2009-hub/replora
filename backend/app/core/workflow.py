@@ -16,6 +16,9 @@ from app.core.operations import OperationRef
 Name = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")]
 """A node ID, port name or IO contract name."""
 
+Label = Annotated[str, Field(max_length=100)]
+"""A display name in any script, for example Arabic."""
+
 
 class PortRef(ContractModel):
     """One port of one node."""
@@ -30,7 +33,7 @@ class Node(ContractModel):
     id: Name
     operation: OperationRef
     params: dict[str, JsonValue] = {}
-    label: Annotated[str, Field(max_length=100)] | None = None
+    label: Label | None = None
 
 
 class Edge(ContractModel):
@@ -44,6 +47,7 @@ class InputContract(ContractModel):
     """A file the workflow needs, its expected columns (for replay drift) and the ports it feeds."""
 
     name: Name
+    label: Label | None = None
     artifact_type: ArtifactType
     columns: list[str] = []
     targets: list[PortRef]
@@ -53,6 +57,7 @@ class OutputContract(ContractModel):
     """A result the workflow gives, taken from one node's output port."""
 
     name: Name
+    label: Label | None = None
     artifact_type: ArtifactType
     source: PortRef
 

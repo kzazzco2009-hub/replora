@@ -162,3 +162,37 @@ def test_params_must_be_json_values():
 def test_unknown_review_policy_is_rejected():
     with pytest.raises(ValidationError):
         ReviewPolicy(on_warning="ignore")
+
+
+def test_inputs_and_outputs_take_an_optional_unicode_label():
+    """A display name for an upload slot or a result (frontend note on #56)."""
+    definition = _definition(
+        inputs=[
+            InputContract(
+                name="orders",
+                label="الطلبات",
+                artifact_type=ArtifactType.RAW_FILE,
+                targets=[PortRef(node_id="parse", port="file")],
+            )
+        ],
+        outputs=[
+            OutputContract(
+                name="clean",
+                label="النتيجة",
+                artifact_type=ArtifactType.TABULAR,
+                source=PortRef(node_id="normalize", port="table"),
+            )
+        ],
+    )
+    assert definition.inputs[0].label == "الطلبات"
+    assert definition.outputs[0].label == "النتيجة"
+    assert _definition().inputs[0].label is None
+    assert WorkflowDefinition.model_validate_json(definition.model_dump_json()) == definition
+
+
+@pytest.mark.parametrize("model", [InputContract, OutputContract])
+def test_io_labels_are_at_most_100_characters(model):
+    port = PortRef(node_id="n", port="p")
+    fields = {"targets": [port]} if model is InputContract else {"source": port}
+    with pytest.raises(ValidationError, match="at most 100 characters"):
+        model(name="x", label="x" * 101, artifact_type=ArtifactType.TABULAR, **fields)
