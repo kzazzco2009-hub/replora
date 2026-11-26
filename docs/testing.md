@@ -114,7 +114,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 **Functional (API)**
 - [ ] T5.3 Register, verify email, login, `me`, refresh, logout. After logout the refresh token is revoked (reuse gives 401).
 - [x] T5.4 **Refresh token reuse detection:** using an old rotated token revokes the whole session family.
-- [ ] T5.5 An unsafe method without `X-CSRF-Token` or with a mismatched one gives 403.
+- [x] T5.5 An unsafe method without `X-CSRF-Token` or with a mismatched one gives 403.
 - [x] T5.6 The cookie flags are `HttpOnly`, `Secure` (in prod config) and `SameSite=Lax`, with the correct `Path`.
 - [ ] T5.7 Login throttling: the 6th failure within 15 min gives 429 with `Retry-After`. Lockout releases after the window.
 - [ ] T5.8 Password reset token: single use, expires after 30 min, and the old sessions are revoked after reset.

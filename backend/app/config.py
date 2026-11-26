@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     debug: bool = False
     openrouter_api_key: SecretStr | None = None
+    allowed_origins: list[str] = ["http://localhost:3000"]
+    """P5.3: an unsafe request that sends `Origin` must come from one of these (S-25)."""
     jwt_secret: SecretStr | None = None
     """P5.2: signs access tokens (HS256, 256+ bits). Outside production a random key is made at
     startup, so a restart ends access tokens (15 minutes), not sessions."""

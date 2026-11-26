@@ -3,6 +3,7 @@
 from http.cookies import SimpleCookie
 
 import pytest
+from conftest import with_csrf
 from fastapi.testclient import TestClient
 
 from app.config import Settings
@@ -17,7 +18,12 @@ SALMA = {"email": "Salma@Example.com", "password": PASSWORD, "display_name": "س
 
 def app_client(db_url: str, **settings) -> TestClient:
     Base.metadata.create_all(make_engine(db_url))
-    return TestClient(create_app(Settings(_env_file=None, database_url=db_url, **settings)))
+    app = create_app(Settings(_env_file=None, database_url=db_url, **settings))
+    # Secure cookies only come back over https, as in production.
+    https = settings.get("app_env") == "production"
+    return with_csrf(
+        TestClient(app, base_url="https://testserver" if https else "http://testserver")
+    )
 
 
 @pytest.fixture
@@ -102,7 +108,7 @@ def test_a_reused_refresh_token_signs_everyone_out(client):
     login(client)
     stolen = client.cookies["replora_refresh"]
     assert client.post("/api/v1/auth/refresh").status_code == 204
-    client.cookies.clear()
+    client.cookies.delete("replora_refresh")
     client.cookies.set("replora_refresh", stolen)
     assert client.post("/api/v1/auth/refresh").status_code == 401
     client.cookies.delete("replora_refresh")
@@ -127,7 +133,7 @@ def test_an_access_token_of_a_revoked_session_is_refused_before_it_expires(clien
     login(client)
     access = client.cookies["replora_access"]
     client.post("/api/v1/auth/logout")
-    client.cookies.clear()
+    client.cookies.delete("replora_access")
     client.cookies.set("replora_access", access)
     response = client.get("/api/v1/auth/me")
     assert (response.status_code, response.json()["code"]) == (401, "UNAUTHENTICATED")

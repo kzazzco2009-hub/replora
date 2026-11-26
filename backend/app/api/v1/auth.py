@@ -6,6 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy import select
 
+from app.api.csrf import issue_csrf
 from app.api.problem import (
     ERROR_RESPONSES,
     NOT_FOUND_RESPONSE,
@@ -50,9 +51,9 @@ router = APIRouter(prefix="/auth", tags=["auth"], responses=ERROR_RESPONSES)
 
 
 @router.get("/csrf", status_code=204)
-def get_csrf() -> None:
+def get_csrf(request: Request, response: Response) -> None:
     """Set the readable `replora_csrf` cookie (call at app start when it is missing)."""
-    raise not_implemented()
+    issue_csrf(request, response)
 
 
 @router.post("/register", status_code=202)
@@ -76,6 +77,7 @@ def login(body: LoginRequest, request: Request, response: Response) -> User | Mf
         agent = request.headers.get("user-agent")
         row, refresh_token = sessions.start(session, user.id, now(request), user_agent=agent)
     set_session_cookies(request, response, row, refresh_token)
+    issue_csrf(request, response)
     return to_user(user)
 
 
@@ -90,6 +92,7 @@ def logout(request: Request, response: Response) -> None:
         with database(request).begin() as session:
             sessions.revoke(session, signed_in.session_id, now(request))
     clear_session_cookies(response)
+    issue_csrf(request, response)
 
 
 @router.post("/refresh", status_code=204)

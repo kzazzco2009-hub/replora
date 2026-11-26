@@ -34,9 +34,22 @@ def db_url(tmp_path):
     _reset_postgres(TEST_DATABASE_URL)
 
 
+def with_csrf(client: TestClient) -> TestClient:
+    """Send the current `replora_csrf` cookie as `X-CSRF-Token`, as the browser client does."""
+    client.get("/api/v1/auth/csrf")
+
+    def copy_token(request) -> None:
+        tokens = [cookie.value for cookie in client.cookies.jar if cookie.name == "replora_csrf"]
+        if tokens:
+            request.headers["X-CSRF-Token"] = tokens[-1]
+
+    client.event_hooks["request"].append(copy_token)
+    return client
+
+
 @pytest.fixture(scope="module")
 def client() -> TestClient:
-    return TestClient(create_app(Settings(_env_file=None)))
+    return with_csrf(TestClient(create_app(Settings(_env_file=None))))
 
 
 @pytest.fixture(scope="module")

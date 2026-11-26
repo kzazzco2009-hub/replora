@@ -48,10 +48,12 @@ def test_auth_endpoint_is_documented_with_its_success_status(openapi, method, pa
     assert str(status) in operation["responses"]
 
 
-IMPLEMENTED = {"/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout",
-               "/api/v1/auth/refresh", ("get", "/api/v1/auth/me")}  # fmt: skip
+IMPLEMENTED = {"/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login",
+               "/api/v1/auth/logout", "/api/v1/auth/refresh",
+               ("get", "/api/v1/auth/me")}  # fmt: skip
 """Phase 5 endpoints that are real now; the rest still answer 501."""
-STUBS = [e for e in AUTH_ENDPOINTS if e[1] not in IMPLEMENTED and (e[0], e[1]) not in IMPLEMENTED]
+STUBS = [e for e in AUTH_ENDPOINTS
+         if e[1] not in IMPLEMENTED and (e[0], e[1]) not in IMPLEMENTED]  # fmt: skip
 
 
 @pytest.mark.parametrize(("method", "path", "status", "body"), STUBS)

@@ -1,7 +1,8 @@
 """API v1, mounted at `/api/v1`."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from app.api.csrf import protect
 from app.api.v1 import (
     auth,
     drafts,
@@ -14,7 +15,7 @@ from app.api.v1 import (
     workspaces,
 )
 
-router = APIRouter(prefix="/api/v1")
+router = APIRouter(prefix="/api/v1", dependencies=[Depends(protect)])
 router.include_router(health.router)
 router.include_router(auth.router)
 router.include_router(workspaces.router)
