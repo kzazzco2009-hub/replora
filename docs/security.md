@@ -48,6 +48,8 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 | S‑11 | Approval integrity | Approval is bound to `plan_hash` (canonical SHA‑256). Any change invalidates it. The approver ID and time are stored. | T1.3, T1.4, T3.1 |
 | S‑12 | Resource-exhaustion limits in the validator | Limits on nodes, depth, fan-in and fan-out, file counts and sizes are enforced **before** execution. | T2.5 |
 | S‑13 | Execution limits | Node timeout of 120 s and run timeout of 900 s, a memory guard and a temp-dir quota (500 MiB). Retries happen only for transient errors (at most 2). | T3.4, T17.6 |
+**Phase 2 status** (the evidence is in `session_log.md`, Session 16):
+- [x] **S‑12:** the validator checks the limits first: ≤ 30 nodes, depth ≤ 10 (nodes on the longest path), fan-in and fan-out ≤ 10, and the file count and size from the definition's `ResourcePolicy` (`LIMIT_*` codes). T2.5 tests each boundary on both sides. Every check is linear in nodes plus edges (Kahn), and a 5000-node chain is reported in about 0.2 s (the test allows 2 s). Still open for later phases: a request body size cap on the API (Phase 8), so a huge JSON is refused before it is parsed.
 
 ## Phase 4 — Persistence
 | ID | Control | Implementation | Verify |
