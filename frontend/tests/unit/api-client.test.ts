@@ -3,16 +3,37 @@ import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
 import { getApiClient } from "../../src/lib/api/client";
 import { useIdempotencyKey } from "../../src/lib/api/idempotency";
-import { isApiError } from "../../src/lib/api/problem";
+import { ApiError, isApiError } from "../../src/lib/api/problem";
 import { server } from "../msw/server";
 import { setScenario } from "../msw/scenarios";
 
 const client = getApiClient();
+const LOGIN_BODY = { email: "x", password: "y" };
 
 function setCsrfCookie(value: string | null) {
   document.cookie = value
     ? `replora_csrf=${value}`
     : "replora_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+}
+
+function postLogin(init?: { baseUrl?: string }) {
+  return client.POST("/api/v1/auth/login", { ...init, body: LOGIN_BODY });
+}
+
+/** Mocks POST /auth/login's response for one test, bypassing fixtures. */
+function mockLoginResponse(respond: () => Response) {
+  server.use(http.post("/api/v1/auth/login", respond));
+}
+
+/** Calls postLogin() and returns the ApiError it's expected to throw. */
+async function catchLoginError(): Promise<ApiError> {
+  try {
+    await postLogin();
+  } catch (error) {
+    if (isApiError(error)) return error;
+    throw error;
+  }
+  throw new Error("expected the POST to throw");
 }
 
 beforeEach(() => {
@@ -30,9 +51,7 @@ describe("CSRF header injection", () => {
       }),
     );
 
-    await client.POST("/api/v1/auth/login", {
-      body: { email: "salma@example.com", password: "x" },
-    });
+    await postLogin();
 
     expect(received).toBe("test-token");
   });
@@ -64,14 +83,28 @@ describe("CSRF header injection", () => {
       ),
     );
 
-    await client.POST("/api/v1/auth/login", {
-      body: { email: "x", password: "y" },
-    });
-    await client.POST("/api/v1/auth/login", {
-      body: { email: "x", password: "y" },
-    });
+    await postLogin();
+    await postLogin();
 
     expect(csrfCalls).toBe(1);
+  });
+
+  it("omits X-CSRF-Token on a POST to an absolute URL on another origin", async () => {
+    setCsrfCookie("test-token");
+    let received: string | null | undefined;
+    server.use(
+      http.post(
+        "https://storage.example.com/api/v1/auth/login",
+        ({ request }) => {
+          received = request.headers.get("x-csrf-token");
+          return HttpResponse.json({ mfa_required: true }, { status: 200 });
+        },
+      ),
+    );
+
+    await postLogin({ baseUrl: "https://storage.example.com" });
+
+    expect(received).toBeNull();
   });
 });
 
@@ -80,86 +113,67 @@ describe("error passthrough", () => {
     setCsrfCookie("test-token");
     setScenario("auth_login", "invalid_credentials");
 
-    let caught: unknown;
-    try {
-      await client.POST("/api/v1/auth/login", {
-        body: { email: "x", password: "y" },
-      });
-    } catch (error) {
-      caught = error;
-    }
+    const error = await catchLoginError();
 
-    if (!isApiError(caught)) throw new Error("expected an ApiError");
-    expect(caught.problem.code).toBe("INVALID_CREDENTIALS");
+    expect(error.problem.code).toBe("INVALID_CREDENTIALS");
   });
-});
 
-describe("error passthrough for a non-JSON error response", () => {
   it("throws ApiError for an HTML 502 (e.g. from an infra proxy)", async () => {
     setCsrfCookie("test-token");
-    server.use(
-      http.post(
-        "/api/v1/auth/login",
-        () =>
-          new HttpResponse("<html><body>Bad Gateway</body></html>", {
-            status: 502,
-            headers: { "content-type": "text/html" },
-          }),
-      ),
+    mockLoginResponse(
+      () =>
+        new HttpResponse("<html><body>Bad Gateway</body></html>", {
+          status: 502,
+          headers: { "content-type": "text/html" },
+        }),
     );
 
-    let caught: unknown;
-    try {
-      await client.POST("/api/v1/auth/login", {
-        body: { email: "x", password: "y" },
-      });
-    } catch (error) {
-      caught = error;
-    }
+    const error = await catchLoginError();
 
-    if (!isApiError(caught)) throw new Error("expected an ApiError");
-    expect(caught.problem.status).toBe(502);
-    expect(caught.problem.code).toBe("INTERNAL_ERROR");
+    expect(error.problem.status).toBe(502);
+    expect(error.problem.code).toBe("INTERNAL_ERROR");
   });
 
   it("throws ApiError for an empty 500 body", async () => {
     setCsrfCookie("test-token");
-    server.use(
-      http.post(
-        "/api/v1/auth/login",
-        () => new HttpResponse(null, { status: 500 }),
-      ),
-    );
+    mockLoginResponse(() => new HttpResponse(null, { status: 500 }));
 
-    let caught: unknown;
-    try {
-      await client.POST("/api/v1/auth/login", {
-        body: { email: "x", password: "y" },
-      });
-    } catch (error) {
-      caught = error;
-    }
+    const error = await catchLoginError();
 
-    if (!isApiError(caught)) throw new Error("expected an ApiError");
-    expect(caught.problem.status).toBe(500);
-    expect(caught.problem.code).toBe("INTERNAL_ERROR");
+    expect(error.problem.status).toBe(500);
+    expect(error.problem.code).toBe("INTERNAL_ERROR");
   });
 
-  it("still parses a normal problem+json error response correctly", async () => {
+  it("throws ApiError with the FILE_TOO_LARGE code for a plain-text 413", async () => {
     setCsrfCookie("test-token");
-    setScenario("auth_login", "invalid_credentials");
+    mockLoginResponse(
+      () => new HttpResponse("request entity too large", { status: 413 }),
+    );
 
-    let caught: unknown;
-    try {
-      await client.POST("/api/v1/auth/login", {
-        body: { email: "x", password: "y" },
-      });
-    } catch (error) {
-      caught = error;
-    }
+    const error = await catchLoginError();
 
-    if (!isApiError(caught)) throw new Error("expected an ApiError");
-    expect(caught.problem.code).toBe("INVALID_CREDENTIALS");
+    expect(error.problem.status).toBe(413);
+    expect(error.problem.code).toBe("FILE_TOO_LARGE");
+  });
+
+  it("falls back safely when a 4xx JSON body is not problem-shaped", async () => {
+    setCsrfCookie("test-token");
+    mockLoginResponse(() =>
+      HttpResponse.json({ unexpected: "shape" }, { status: 400 }),
+    );
+
+    const error = await catchLoginError();
+
+    expect(error.problem.status).toBe(400);
+    expect(error.problem.code).toBe("INTERNAL_ERROR");
+  });
+
+  it("passes a normal 2xx JSON response through untouched", async () => {
+    const { data } = await client.GET("/api/v1/auth/me");
+
+    expect((data as { email?: string } | undefined)?.email).toBe(
+      "salma@example.com",
+    );
   });
 });
 

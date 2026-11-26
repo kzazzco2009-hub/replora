@@ -11,7 +11,9 @@ export interface IdempotencyKey {
  * One UUID per user action (api_contract.md §1): required on
  * `POST /workspaces/{ws}/runs` and `POST /workspaces/{ws}/runs/{id}/approve`.
  * Stable across re-renders and retries of the same action. Call `reset()`
- * only when the action itself restarts (e.g. a new `plan_hash`).
+ * whenever the action itself changes — not just on a new `plan_hash`, but
+ * on any change to the request body too (different files, another draft):
+ * reusing a key with a different body gets 409 IDEMPOTENCY_KEY_MISMATCH.
  */
 export function useIdempotencyKey(): IdempotencyKey {
   const [value, setValue] = useState(() => crypto.randomUUID());

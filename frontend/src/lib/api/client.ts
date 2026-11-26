@@ -14,19 +14,50 @@ const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const csrfMiddleware: Middleware = {
   async onRequest({ request }) {
     if (!UNSAFE_METHODS.has(request.method)) return;
+    // The one request this client could ever send to another origin is
+    // the direct-to-storage upload PUT (S-65, a Supabase signed URL in
+    // production). That origin never checks X-CSRF-Token, and sending it
+    // would turn a simple upload into a CORS-preflighted request, so the
+    // header is same-origin only.
+    if (new URL(request.url).origin !== location.origin) return;
     const token = await ensureCsrfToken();
     request.headers.set("X-CSRF-Token", token);
   },
 };
 
+const FALLBACK_CODE_BY_STATUS: Record<number, string> = {
+  413: "FILE_TOO_LARGE",
+  429: "RATE_LIMITED",
+};
+
+function isProblem(value: unknown): value is Problem {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { code?: unknown }).code === "string"
+  );
+}
+
+function buildFallbackProblem(response: Response): Problem {
+  return {
+    type: "about:blank",
+    title: response.statusText || "Unexpected error",
+    status: response.status,
+    code: FALLBACK_CODE_BY_STATUS[response.status] ?? "INTERNAL_ERROR",
+  };
+}
+
 /**
  * Every non-2xx response (except 304, which isn't an error — api_contract.md
- * §1) is meant to be `application/problem+json`, but one that never
- * reached the backend (a 502/504 from an infra proxy, an empty body) might
- * not be. Falling back to a minimal Problem using INTERNAL_ERROR — the
- * contract's own catch-all code (error-codes.json), not an invented one —
- * means every caller gets an ApiError either way, never a raw JSON parse
- * error. `problem.detail` is never read for display anywhere.
+ * §1) is meant to be `application/problem+json`, but one that never reached
+ * the backend (a 502/504 from an infra proxy, a 413 from an upstream body
+ * -size limit, an empty body) might not be — and even a parsed JSON body
+ * might not be problem-shaped. Falling back to a minimal Problem, using a
+ * status-matched code from error-codes.json where one exists (413 ->
+ * FILE_TOO_LARGE, 429 -> RATE_LIMITED) and INTERNAL_ERROR otherwise — never
+ * an invented code — means every caller gets an ApiError either way, never
+ * a raw JSON parse error or an unrelated body passed through as if it were
+ * one. `problem.detail` is never read for display anywhere.
  */
 const errorMiddleware: Middleware = {
   async onResponse({ response }) {
@@ -34,14 +65,10 @@ const errorMiddleware: Middleware = {
 
     let problem: Problem;
     try {
-      problem = (await response.json()) as Problem;
+      const body: unknown = await response.json();
+      problem = isProblem(body) ? body : buildFallbackProblem(response);
     } catch {
-      problem = {
-        type: "about:blank",
-        title: response.statusText || "Unexpected error",
-        status: response.status,
-        code: "INTERNAL_ERROR",
-      };
+      problem = buildFallbackProblem(response);
     }
     throw new ApiError(problem);
   },
