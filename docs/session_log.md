@@ -203,6 +203,11 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - TDD: 4 red, then **352 passed**. All checks clean, CI green. Pushed with `--force-with-lease`. Commented on #42 (7186470568).
 - The work was done in a scratch worktree, so the uncommitted `plan.md` line in the main clone wasn't touched.
 
+**Backend review of the frontend PRs.** All read in full, with CI green. Developer A approved **#39** (`a7faeb2`), **#46** (`c736a34`), **#47** (`bca2816`) and **#48** (`628949b`). There were no blocking points. The non-blocking points were posted as PR comments:
+- **#46** (7187753894): the active state is an exact match, so nested routes are never highlighted; the "More" `<details>` stays open after navigation; safe-area inset; use the next-intl `Link`; `lucide` icons; a route group to keep the auth pages without the shell.
+- **#47** (7187754869): a signed-in locale or theme switch must also `PATCH /auth/me`, because `User.locale` drives the emails; the query string is dropped on switch (the #41 preview filters); full language names as accessible names.
+- **#48** (7187755689): a caller's `aria-describedby` overrides the error link; `duration-*` without `transition-*`; merging `className`.
+
 **P0.5 not ticked:** it waits on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
 
 **Not done:** an uncommitted blank line at the end of `docs/plan.md` was there on arrival. It's left out of the commit and is the owner's to keep or drop (`git restore docs/plan.md`).
