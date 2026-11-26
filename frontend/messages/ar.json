@@ -28,5 +28,10 @@
   "shell": {
     "primaryNav": "التنقل الرئيسي",
     "skipToContent": "تخطي إلى المحتوى الرئيسي"
+  },
+  "localeSwitch": {
+    "groupLabel": "اللغة",
+    "ar": "AR",
+    "en": "EN"
   }
 }
