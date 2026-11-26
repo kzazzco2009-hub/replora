@@ -5,6 +5,7 @@ import { Readex_Pro } from "next/font/google";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import "../globals.css";
+import { QueryProvider } from "@/components/providers/query-provider";
 import { AppShell } from "@/components/shell/app-shell";
 import { ThemeCookieSync } from "@/components/theme/theme-cookie-sync";
 import { ThemeProvider } from "@/components/theme/theme-provider";
@@ -57,10 +58,12 @@ export default async function LocaleLayout({
     >
       <body>
         <NextIntlClientProvider>
-          <ThemeProvider defaultTheme="system">
-            <ThemeCookieSync />
-            <AppShell>{children}</AppShell>
-          </ThemeProvider>
+          <QueryProvider>
+            <ThemeProvider defaultTheme="system">
+              <ThemeCookieSync />
+              <AppShell>{children}</AppShell>
+            </ThemeProvider>
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>
