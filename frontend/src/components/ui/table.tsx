@@ -4,7 +4,11 @@ export interface TableColumn<K extends string = string> {
   key: K;
   header: string;
   align?: "start" | "end";
-  /** Numeric cells get dir="ltr" so digits read right-aligned on RTL pages too. */
+  /**
+   * Numeric cells keep the table's own direction (so `text-end` resolves the
+   * same way for the header and the cell); only the digits are isolated in a
+   * `dir="ltr"` span, so they still read left-to-right on RTL pages.
+   */
   numeric?: boolean;
   /** Renders this column's cell as <th scope="row"> instead of <td>. */
   rowHeader?: boolean;
@@ -33,6 +37,10 @@ const ALIGN_CLASS: Record<"start" | "end", string> = {
 
 function columnAlign(column: TableColumn): "start" | "end" {
   return column.align ?? (column.numeric ? "end" : "start");
+}
+
+function cellContent(column: TableColumn, content: ReactNode): ReactNode {
+  return column.numeric ? <span dir="ltr">{content}</span> : content;
 }
 
 /**
@@ -103,15 +111,11 @@ export function Table<K extends string = string>({
                   const content = row.cells[column.key];
                   return column.rowHeader ? (
                     <th key={column.key} scope="row" className={className}>
-                      {content}
+                      {cellContent(column, content)}
                     </th>
                   ) : (
-                    <td
-                      key={column.key}
-                      dir={column.numeric ? "ltr" : undefined}
-                      className={className}
-                    >
-                      {content}
+                    <td key={column.key} className={className}>
+                      {cellContent(column, content)}
                     </td>
                   );
                 })}

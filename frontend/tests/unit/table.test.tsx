@@ -50,12 +50,38 @@ describe.each(["ltr", "rtl"] as const)("Table (dir=%s)", (dir) => {
     expect(screen.getByText("85.50")).toBeTruthy();
   });
 
-  it("gives a numeric cell dir=ltr so digits read right-aligned on RTL pages too", () => {
+  it("does not put dir on a numeric <td>; only its digits span gets dir=ltr", () => {
     render(
       <Table caption="Invoices" columns={COLUMNS} rows={ROWS} dir={dir} />,
     );
 
-    expect(screen.getByText("120.00").getAttribute("dir")).toBe("ltr");
+    const digits = screen.getByText("120.00");
+    expect(digits.tagName).toBe("SPAN");
+    expect(digits.getAttribute("dir")).toBe("ltr");
+    expect(digits.closest("td")?.getAttribute("dir")).toBeNull();
+  });
+
+  it("isolates digits with dir=ltr inside a numeric row-header cell too", () => {
+    const numericRowHeaderColumns: TableColumn<"amount">[] = [
+      { key: "amount", header: "Amount", numeric: true, rowHeader: true },
+    ];
+    const numericRowHeaderRows: TableRowData<"amount">[] = [
+      { id: "1", cells: { amount: "120.00" } },
+    ];
+
+    render(
+      <Table
+        caption="Amounts"
+        columns={numericRowHeaderColumns}
+        rows={numericRowHeaderRows}
+        dir={dir}
+      />,
+    );
+
+    const digits = screen.getByText("120.00");
+    expect(digits.tagName).toBe("SPAN");
+    expect(digits.getAttribute("dir")).toBe("ltr");
+    expect(digits.closest("th")?.getAttribute("dir")).toBeNull();
   });
 
   it("gives a numeric column's header the same alignment class as its cells", () => {
@@ -64,9 +90,9 @@ describe.each(["ltr", "rtl"] as const)("Table (dir=%s)", (dir) => {
     );
 
     const header = screen.getByRole("columnheader", { name: "Amount" });
-    const cell = screen.getByText("120.00");
+    const cell = screen.getByText("120.00").closest("td");
     expect(header.className).toContain("text-end");
-    expect(cell.className).toContain("text-end");
+    expect(cell?.className).toContain("text-end");
   });
 
   it("puts dir on the scroll container, not the table", () => {
