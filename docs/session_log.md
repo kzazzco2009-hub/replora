@@ -3,6 +3,14 @@
 **Read this file first at the start of every session.** Then continue from "Next step".
 Append a new entry per session (newest at the top). For each step record: what was done, the commands run, the results (pass or fail counts), and the decisions made.
 
+> **Start here (Session 16, the other machine):**
+> 1. Run `D:\Projects\replora_handover.md` Parts 1–5 (memory, sync, setup, checks, GitHub).
+> 2. **Approve the frontend's #58** at `75528d1`. It's re-reviewed (7192378154), but Claude's approval was blocked:
+>    `gh pr review 58 -R kzazzco2009-hub/replora --approve -b "Re-approved 75528d1 (see 7192378154)."`
+>    If its head has moved, read the new commits first.
+> 3. **#60 (P1.4):** check the frontend's review on the current head (`gh api repos/kzazzco2009-hub/replora/pulls/60/reviews`) and CI 4/4. Then merge on the user's go: `gh pr merge 60 -R kzazzco2009-hub/replora --squash`.
+> 4. Then **P1.5** (see "Next step").
+
 ---
 
 ## Current status
