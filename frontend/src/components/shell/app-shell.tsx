@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { LocaleSwitch } from "@/components/locale/locale-switch";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { BottomTabBar } from "./bottom-tab-bar";
 import { NAV_ITEMS } from "./nav-items";
 import { IconRail, Sidebar, type ShellNavItem } from "./side-nav";
@@ -35,9 +37,15 @@ export function AppShell({ children }: { children: ReactNode }) {
       </a>
       <Sidebar items={items} navLabel={navLabel} />
       <IconRail items={items} navLabel={navLabel} />
-      <main id="main-content" className="min-w-0 flex-1 p-4 pb-20 sm:pb-4">
-        {children}
-      </main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center justify-end gap-2 border-b border-line p-2">
+          <LocaleSwitch />
+          <ThemeToggle />
+        </header>
+        <main id="main-content" className="flex-1 p-4 pb-20 sm:pb-4">
+          {children}
+        </main>
+      </div>
       <BottomTabBar items={items} navLabel={navLabel} moreLabel={t("more")} />
     </div>
   );

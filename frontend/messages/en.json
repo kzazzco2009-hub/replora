@@ -28,5 +28,10 @@
   "shell": {
     "primaryNav": "Primary navigation",
     "skipToContent": "Skip to main content"
+  },
+  "localeSwitch": {
+    "groupLabel": "Language",
+    "ar": "AR",
+    "en": "EN"
   }
 }
