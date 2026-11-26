@@ -7,7 +7,23 @@ from uuid import UUID
 from pydantic import Field, RootModel
 
 from app.api.models import ApiModel
-from app.api.v1.operation_models import ArtifactType
+from app.core.artifact_type import ArtifactType
+from app.core.draft import Explanation
+from app.core.validation import Issue, ValidationReport
+
+__all__ = [
+    "AiDisclosure",
+    "Draft",
+    "DraftCreate",
+    "DraftUpdate",
+    "Explanation",
+    "Issue",
+    "Planner",
+    "Template",
+    "TemplateInput",
+    "ValidationReport",
+    "WorkflowDefinition",
+]
 
 Planner = Literal["template", "ai"]
 """`mock` exists only in test builds and is never exposed."""
@@ -45,32 +61,11 @@ class DraftUpdate(ApiModel):
     definition: WorkflowDefinition
 
 
-class Explanation(ApiModel):
-    """TemplatePlanner: `key` + `params` (translated by the client). AI planner: `text`."""
-
-    key: str | None = None
-    params: dict[str, Any] | None = None
-    text: str | None = Field(default=None, description="Already in `user.locale`")
-
-
 class AiDisclosure(ApiModel):
     """What was sent to the AI planner. Empty for template drafts."""
 
     sent_fields: list[str]
     samples_sent: bool
-
-
-class Issue(ApiModel):
-    code: str
-    path: str
-    node_id: str | None = None
-    params: dict[str, Any] = {}
-
-
-class ValidationReport(ApiModel):
-    valid: bool
-    errors: list[Issue]
-    warnings: list[Issue]
 
 
 class Draft(ApiModel):

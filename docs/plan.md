@@ -193,7 +193,7 @@ Goal: a clean, secure, reproducible monorepo with CI that is green on empty skel
 Goal: frozen domain models that both developers rely on.
 - [x] P1.1 Pydantic v2 models: `ArtifactType` enum (all 11 artifact kinds), `ArtifactRef` (id, type, format, sha256, lineage, owner scope), `Port`, and `OperationContract` (id, version, input/output ports, params schema).
 - [x] P1.2 `Node`, `Edge`, and `WorkflowDefinition` (workflow_id, workflow_version, schema_version, nodes, edges, IO contracts, resource policy, review policy).
-- [ ] P1.3 `WorkflowDraft` (planner output, explanation, warnings) and `ValidationReport` (errors and warnings with codes).
+- [x] P1.3 `WorkflowDraft` (planner output, explanation, warnings) and `ValidationReport` (errors and warnings with codes).
 - [ ] P1.4 `plan_hash` = SHA‑256 of the canonical JSON (sorted keys, no whitespace, normalized numbers). It is stable across runs and machines.
 - [ ] P1.5 `RunState` enum and the allowed transition table, as data.
 - [ ] P1.6 Export JSON Schemas to `contracts/schemas/`. Add golden fixtures (valid and invalid) to `contracts/fixtures/`.

@@ -49,7 +49,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
-| 1 Contracts | 2/7 | 0/6 | 0/2 | ☐ |
+| 1 Contracts | 3/7 | 0/6 | 0/2 | ☐ |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
@@ -172,6 +172,15 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **Shapes only.** Unique IDs, known ports, no cycles and the limits belong to the P2 validator, which returns a report. So an empty workflow is a valid shape.
 - **The API's `WorkflowDefinition` placeholder (an object) is not replaced yet.** That changes `openapi.json` and the frontend's types, so it goes with the JSON Schema export in P1.6, as the placeholder's docstring says. The drift check passes.
 - **TDD:** `test_core_workflow.py` was red first (no module), then 29 passed. Checks: ruff clean (51 files), **453 passed**, no drift.
+- Opened as **#56**.
+
+**P1.3: `app/core/validation.py` and `app/core/draft.py`** (branch `feat/p1.3-draft-validation-report`, stacked on #56):
+- **`Issue`, `ValidationReport` and `Explanation` moved from `draft_models.py` to core**, with the same fields, docstrings and descriptions. `draft_models.py` re-exports them, and `run_models.py` still imports `Issue` through it.
+- Two new rules, both model validators, so the JSON schema is unchanged:
+  - `ValidationReport.valid` is true exactly when there are no errors;
+  - `Explanation` is either a `key` (with optional `params`) or a `text`.
+- **New `WorkflowDraft(definition, explanation, warnings=[])`**: what a planner returns. It's never trusted, because the validator re-checks it (P12.3).
+- **TDD:** `test_core_draft.py` was red first (no module), then 20 passed. Checks: ruff clean (54 files), **473 passed**, no drift.
 
 ## Session 15 — 2026-11-26 (`D:\Projects\replora`, after Session 14 on the other machine)
 **Goal:** check that this machine matches Session 14, answer the frontend, and finalize P0.5 and P0.8.
