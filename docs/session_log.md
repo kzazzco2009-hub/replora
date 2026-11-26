@@ -157,6 +157,13 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
   3. a typo in a scenario name gives an unclear 500.
 - Idea: a parity test of fixtures ↔ `ENDPOINTS` ↔ `openapi.json`.
 
+**P1.2 follow-up, IO labels** (branch `feat/p1.2-io-labels`, after #56 merged as `30b1025`, option (a) chosen by Developer A):
+- The frontend asked on #56 (7191619340) for an optional display `label` on `InputContract` and `OutputContract`, for Arabic slot and result names.
+- Added `label: Label | None` (free Unicode, at most 100 characters; `Label` is shared with `Node.label`).
+- TDD: 3 red, then green. The first version of the length test passed for the wrong reason (an unknown `label` is `extra_forbidden`, and that message also contains "label"), so it now matches "at most 100 characters".
+- Checks: ruff clean, **456 passed**, no drift.
+- #55 (`LICENSE`, `3600675`) and #56 (`30b1025`) were merged on Developer A's go. #57 was rebased onto `main` (`--onto origin/main a8fd013`, range-diff `=`, 473 passed, no drift) as `25585dc`.
+
 **#52 merged** (`8cf1c1b`, P1.1) on Developer A's go. **Backend review of the frontend's #54** (Toast, `799fd09`, 7191428081). Nothing blocking:
 - the installed `sonner` container `<section>` is already `aria-live="polite"`, so the `role="status"`/`role="alert"` inside it is a nested live region, which some screen readers announce twice;
 - error toasts could show the API's `correlation_id`.
