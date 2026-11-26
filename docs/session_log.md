@@ -34,7 +34,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 - check the `noreply` git email on both machines.
 
 **Both owners:** decide on a `LICENSE`. |
-| Next step | 1) **Merge #43, then the `docs/g0-readiness` PR** (after the frontend approves). That PR ticks P0.5, so Phase 0 is then 11/11 on `main`. Once #43 merges, rebase `docs/g0-readiness` onto `main` (`git rebase --onto origin/main 78780e6`).
+| Next step | 1) **Merge #43, then the `docs/g0-readiness` PR** (after the frontend approves). That PR ticks P0.5, so Phase 0 is then 11/11 on `main`. Once #43 merges, rebase `docs/g0-readiness` onto `main` (`git rebase --onto origin/main origin/docs/session-14-final`, run before that branch is deleted).
 
 2) **#42 merged** (`8e8b24b`, Session 15).
 
