@@ -4,12 +4,13 @@ from importlib.metadata import version
 from typing import Literal
 
 from fastapi import APIRouter
-from pydantic import BaseModel
+
+from app.api.models import ApiModel
 
 router = APIRouter(tags=["health"])
 
 
-class Health(BaseModel):
+class Health(ApiModel):
     """Liveness status and the running backend version."""
 
     status: Literal["ok"]

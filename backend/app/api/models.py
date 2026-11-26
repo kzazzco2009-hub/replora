@@ -15,9 +15,9 @@ from pydantic_core import PydanticCustomError
 
 
 class ApiModel(BaseModel):
-    """Unknown fields are rejected (plan P1.7)."""
+    """Unknown fields are rejected, and a body never changes after it is built (P1.7)."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
 
 def _email(value: Any, handler: ValidatorFunctionWrapHandler) -> str:

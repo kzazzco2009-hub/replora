@@ -197,8 +197,8 @@ Goal: frozen domain models that both developers rely on.
 - [x] P1.4 `plan_hash` = SHA‑256 of the canonical JSON (sorted keys, no whitespace, normalized numbers). It is stable across runs and machines.
 - [x] P1.5 `RunState` enum and the allowed transition table, as data.
 - [x] P1.6 Export JSON Schemas to `contracts/schemas/`. Add golden fixtures (valid and invalid) to `contracts/fixtures/`.
-- [ ] P1.7 Every model uses `extra="forbid"` and `frozen=True` where it is immutable.
-- [ ] Tests T1.* pass · Security S‑10, S‑11 verified · **Gate G1 (contracts v1 frozen. Changes after this need a Change Request in `api_contract.md` §9)**
+- [x] P1.7 Every model uses `extra="forbid"` and `frozen=True` where it is immutable.
+- [x] Tests T1.* pass · Security S‑10, S‑11 verified · **Gate G1 (contracts v1 frozen. Changes after this need a Change Request in `api_contract.md` §9)**
 
 ### Phase 2 — Operation registry and DAG validator (M)
 - [ ] P2.1 `OperationRegistry`: register and look up by `(id, version)`. Duplicates are rejected. `list()` is used for the API.
