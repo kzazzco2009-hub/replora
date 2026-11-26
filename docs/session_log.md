@@ -10,21 +10,23 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 2 — Registry and validator (B2): complete, G2 awaiting Developer A.** Session 16. **G1 passed** 2026-11-26 (Developer A), on the condition that the Phase 1 stack merges after the frontend's review. `main` is at **`881de20`** (#60) on the backend side; the frontend has since merged #58, #61, #62, #64, #65, #67.
+| Current phase | **Phase 3 — Execution engine (B3): complete, G3 awaiting Developer A.** Session 16. **G1 and G2 passed** 2026-11-26 (Developer A), on the condition that their stacks merge after the frontend's review. `main` is at **`ef29ba7`** (#69).
 
-**Phase 1:** 7/7 steps, T1.1–T1.6, S‑10, S‑11 (Phase 1 part; T3.1 at G3).
-**Phase 2:** 6/6 steps, T2.1–T2.8, S‑12. End-of-phase run on the top of the stack: 1196 backend + 186 frontend tests, no drift, no leaks.
+**Phase 1:** 7/7 steps, T1.1–T1.6, S‑10, S‑11.
+**Phase 2:** 6/6 steps, T2.1–T2.8, S‑12.
+**Phase 3:** 9/9 steps, T3.1–T3.11, S‑11 (Phase 3 part), S‑13 (Phase 3 part; timeouts, memory and quota at T17.6). End-of-phase run on the top of the stack: 1433 backend + 186 frontend tests, no drift, no leaks.
 
-**Merged:** #68 P1.5 (`1eb5085`). **Open backend stack (merge in order; after each merge, rebase the next onto `main`, show the range-diff and ping the frontend to re-approve):** #69 P1.5b (contract; rebased, head `06c1568`, waiting for re-approval) → #70 P1.6 (contract) → #71 P1.7/S‑10/G1 → #72 P2.1 → #73 P2.2+P2.5 → #74 P2.3 → `feat/p2.4-validator-limits` (P2.4, P2.6, G2 record).
+**Merged:** #68 P1.5, #69 P1.5b. **Open backend stack (merge in order; after each merge, rebase the next onto `main`, show the range-diff and ping the frontend to re-approve):** #70 P1.6 (rebased at `9447c56`, waiting for re-approval) → #71 P1.7/S‑10 → #72 P2.1 → #73 P2.2+P2.5 → #74 P2.3 → #75 P2.4+P2.6 → #77 P3.1+P3.2+G2 record → #78 P3.3 → #79 P3.4 (`run_codes`) → #80 P3.5 → #81 P3.6 → #82 P3.7 → #83 P3.8 → #84 P3.9 reconcile (`planner_codes`) → `feat/p3.9-merge-template` (merge template, G3 record).
 
-**Frontend PRs:** #63 re-approved at `e5e5b27`; #66 has a change request (RTL numeric alignment), a fix is coming. |
-| Last gate passed | **G2** (2026-11-26, Developer A, `decisions.md`). Phase 3 started: P3.1 and P3.2 in `app/core/engine/run.py`. |
-| Waiting on | **Developer A:** nothing. `pre-commit install` is done, and this clone's `.git/config` sets the noreply email.
+**Frontend PRs:** #76 approved (TanStack Query provider), and their 401 note answered. |
+| Last gate passed | **G2** (2026-11-26, Developer A, `decisions.md`). **G3 is ready and awaiting Developer A.** |
+| Waiting on | **Developer A:** **approve G3** (or not), then Phase 4 can start.
 
-**Frontend:** review the stack, #69 and #70 first (they change `schema.d.ts`); the `workflow_codes` translations; push the #66 fix. |
-| Next step | 1) **Phase 3** continues with P3.3 (in-memory executor). P3.1 and P3.2 are done (T3.1, which finishes S‑11).
-2) Merge the stack in order as the frontend approves it. When the base of a stacked PR merges, retarget the child to `main` and `git rebase --onto origin/main <old base tip>`, check `git range-diff`, regenerate `openapi.json`/`schema.d.ts`/`contracts/schemas` if needed.
-3) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). The API request body size cap belongs to Phase 8 (S‑12 note). |
+**Frontend:** re-approve #70 so the stack can keep merging; review the Phase 2 and 3 PRs (the shared files are `error-codes.json` → `run_codes` and `planner_codes`, `.env.example`); add the i18n keys `templates.{reconcile,merge}.{title,description}` and `plans.{reconcile,merge}`. |
+| Next step | 1) After the G3 go: **Phase 4** (persistence: SQLAlchemy, Alembic, workspace-scoped repositories; P4.6 persists runs, run_nodes, artifacts and the idempotency ledger).
+2) Merge the stack in order as the frontend approves it (recipe in the notes below and in memory).
+3) Phase 7 registers the real operations under the ids the templates use: `parse_csv`, `parse_json`, `compare`, `report_csv`, `append_rows`, `export_csv`.
+4) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). The API request body size cap belongs to Phase 8 (S‑12 note). |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
 1. `git fetch --all --prune; git switch main; git pull --ff-only` (if a log PR is still open, switch to its branch and pull). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`. Once per clone: `pre-commit install`.
@@ -48,7 +50,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
 | 1 Contracts | 7/7 | 6/6 | 2/2 (S‑11 re-checked at G3) | ☑ G1 2026-11-26 (Developer A; stack merging) |
 | 2 Validator | 6/6 | 8/8 | 1/1 | ☑ G2 2026-11-26 (Developer A; stack merging) |
-| 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
+| 3 Engine | 9/9 | 11/11 | 1/1 (S‑13 timeouts at T17.6) | ☐ G3 awaiting Developer A |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
 | 5 Auth | 0/11 | 0/15 | 0/10 | ☐ |
 | 6 Files | 0/7 | 0/10 | 0/8 | ☐ |
@@ -364,6 +366,24 @@ PR **#83** (stacked on #82).
 - Mutation checks: all 6 rules are caught. Two survived at first (a numeric key excluded from the value, and case-insensitive hints), so tests were added for both.
 - The merge template follows in the next PR, which closes P3.9.
 - `uv run pytest -q`: **1426 passed**. ruff is clean.
+
+PR **#84** (stacked on #83).
+
+**P3.9 part 2, the merge template** (`template.py`, `tests/unit/test_template_merge.py`; the tests failed first). `plan("merge", files)` takes 2–10 files and builds parse ×N → `append_rows` (in the given order, `in_0…`) → `export_csv`. A file whose columns differ from the first file's (after NFKC and trimming, in any order) gets a `COLUMNS_DIFFER` warning with `{file, missing, extra}`, so the merge is never silent. `TemplateSpec.max_inputs` was added, and `COLUMNS_DIFFER` joined `planner_codes`. Mutation checks: all 5 rules are caught. **P3.9 is done.**
+
+**End-of-Phase-3 run** (top of the stack, `feat/p3.9-merge-template`):
+| Command | Result |
+|---|---|
+| `uv run ruff check .` · `ruff format --check .` | clean · 96 files formatted |
+| `uv run pytest -q` | **1433 passed** (unit and integration) |
+| `export_openapi --check` · `export_schemas --check` | exit 0 · exit 0 |
+| `uv run pip-audit` | no known vulnerabilities |
+| `pnpm -C frontend run gen:api` + `git diff --exit-code schema.d.ts` | no drift |
+| frontend lint · format:check · typecheck · test · build | clean · clean · clean · **186 passed** · built (on this stack's base) |
+| `pnpm audit --audit-level=high` | no known vulnerabilities |
+| `gitleaks git .` | no leaks found |
+
+**Gate G3: Phase 3 is complete and waiting for Developer A's approval.** The instruction was to approve G2 and start Phase 3, not to go past it, so Phase 4 doesn't start until G3 is approved. **S‑13 note for the gate:** retries and cancellation are verified now. Node and run timeouts, the memory guard and the temp-dir quota need the worker that can stop a node (P8.3), so they are verified at T17.6, as `security.md` lists.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.

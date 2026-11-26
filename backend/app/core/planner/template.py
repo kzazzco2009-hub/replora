@@ -56,21 +56,27 @@ class TemplateSpec:
     title_key: str
     description_key: str
     required_inputs: tuple[ArtifactType, ...]
+    max_inputs: int
 
 
+TWO_FILES = (ArtifactType.RAW_FILE, ArtifactType.RAW_FILE)
 TEMPLATES = {
-    "reconcile": TemplateSpec(
-        "reconcile", "templates.reconcile.title", "templates.reconcile.description",
-        (ArtifactType.RAW_FILE, ArtifactType.RAW_FILE),
-    ),
+    "reconcile": TemplateSpec("reconcile", "templates.reconcile.title",
+                              "templates.reconcile.description", TWO_FILES, 2),
+    "merge": TemplateSpec("merge", "templates.merge.title", "templates.merge.description",
+                          TWO_FILES, 10),
 }  # fmt: skip
 
 
 def plan(template_id: str, files: list[FileFacts]) -> WorkflowDraft:
     """The draft for one template. The same files always give the same draft and plan_hash."""
     spec = TEMPLATES[template_id]
-    if len(files) != len(spec.required_inputs):
-        raise ValueError(f"{template_id} needs {len(spec.required_inputs)} files")
+    low, high = len(spec.required_inputs), spec.max_inputs
+    if not low <= len(files) <= high:
+        count = f"{low}" if low == high else f"{low} to {high}"
+        raise ValueError(f"{template_id} needs {count} files")
+    if template_id == "merge":
+        return _merge(files)
     return _reconcile(*files)
 
 
@@ -128,6 +134,39 @@ def _reconcile(left: FileFacts, right: FileFacts) -> WorkflowDraft:
     labels = {"left": left.label, "right": right.label}
     explanation = Explanation(key="plans.reconcile", params={**params, **labels})
     return WorkflowDraft(definition=definition, explanation=explanation, warnings=warnings + more)
+
+
+def _merge(files: list[FileFacts]) -> WorkflowDraft:
+    ids = [f"file_{index}" for index in range(len(files))]
+    definition = WorkflowDefinition(
+        nodes=[*(_parser(node_id, facts) for node_id, facts in zip(ids, files, strict=True)),
+               Node(id="merge", operation={"id": "append_rows", "version": 1}),
+               Node(id="export", operation={"id": "export_csv", "version": 1})],
+        edges=[*(_edge(node_id, "table", "merge", f"in_{index}")
+                 for index, node_id in enumerate(ids)),
+               _edge("merge", "table", "export", "table")],
+        inputs=[_input(node_id, facts, node_id) for node_id, facts in zip(ids, files, strict=True)],
+        outputs=[OutputContract(name="merged", artifact_type=ArtifactType.OUTPUT_FILE,
+                                source=PortRef(node_id="export", port="file"))],
+    )  # fmt: skip
+    explanation = Explanation(key="plans.merge", params={"files": len(files)})
+    return WorkflowDraft(definition=definition, explanation=explanation,
+                         warnings=_column_drift(files))  # fmt: skip
+
+
+def _column_drift(files: list[FileFacts]) -> list[Issue]:
+    """A `COLUMNS_DIFFER` warning for each file whose columns aren't the first file's."""
+    first = {_normal(c.name): c.name for c in files[0].columns}
+    warnings = []
+    for index, facts in enumerate(files[1:], start=1):
+        names = {_normal(c.name): c.name for c in facts.columns}
+        missing = [name for normal, name in first.items() if normal not in names]
+        extra = [name for normal, name in names.items() if normal not in first]
+        if missing or extra:
+            params = {"file": facts.label, "missing": missing, "extra": extra}
+            warnings.append(Issue(code=PlannerCode.COLUMNS_DIFFER, path=f"inputs/{index}",
+                                  params=params))  # fmt: skip
+    return warnings
 
 
 def _parser(node_id: str, facts: FileFacts) -> Node:
