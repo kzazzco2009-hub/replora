@@ -153,3 +153,32 @@
     --duration-rail: 1ms;
   }
 }
+
+/* Sheet slide (src/components/ui/sheet.tsx): the closed-state offset is
+ * +100% in LTR and -100% in RTL, so the panel always exits toward the
+ * inline-end edge. */
+:root {
+  --sheet-offset-closed: 100%;
+}
+
+:root[dir="rtl"] {
+  --sheet-offset-closed: -100%;
+}
+
+@keyframes sheet-slide-in {
+  from {
+    transform: translateX(var(--sheet-offset-closed));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes sheet-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--sheet-offset-closed));
+  }
+}

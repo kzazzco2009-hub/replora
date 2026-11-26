@@ -16,9 +16,12 @@ export interface SheetProps {
 
 /**
  * A side panel that slides in from the inline-end edge (right in EN/LTR,
- * left in AR/RTL). The slide direction is physical (`translate-x`), so it
- * is the one place in this component that needs explicit `ltr:`/`rtl:`
- * variants rather than a logical utility.
+ * left in AR/RTL). Radix's `Presence` only detects a CSS `animation`
+ * when deciding how long to keep the closed node mounted (it reads
+ * `animationName`, not `transition`), so the slide is a `@keyframes`
+ * animation driven by `data-state` (tokens.css), not a transition. The
+ * closed-state offset is the `--sheet-offset-closed` CSS variable, which
+ * flips under `:root[dir="rtl"]` so the direction follows `document.dir`.
  */
 export function Sheet({
   open,
@@ -36,7 +39,7 @@ export function Sheet({
         <RadixDialog.Overlay className="fixed inset-0 bg-black/50" />
         <RadixDialog.Content
           aria-describedby={undefined}
-          className="fixed inset-y-0 end-0 flex w-[90vw] max-w-sm flex-col gap-3 overflow-y-auto bg-surface-raised p-6 text-ink outline-none transition-transform duration-[var(--duration-base)] ltr:data-[state=closed]:translate-x-full rtl:data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0"
+          className="fixed inset-y-0 end-0 flex w-[90vw] max-w-sm flex-col gap-3 overflow-y-auto bg-surface-raised p-6 text-ink outline-none data-[state=open]:animate-[sheet-slide-in_var(--duration-base)_ease-out] data-[state=closed]:animate-[sheet-slide-out_var(--duration-base)_ease-in]"
         >
           <div className="flex items-start justify-between gap-4">
             <RadixDialog.Title className="text-lg font-semibold">

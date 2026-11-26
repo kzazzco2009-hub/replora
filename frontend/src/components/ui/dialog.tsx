@@ -31,8 +31,7 @@ export function Dialog({
         <RadixDialog.Overlay className="fixed inset-0 bg-black/50" />
         <RadixDialog.Content
           aria-describedby={undefined}
-          className="fixed inset-0 m-auto flex max-h-[85vh] w-[90vw] max-w-md flex-col gap-3 overflow-y-auto rounded-dialog bg-surface-raised p-6 text-ink outline-none"
-          style={{ height: "fit-content" }}
+          className="fixed inset-0 m-auto flex h-fit max-h-[85vh] w-[90vw] max-w-md flex-col gap-3 overflow-y-auto rounded-dialog bg-surface-raised p-6 text-ink outline-none"
         >
           <div className="flex items-start justify-between gap-4">
             <RadixDialog.Title className="text-lg font-semibold">
