@@ -1,5 +1,7 @@
 import { cleanup } from "@testing-library/react";
-import { afterEach, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, vi } from "vitest";
+import { resetScenarios } from "./msw/scenarios";
+import { server } from "./msw/server";
 
 afterEach(cleanup);
 
@@ -12,3 +14,13 @@ vi.mock("next/font/google", () => ({
     className: "mock-readex-pro",
   }),
 }));
+
+// msw/node only: no public/mockServiceWorker.js and no browser worker
+// registration (security decision — anything in public/ ships to prod).
+// msw 3.x renamed `onUnhandledRequest` to `onUnhandledFrame`.
+beforeAll(() => server.listen({ onUnhandledFrame: "error" }));
+afterEach(() => {
+  server.resetHandlers();
+  resetScenarios();
+});
+afterAll(() => server.close());
