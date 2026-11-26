@@ -1544,13 +1544,13 @@ export interface components {
         };
         /**
          * Preview
-         * @description One page of an output table; `rows` follow `columns` in order.
+         * @description One page of an output table.
          */
         Preview: {
             /** Columns */
             columns: components["schemas"]["Column"][];
             /** Rows */
-            rows: (string | number | boolean | null)[][];
+            rows: components["schemas"]["PreviewRow"][];
             /**
              * Total
              * @description Rows matching the filter
@@ -1558,6 +1558,24 @@ export interface components {
             total: number;
             /** Offset */
             offset: number;
+        };
+        /**
+         * PreviewRow
+         * @description One output row; `cells` follow `columns` in order.
+         */
+        PreviewRow: {
+            /**
+             * Row
+             * @description The output row number, as taken by the lineage path
+             */
+            row: number;
+            /**
+             * Status
+             * @description Null outside a reconciliation
+             */
+            status: ("matched" | "value_diff" | "missing_left" | "missing_right") | null;
+            /** Cells */
+            cells: (string | number | boolean | null)[];
         };
         /**
          * ProblemDetails

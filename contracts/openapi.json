@@ -6901,23 +6901,7 @@
           },
           "rows": {
             "items": {
-              "items": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "integer"
-                  },
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "type": "array"
+              "$ref": "#/components/schemas/PreviewRow"
             },
             "type": "array",
             "title": "Rows"
@@ -6941,7 +6925,66 @@
           "offset"
         ],
         "title": "Preview",
-        "description": "One page of an output table; `rows` follow `columns` in order."
+        "description": "One page of an output table."
+      },
+      "PreviewRow": {
+        "properties": {
+          "row": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Row",
+            "description": "The output row number, as taken by the lineage path"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "matched",
+                  "value_diff",
+                  "missing_left",
+                  "missing_right"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status",
+            "description": "Null outside a reconciliation"
+          },
+          "cells": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer",
+                  "maximum": 9007199254740991.0,
+                  "minimum": -9007199254740991.0
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Cells"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "row",
+          "status",
+          "cells"
+        ],
+        "title": "PreviewRow",
+        "description": "One output row; `cells` follow `columns` in order."
       },
       "ProblemDetails": {
         "properties": {

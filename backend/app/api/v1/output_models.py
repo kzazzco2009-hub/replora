@@ -1,7 +1,7 @@
 """Response bodies for the §7 run outputs (docs/api_contract.md)."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import Field
@@ -10,8 +10,13 @@ from app.api.models import ApiModel
 from app.api.v1.operation_models import ArtifactType
 
 ReconcileStatus = Literal["matched", "value_diff", "missing_left", "missing_right"]
-Cell = str | int | bool | None
-"""Decimals and dates are strings, so no precision is lost (D14)."""
+MAX_SAFE_INTEGER = 2**53 - 1
+SafeInt = Annotated[int, Field(ge=-MAX_SAFE_INTEGER, le=MAX_SAFE_INTEGER)]
+Cell = str | SafeInt | bool | None
+"""Decimals and dates are strings, so no precision is lost (D14).
+
+An `integer` cell fits a JavaScript number exactly; a column with larger values is `decimal`.
+"""
 
 
 class OutputArtifact(ApiModel):
@@ -30,11 +35,19 @@ class Column(ApiModel):
     nullable: bool
 
 
+class PreviewRow(ApiModel):
+    """One output row; `cells` follow `columns` in order."""
+
+    row: int = Field(ge=0, description="The output row number, as taken by the lineage path")
+    status: ReconcileStatus | None = Field(description="Null outside a reconciliation")
+    cells: list[Cell]
+
+
 class Preview(ApiModel):
-    """One page of an output table; `rows` follow `columns` in order."""
+    """One page of an output table."""
 
     columns: list[Column]
-    rows: list[list[Cell]]
+    rows: list[PreviewRow]
     total: int = Field(description="Rows matching the filter")
     offset: int
 

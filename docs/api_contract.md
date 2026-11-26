@@ -146,7 +146,7 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
 | GET | `/workspaces/{ws}/runs/{id}` | — | `Run` |
 | GET | `/workspaces/{ws}/runs/{id}/events` | `?after=<seq>` | `{events: [RunEvent], last_seq}` |
 | GET | `/workspaces/{ws}/runs/{id}/outputs` | — | `OutputArtifact[]` |
-| GET | `/workspaces/{ws}/runs/{id}/outputs/{artifact_id}/preview` | `?offset=0&limit=100&status=matched\|value_diff\|missing_left\|missing_right&q=<text>` | `{columns: [Column], rows: [[...]], total, offset}` |
+| GET | `/workspaces/{ws}/runs/{id}/outputs/{artifact_id}/preview` | `?offset=0&limit=100&status=matched\|value_diff\|missing_left\|missing_right&q=<text>` | `{columns: [Column], rows: [{row, status, cells: [...]}], total, offset}` (`row` is the number the lineage path takes; `status` is null outside a reconciliation) |
 | GET | `/workspaces/{ws}/runs/{id}/outputs/{artifact_id}/download` | — | `{url, expires_at}` |
 | GET | `/workspaces/{ws}/runs/{id}/outputs/{artifact_id}/rows/{row}/lineage` | — | `Lineage` |
 

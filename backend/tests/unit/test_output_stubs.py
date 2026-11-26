@@ -74,6 +74,25 @@ def test_preview_filters_by_reconciliation_status(openapi, schemas):
     assert set(schemas["Preview"]["properties"]) == {"columns", "rows", "total", "offset"}
 
 
+def test_preview_row_carries_its_number_and_status(schemas):
+    rows = schemas["Preview"]["properties"]["rows"]
+    row = schemas["PreviewRow"]
+
+    assert rows["items"] == {"$ref": "#/components/schemas/PreviewRow"}
+    assert set(row["properties"]) == {"row", "status", "cells"}
+    assert set(row["required"]) == {"row", "status", "cells"}
+    assert row["properties"]["row"]["minimum"] == 0
+    statuses = [option.get("enum") for option in row["properties"]["status"]["anyOf"]]
+    assert statuses == [["matched", "value_diff", "missing_left", "missing_right"], None]
+
+
+def test_integer_cells_stay_in_the_javascript_safe_range(schemas):
+    cell_types = schemas["PreviewRow"]["properties"]["cells"]["items"]["anyOf"]
+    integer = next(option for option in cell_types if option.get("type") == "integer")
+
+    assert (integer["minimum"], integer["maximum"]) == (-(2**53 - 1), 2**53 - 1)
+
+
 def test_lineage_row_is_a_non_negative_index(client):
     url = f"{ARTIFACT}/rows/-1/lineage".format(**IDS)
 
