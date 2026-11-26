@@ -13,6 +13,37 @@
     "retry": "Try again",
     "reference": "Reference"
   },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "problem": {
+      "VALIDATION_FAILED": "Some fields need attention. Check the highlighted fields and try again.",
+      "NOT_FOUND": "This couldn't be found. It may have been moved, removed, or isn't available to you.",
+      "METHOD_NOT_ALLOWED": "This action isn't available right now. Please refresh and try again.",
+      "UNAUTHENTICATED": "Your session has ended. Please sign in again.",
+      "INVALID_CREDENTIALS": "That email or password doesn't match our records. Please try again.",
+      "MFA_CHALLENGE_INVALID": "This sign-in attempt has expired. Please sign in again.",
+      "MFA_CODE_INVALID": "That code didn't match. Check the app or recovery code and try again.",
+      "PASSWORD_INCORRECT": "That password doesn't match your current one. Please try again.",
+      "TOKEN_INVALID": "This link has expired or was already used. Request a new one.",
+      "CSRF_FAILED": "This session needs to refresh. Please try again.",
+      "EMAIL_NOT_VERIFIED": "Please verify your email address to continue.",
+      "MFA_ALREADY_ENABLED": "Two-factor authentication is already on for this account.",
+      "MFA_NOT_ENABLED": "Two-factor authentication isn't on for this account.",
+      "RATE_LIMITED": "Too many attempts. Please wait a moment and try again.",
+      "FILE_TOO_LARGE": "This file is larger than the allowed size. Use a smaller file or split it.",
+      "QUOTA_EXCEEDED": "This workspace has run out of storage. Delete some files or ask the workspace owner to add more space.",
+      "PERSONAL_WORKSPACE_UNDELETABLE": "Your personal workspace can't be deleted. Only workspaces you created can be removed.",
+      "PRECONDITION_FAILED": "This changed somewhere else since it was loaded. Reload it, then make your changes again.",
+      "PRECONDITION_REQUIRED": "This couldn't be saved. Please reload the page and try again.",
+      "DRAFT_INVALID": "This plan has issues that need to be fixed before it can run. Review the highlighted steps.",
+      "PLAN_HASH_MISMATCH": "This plan changed since it was shown. Please review it again before approving.",
+      "INVALID_STATE_TRANSITION": "This run can't do that right now. Its current status doesn't allow this action.",
+      "IDEMPOTENCY_KEY_MISMATCH": "This request couldn't be repeated as sent. Please refresh and try again.",
+      "BASE_VERSION_STALE": "A newer version of this workflow exists. Reload it, then map again from the latest version.",
+      "INTERNAL_ERROR": "Something went wrong on our side. If this keeps happening, contact support with the reference below.",
+      "NOT_IMPLEMENTED": "This feature isn't available yet."
+    }
+  },
   "home": {
     "title": "Replora"
   },
