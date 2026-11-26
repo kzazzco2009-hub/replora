@@ -27,6 +27,7 @@ VALIDATION_CODES = {
         "model_attributes_type",
         "string_type",
         "string_too_short",
+        "password_breached",
         "string_too_long",
         "string_pattern_mismatch",
         "literal_error",

@@ -4,15 +4,25 @@ from datetime import datetime
 from typing import Annotated, Literal, Self
 from uuid import UUID
 
-from pydantic import EmailStr, Field, model_validator
+from pydantic import AfterValidator, EmailStr, Field, model_validator
 from pydantic_core import PydanticCustomError
 
 from app.api.models import ApiModel, Email
 from app.api.v1.workspace_models import Workspace
+from app.auth.passwords import is_breached
 
 Locale = Literal["ar", "en"]
 Theme = Literal["light", "dark", "system"]
-Password = Annotated[str, Field(min_length=12, max_length=256)]
+
+
+def _not_breached(password: str) -> str:
+    """P5.1: a password from the breached list is refused (NIST 800-63B)."""
+    if is_breached(password):
+        raise PydanticCustomError("password_breached", "This password is known from breaches")
+    return password
+
+
+Password = Annotated[str, Field(min_length=12, max_length=256), AfterValidator(_not_breached)]
 CurrentPassword = Annotated[str, Field(min_length=1, max_length=256)]
 OtpCode = Annotated[str, Field(pattern=r"^\d{6}$")]
 RecoveryCode = Annotated[str, Field(min_length=1, max_length=64)]

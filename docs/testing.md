@@ -108,8 +108,8 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 
 ## Phase 5 — Auth and authorization
 **Unit**
-- [ ] T5.1 Passwords are hashed with argon2id and verified correctly. A wrong password fails. The hash never appears in a response.
-- [ ] T5.2 The password policy rejects strings shorter than 12 characters and breached-list passwords, and accepts long passphrases including Arabic text.
+- [x] T5.1 Passwords are hashed with argon2id and verified correctly. A wrong password fails. The hash never appears in a response.
+- [x] T5.2 The password policy rejects strings shorter than 12 characters and breached-list passwords, and accepts long passphrases including Arabic text.
 
 **Functional (API)**
 - [ ] T5.3 Register, verify email, login, `me`, refresh, logout. After logout the refresh token is revoked (reuse gives 401).

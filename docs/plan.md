@@ -232,7 +232,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] Tests T4.* pass · Security S‑14, S‑15 verified · **Gate G4**
 
 ### Phase 5 — Authentication and authorization (M)
-- [ ] P5.1 Register and login with argon2id hashing (`pwdlib`). Password policy follows NIST 800‑63B (length ≥ 12, breached-password check offline list, no composition rules).
+- [x] P5.1 Register and login with argon2id hashing (`pwdlib`). Password policy follows NIST 800‑63B (length ≥ 12, breached-password check offline list, no composition rules).
 - [ ] P5.2 Sessions: short access token (15 min) and a rotating refresh token (stored hashed, revocable), both in `HttpOnly; Secure; SameSite=Lax` cookies. Logout revokes the session.
 - [ ] P5.3 CSRF protection: a double-submit token (`X-CSRF-Token`) on all unsafe methods.
 - [ ] P5.4 Email verification and password reset (single-use, hashed, 30‑min tokens). The email goes to the console sink locally.
