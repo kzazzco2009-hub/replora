@@ -183,7 +183,47 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **#47** (7187754869): a signed-in locale or theme switch must also `PATCH /auth/me`, because `User.locale` drives the emails; the query string is dropped on switch (the #41 preview filters); full language names as accessible names.
 - **#48** (7187755689): a caller's `aria-describedby` overrides the error link; `duration-*` without `transition-*`; merging `className`.
 
-**P0.5 not ticked:** it waits on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
+**G0 readiness check on `main` `f07e323`** (detached in the main clone, the tree clean before and after; `pnpm install --frozen-lockfile` and `uv sync --locked`):
+
+| Check | Command | Result |
+|---|---|---|
+| Backend lint | `uv run ruff check .` · `ruff format --check .` | clean · 40 files formatted |
+| Backend tests | `uv run pytest -q` | **377 passed** |
+| Contract drift | `uv run python -m app.export_openapi --check` | exit 0 |
+| Backend audit | `uv run pip-audit` | no known vulnerabilities |
+| Frontend | `pnpm -C frontend lint` · `typecheck` · `format:check` | all exit 0 |
+| Frontend tests | `pnpm -C frontend test` | **14 files, 123 passed** |
+| Frontend build | `pnpm -C frontend build` | exit 0 |
+| Frontend audit | `pnpm audit --audit-level=high` | no known vulnerabilities |
+| Secrets | `gitleaks git .` | no leaks |
+| **T0.4, re-proven** | one byte appended to `openapi.json`, then `--check` | exit 1 "is out of date", restored |
+| **T0.5, re-proven** | a fake `sk-or-v1-<64 hex>` in an empty temp dir, `gitleaks dir --config .gitleaks.toml` | `leaks found: 1` (`openrouter-api-key`), exit 1, probe removed |
+| **T0.3 lint gate, re-proven locally** | a probe file with `className="ml-2"`, then `eslint` | `local/no-physical-direction` error, exit 1, probe removed |
+
+**G0 gate report (draft, to post on #1 once #42 is merged and P0.5 is ticked):**
+
+| Item | State | Evidence |
+|---|---|---|
+| P0.1–P0.4, P0.6, P0.7, P0.9–P0.11 | ✅ | #2, #6, #14, #19, #25, #26 and the earlier sessions |
+| P0.5 contract and types | ⏳ #42 | §2 #8 · §3 #10, #27 · §4 #11, #32 · §5 #28 · §6 #34 · §7 #40, #41 · §8 #42 · `gen:api` on `main`. `openapi-fetch` → P9.6 |
+| P0.8 governance | ✅ | ruleset `main` live (Session 15), CODEOWNERS, PR template |
+| Tests T0.1–T0.7 | ✅ 7/7 | T0.3–T0.5 re-proven above |
+| Security S‑01–S‑05 | ✅ 5/5 | `security.md` Phase 0; S‑05 Session 15 |
+| api_contract.md draft | ✅ | agreed on #1; §2–§8 stubbed in `openapi.json`; §2 fixtures #44 |
+| Frontend F0 | ✅ steps | P0.4, P0.5 (types) and T0.2 are ticked in `docs/frontend/plan.md`. Their F0 gate line (line 107) is theirs to tick |
+| Open owner items | — | `LICENSE` (both); confirming fork-PR approval and secret scanning in Settings (frontend) |
+
+The G0 decision needs **both developers**. No Phase 1 work starts before it.
+
+**Housekeeping:** 11 merged local branches deleted after checking them:
+- 8 had tips equal to their PR's final head;
+- `feat/p0.5-workspace-codes` was #27 before its rebase (range-diff `=` in Session 14);
+- `feat/p0.5-file-stubs` held an old log line that `main` supersedes;
+- `backend/setup` held only the initial commit, already in `main`.
+
+`feat/p0.5-workflows-stubs` (#42) was kept. The merged remote branches #40, #41, #44 and #45 are for Developer A to delete (Claude can't).
+
+**P0.5 not ticked:** it waits on #42 only. `openapi-fetch` is P9.6 in the frontend's plan, and the P0.5 text is corrected on `docs/g0-readiness`. Earlier note: it waited on #41/#42 and on `openapi-fetch`, which isn't in `frontend/package.json` (only `openapi-typescript`).
 
 **Stray `plan.md` line:** an uncommitted blank line at the end of `docs/plan.md` was there on arrival. Developer A said to drop it (`git restore docs/plan.md`).
 
