@@ -41,7 +41,7 @@
 - [x] §2 auth fixtures in `contracts/fixtures/auth/`, validated against `openapi.json` and `error-codes.json` *(#44; agreed in issue #1, api_contract.md §10)*
 - [x] Tests: [x] T0.1 · [x] T0.3 (backend job) · [x] T0.4 · [x] T0.5 · [x] T0.6 · [x] T0.7
 - [x] Security S‑01…S‑05 verified *(S‑02 in #33; S‑05 once the ruleset went live, Session 15)*
-- [ ] **Gate G0** (shared: both tracks green)
+- [x] **Gate G0** (shared: both tracks green) *(approved by both on #1, 7189738362 and 7190193580; in effect with #50)*
 
 ### B1 — Core contracts → Phase 1 (P1.1–P1.7) · T1.* · S‑10, S‑11 · **Gate G1**
 ### B2 — Registry and validator → Phase 2 (P2.1–P2.6) · T2.* · S‑12 · **Gate G2**
