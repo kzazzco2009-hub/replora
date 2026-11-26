@@ -102,4 +102,21 @@ describe.each(["ltr", "rtl"] as const)("Sheet (dir=%s)", (dir) => {
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it("has no aria-describedby and logs no warning when no description is given", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(
+      <div dir={dir}>
+        <Sheet open onOpenChange={vi.fn()} title="Lineage" closeLabel="Close">
+          <p>Side panel content</p>
+        </Sheet>
+      </div>,
+    );
+
+    expect(
+      screen.getByRole("dialog").getAttribute("aria-describedby"),
+    ).toBeNull();
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
 });
