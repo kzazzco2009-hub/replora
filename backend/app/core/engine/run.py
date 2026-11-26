@@ -1,11 +1,12 @@
-"""A run and how it moves (P3.1), and approval bound to `plan_hash` (P3.2, S-11).
+"""A run and how it moves (P3.1), approval bound to `plan_hash` (P3.2, S-11), and expiry (P3.6).
 
-`transition` is the only way a run changes state, and it follows the P1.5 table. Approval goes
-through `approve`, which records who approved which hash and when. A run starts only while that
-hash still matches its definition, so any change to the plan after approval invalidates it.
+`transition` is the only way a run changes state, and it follows the P1.5 table. Every change
+records when the new state began. Approval goes through `approve`, which records who approved
+which hash and when. A run starts only while that hash still matches its definition, so any
+change to the plan after approval invalidates it.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID, uuid7
 
 from app.core.model import ContractModel
@@ -31,6 +32,7 @@ class Run(ContractModel):
     definition: WorkflowDefinition
     state: RunState = RunState.DRAFT
     created_at: datetime
+    state_since: datetime
     approval: Approval | None = None
 
     @property
@@ -39,17 +41,17 @@ class Run(ContractModel):
 
 
 def new_run(definition: WorkflowDefinition, now: datetime) -> Run:
-    return Run(id=uuid7(), definition=definition, created_at=now)
+    return Run(id=uuid7(), definition=definition, created_at=now, state_since=now)
 
 
-def transition(run: Run, action: RunAction) -> Run:
-    """The run after `action`, or `InvalidTransitionError`. Starting needs a valid approval."""
+def transition(run: Run, action: RunAction, at: datetime) -> Run:
+    """The run after `action` at `at`, or `InvalidTransitionError`. Starting needs an approval."""
     target = next_state(run.state, action)
     if action is RunAction.APPROVE:
         raise ValueError("use approve(), which checks the plan_hash")
     if action is RunAction.START:
         check_approval(run)
-    return run.model_copy(update={"state": target})
+    return run.model_copy(update={"state": target, "state_since": at})
 
 
 def approve(run: Run, approved_hash: str, by: UUID, at: datetime) -> Run:
@@ -58,10 +60,17 @@ def approve(run: Run, approved_hash: str, by: UUID, at: datetime) -> Run:
     if approved_hash != run.plan_hash:
         raise PlanHashMismatchError("the approved plan_hash is not the run's plan")
     approval = Approval(plan_hash=approved_hash, by=by, at=at)
-    return run.model_copy(update={"state": target, "approval": approval})
+    return run.model_copy(update={"state": target, "state_since": at, "approval": approval})
 
 
 def check_approval(run: Run) -> None:
     """Raise unless the run has an approval for exactly its current plan."""
     if run.approval is None or run.approval.plan_hash != run.plan_hash:
         raise PlanHashMismatchError("the run has no approval for its current plan")
+
+
+def expire_if_stale(run: Run, now: datetime, ttl: timedelta) -> Run:
+    """EXPIRED when the run has awaited approval for longer than `ttl`; otherwise unchanged."""
+    if run.state is RunState.AWAITING_APPROVAL and now - run.state_since > ttl:
+        return transition(run, RunAction.EXPIRE, now)
+    return run

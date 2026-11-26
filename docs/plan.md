@@ -215,7 +215,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] P3.3 In-memory executor: topological order, node-by-node execution, outputs stored as artifacts with lineage.
 - [x] P3.4 Failure semantics: a failed required branch makes the run FAILED, a failed optional branch makes it PARTIAL with warnings, and a low-confidence result makes it NEEDS_REVIEW.
 - [x] P3.5 Retry: only `TransientError`, at most 2 extra attempts with backoff. Idempotency key = `(run_id, node_id, input_hashes)`, so a node is never executed twice for the same inputs.
-- [ ] P3.6 Cancellation: CANCEL_REQUESTED is checked between nodes and leads to CANCELLED. EXPIRED applies when approval times out (AWAITING_APPROVAL older than 24 h, configurable).
+- [x] P3.6 Cancellation: CANCEL_REQUESTED is checked between nodes and leads to CANCELLED. EXPIRED applies when approval times out (AWAITING_APPROVAL older than 24 h, configurable).
 - [ ] P3.7 Replay: re-run a pinned workflow version on new inputs. A contract mismatch leads to NEEDS_REVIEW.
 - [ ] P3.8 `MockPlanner` plus fake adapters (fake ZIP with fake CSV and JSON branches). This is the integration test for the original S1.4. **The MockPlanner is test-only.**
 - [ ] P3.9 `TemplatePlanner` (user-facing, deterministic). Templates such as "Reconcile two files on a key" and "Merge files with the same columns" are filled from file metadata (column-name matching). This is what MVP users get before the AI planner exists, and it remains the fallback afterwards.

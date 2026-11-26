@@ -302,6 +302,22 @@ PR **#79** (stacked on #78).
 - Mutation checks: the ledger check, the run in the key, the input hashes in the key, retrying any `OperationError`, the backoff growth, and both off-by-ones in the attempt guard each fail 1–4 tests. A redundant `range` bound survived a mutation, so it was replaced by `itertools.count`.
 - `uv run pytest -q`: **1374 passed**. ruff is clean.
 
+PR **#80** (stacked on #79).
+
+**P3.6, cancellation and expiry** (`run.py`, `executor.py`, `app/config.py`, `tests/unit/test_engine_cancel.py`; the cancel tests failed first).
+- `transition(run, action, at)` now takes the time, and `Run.state_since` records when the current state began. The executor gets the time from an injectable `clock`.
+- **Cancel:** `execute(..., cancelled=...)` asks before every node. Once it says yes, the run goes RUNNING → CANCEL_REQUESTED → CANCELLED and no other node starts. A run already CANCEL_REQUESTED when it is picked up is confirmed CANCELLED without starting. The cancel API itself is the P1.5 table: NEEDS_REVIEW → CANCELLED at once.
+- **Expiry:** `expire_if_stale(run, now, ttl)` expires a run that has been AWAITING_APPROVAL for **longer** than the TTL. `Settings.approval_ttl_hours` defaults to 24 (`APPROVAL_TTL_HOURS` in `.env.example`). The scheduler that calls it belongs to the worker (Phase 8).
+- **T3.6 and T3.7:**
+  - cancel after two nodes → CANCELLED, with only those two artifacts;
+  - cancel before the first node;
+  - cancelled while queued → never starts;
+  - the TTL boundary on both sides;
+  - only AWAITING_APPROVAL expires;
+  - the setting.
+- Mutation checks: the between-node check, the queued-cancel check, `>` vs `>=`, the state guard, and recording `state_since` each fail 1–11 tests.
+- `uv run pytest -q`: **1392 passed**. ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 

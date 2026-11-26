@@ -82,8 +82,8 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [x] T3.3 A failure in a required branch gives FAILED. A failure in an optional branch gives PARTIAL with a warning. Low confidence gives NEEDS_REVIEW.
 - [x] T3.4 A transient error is retried at most 2 extra times. A non-transient error is never retried.
 - [x] T3.5 Idempotency: re-running the same node with the same inputs does not execute it again (spy counter = 1).
-- [ ] T3.6 Cancel between nodes gives CANCELLED. No node starts after CANCEL_REQUESTED.
-- [ ] T3.7 Approval timeout gives EXPIRED.
+- [x] T3.6 Cancel between nodes gives CANCELLED. No node starts after CANCEL_REQUESTED.
+- [x] T3.7 Approval timeout gives EXPIRED.
 - [ ] T3.8 Replay with pinned versions produces identical output hashes.
 
 **Integration (fake adapters)**

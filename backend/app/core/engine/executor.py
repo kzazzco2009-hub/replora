@@ -18,6 +18,7 @@ import itertools
 import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -28,7 +29,7 @@ from app.core.engine.run import Run, transition
 from app.core.engine.store import ArtifactStore, Data
 from app.core.registry import OperationRegistry
 from app.core.run_issue_codes import RunIssueCode
-from app.core.run_state import RunAction
+from app.core.run_state import RunAction, RunState
 from app.core.validation import Issue
 from app.core.workflow import Node, WorkflowDefinition
 
@@ -118,13 +119,18 @@ def execute(
     inputs: Mapping[str, ArtifactRef],
     ledger: Ledger | None = None,
     sleep: Callable[[float], None] = time.sleep,
+    clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+    cancelled: Callable[[], bool] = lambda: False,
 ) -> Execution:
     """Run an approved, queued run to its end state. `inputs` are the workflow's files by name.
 
     Pass the same `ledger` to a later attempt of the same run to skip the nodes already done.
+    `cancelled` is asked before every node; once it says yes, no other node starts.
     """
-    runner = _Runner(transition(run, RunAction.START), registry, handlers, store,
-                     {} if ledger is None else ledger, sleep)  # fmt: skip
+    if run.state is RunState.CANCEL_REQUESTED:
+        return Execution(transition(run, RunAction.CONFIRM_CANCEL, clock()), {}, {})
+    runner = _Runner(transition(run, RunAction.START, clock()), registry, handlers, store,
+                     {} if ledger is None else ledger, sleep, clock, cancelled)  # fmt: skip
     return runner.run(inputs)
 
 
@@ -136,6 +142,8 @@ class _Runner:
     store: ArtifactStore
     ledger: Ledger
     sleep: Callable[[float], None]
+    clock: Callable[[], datetime]
+    cancelled: Callable[[], bool]
     produced: dict[Slot, ArtifactRef] = field(default_factory=dict)
     issues: list[Issue] = field(default_factory=list)
 
@@ -146,6 +154,9 @@ class _Runner:
                  for e in definition.edges}  # fmt: skip
         index = {node.id: i for i, node in enumerate(definition.nodes)}
         for node_id in topological_order(definition):
+            if self.cancelled():
+                self.run_ = transition(self.run_, RunAction.CANCEL, self.clock())
+                return self._end(RunAction.CONFIRM_CANCEL)
             node = definition.nodes[index[node_id]]
             if not self._node(node, f"nodes/{index[node_id]}", feeds, wires):
                 return self._end(RunAction.REQUEST_REVIEW)
@@ -214,7 +225,8 @@ class _Runner:
         outputs = {o.name: self.produced[o.source.node_id, o.source.port]
                    for o in self.run_.definition.outputs
                    if (o.source.node_id, o.source.port) in self.produced}  # fmt: skip
-        return Execution(transition(self.run_, action), self.produced, outputs, self.issues)
+        end = transition(self.run_, action, self.clock())
+        return Execution(end, self.produced, outputs, self.issues)
 
 
 class _Failed(Exception):

@@ -24,8 +24,8 @@ NOW = datetime(2026, 11, 26, 12, tzinfo=UTC)
 
 def awaiting() -> Run:
     run = new_run(reconcile_workflow(), NOW)
-    run = transition(run, RunAction.VALIDATE)
-    return transition(run, RunAction.REQUEST_APPROVAL)
+    run = transition(run, RunAction.VALIDATE, NOW)
+    return transition(run, RunAction.REQUEST_APPROVAL, NOW)
 
 
 def test_a_new_run_is_a_draft_bound_to_its_plan_hash():
@@ -43,7 +43,7 @@ def test_every_allowed_transition_moves_the_run(pair, target):
     if action is RunAction.APPROVE:
         assert approve(run, run.plan_hash, USER, NOW).state is target
     else:
-        assert transition(run, action).state is target
+        assert transition(run, action, NOW).state is target
 
 
 ILLEGAL = [(s, a) for s in RunState for a in RunAction if (s, a) not in TRANSITIONS]
@@ -53,14 +53,14 @@ ILLEGAL = [(s, a) for s in RunState for a in RunAction if (s, a) not in TRANSITI
 def test_an_illegal_transition_raises_and_changes_nothing(state, action):
     run = new_run(reconcile_workflow(), NOW).model_copy(update={"state": state})
     with pytest.raises(InvalidTransitionError) as caught:
-        transition(run, action)
+        transition(run, action, NOW)
     assert caught.value.params == {"from": state.value, "action": action.value}
     assert run.state is state
 
 
 def test_approve_is_not_a_plain_transition():
     with pytest.raises(ValueError, match="approve"):
-        transition(awaiting(), RunAction.APPROVE)
+        transition(awaiting(), RunAction.APPROVE, NOW)
 
 
 def test_approval_with_the_right_hash_queues_the_run_and_records_who_and_when():
@@ -97,12 +97,12 @@ def test_changing_the_plan_after_approval_invalidates_the_approval():
     with pytest.raises(PlanHashMismatchError):
         check_approval(tampered)
     with pytest.raises(PlanHashMismatchError):
-        transition(tampered, RunAction.START)
+        transition(tampered, RunAction.START, NOW)
 
 
 def test_a_run_can_start_only_with_a_valid_approval():
     unapproved = awaiting().model_copy(update={"state": RunState.QUEUED})
     with pytest.raises(PlanHashMismatchError):
-        transition(unapproved, RunAction.START)
+        transition(unapproved, RunAction.START, NOW)
     approved = approve(awaiting(), awaiting().plan_hash, USER, NOW)
-    assert transition(approved, RunAction.START).state is RunState.RUNNING
+    assert transition(approved, RunAction.START, NOW).state is RunState.RUNNING

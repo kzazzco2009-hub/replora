@@ -1,9 +1,10 @@
 """Application settings, read from environment variables (and the repo-root `.env` locally)."""
 
+from datetime import timedelta
 from pathlib import Path
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 
-from pydantic import SecretStr, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -25,6 +26,12 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     debug: bool = False
     openrouter_api_key: SecretStr | None = None
+    approval_ttl_hours: Annotated[int, Field(ge=1)] = 24
+    """P3.6: a run awaiting approval for longer than this expires."""
+
+    @property
+    def approval_ttl(self) -> timedelta:
+        return timedelta(hours=self.approval_ttl_hours)
 
     @model_validator(mode="after")
     def _production_is_safe(self) -> Self:
