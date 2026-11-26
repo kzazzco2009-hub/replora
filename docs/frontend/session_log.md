@@ -221,3 +221,15 @@ P9.3 complete (all three PRs merged). Ticked in `docs/frontend/plan.md`.
 - PR C — #38, merged `308f2f9`: the logical-CSS lint rule (`local/no-physical-direction`) banning physical-direction Tailwind classes/style properties, plus a `src/**/*.css` scan test.
 
 Next step: P9.4 app shell.
+
+## Session 9 — 2026-11-26
+Docs-only PR (`frontend/docs-f0-progress`). Ticked and updated `docs/frontend/plan.md`, no code changes.
+
+- Ticked **P9.4** (app shell + locale switch): both PRs merged (#46, #47).
+- **P9.5** progress note: 3 of 4 PRs merged (#48 primitives, #49 dialog + sheet, #54 toast). Controls (Select, Tabs) and Data display still open. Not ticked.
+- **P9.6** progress note: PR 1 (#53) merged, PR 2 (#58) in review, PRs 3–4 not started. Not ticked.
+- Ticked **"Co-write the api_contract.md draft"**: `docs/api_contract.md` exists on `origin/main` (identical to the local copy); `docs/backend_plan.md:39` ticks the same joint step with *"agreed at G0 in issue #1"*; `docs/decisions.md`'s G0 record confirms both developers approved.
+- Ticked the **F0 gate line** (Gate G0, joint): every step above it in F0 is now `[x]`. T0.2, T0.3, T0.5 are `[x]` in `testing.md`; S‑01, S‑03, S‑04, S‑05 are `[x]` in `security.md`; `decisions.md` records Gate G0 passed by both developers, conditional on #43 and #50 merging — both confirmed merged (`ff55103`, `3932c3a`).
+- Replaced the "the owner" phase-gate wording (line 16) with the co-owner gate-approver wording from `decisions.md` (2026-11-25). No occurrence of "the owner" in `frontend/CLAUDE.md`, so nothing to change there.
+
+Next step: finish P9.5 (Controls, Data display PR) and P9.6 (PR 2 review, PRs 3–4).
