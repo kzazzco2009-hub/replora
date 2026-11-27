@@ -53,7 +53,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 6 Files | 7/7 | 10/10 | 7/7 + S‑29 rest (S‑35 partly at T15.2/T17.6) | ☑ G6 2026-11-27 (backend; pre-approved; I2 with the frontend) |
 | 7 First pipeline | 6/6 | 12/12 | 1/1 (S‑37 CSV part; XLSX at T14.6) | ☑ G7 2026-11-27 (backend; pre-approved) |
 | 8 API + worker | 0/9 | 0/10 | 0/6 | ☐ |
-| 9 FE foundation | 3/8 | 0/9 | 0/5 | ☐ |
+| 9 FE foundation | 5/8 (P9.4, P9.5 ticked in #160) | 0/9 | 0/5 | ☐ |
 | 10 FE core flow | 0/10 | 0/11 | 0/2 | ☐ |
 | 11 UX + a11y | 0/5 | 1/7 | — | ☐ |
 | 12 AI planner | 0/5 | 0/6 | 0/5 | ☐ |
@@ -135,6 +135,7 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **Merges:** Developer A approved all 30 frontend PRs at their heads; the frontend merges their own stack. **#71 squash-merged** (`def662a`). The backend stack sat on an old copy of #71 (`3df6361`, same backend content as #71's final `e828fa5`) and conflicted with `main`, so it was rebased in one go (`git rebase --onto origin/main 3df6361 --update-refs`): **range-diff 74/74 `=`**; old top `05faf5c` vs new top `44e59b3` over `backend contracts docs .github` minus `docs/frontend`: **empty**. Old heads are backed up in the scratchpad `stack_backup.txt`. 56 branches pushed atomically with per-branch leases.
 - **Mistake and correction:** I told the frontend that later squash merges would stay clean without a push. A simulation proved that wrong (#73 conflicts after a squash of #72), and I corrected it on #1 (7228291544).
 - **CI after the rebase:** backend jobs green on the whole stack. The **Frontend job is red from #96 up**: `main`'s parity test (#92) pins the exact code sets, and the stack adds `PASSWORD_BREACHED` (validation, #96), `PERMISSION_DENIED` (problem 403, #101) and `OWNS_SHARED_WORKSPACE` (problem 409, #105). The frontend's own stack (#117, #139) rewrites that test, so the fix waits until their stack is on `main`. Then: rebase the backend stack again and add the 3 codes in their new format in #96/#101/#105 (texts from them, or placeholders). Consolidated open items posted on #1 (7228401334).
+- **Plan ticks (#160, from `main`):** P9.4 and P9.5 are merged on `main` and ticked in the frontend plan, so they're now ticked in `plan.md`. Evidence on `main` `def662a`: frontend typecheck OK, **404 tests passed**. Not done: P9.6 (#117 open), P9.7, P9.8, Phases 10 and 11 (open PRs only). Their PR titles number the run-progress screen `P11.1` and results `P12.1`; the plan has those as P10.5 and P10.6.
 - **Decided (Developer A), pending the frontend:** land the backend stack with **merge commits**. The admin enables `allow_merge_commit` and adds `merge` to the ruleset's `allowed_merge_methods`, then reverts both afterwards. Simulated: main + #72 + #73 + top, all clean, final tree = stack-top tree. Proposal on #1 (7228305154). The `decisions.md` row follows once the frontend agrees.
 
 ## Session 18 — 2026-11-27 (`D:\Projects\replora`): red CI on the stack, G7
