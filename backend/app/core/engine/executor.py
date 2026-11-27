@@ -1,4 +1,4 @@
-"""The in-memory executor (P3.3, P3.4): nodes run one at a time in topological order.
+"""The in-memory executor (P3.3–P3.5): nodes run one at a time in topological order.
 
 It runs a definition the validator (P2) has already accepted, so every port is bound and there
 is no cycle. Each output is stored as an artifact whose lineage names the run, the node, the
@@ -7,12 +7,19 @@ operation version and the artifacts it was made from.
 A node that raises `OperationError` fails, and a node missing a required input is skipped. The run
 is FAILED when a workflow output is missing, PARTIAL when something failed but every output
 exists, and NEEDS_REVIEW as soon as a node warns under the `review` policy.
+
+Only a `TransientError` is retried: at most `MAX_RETRIES` more times, with exponential backoff.
+A node that succeeded is recorded in the ledger under `(run_id, node_id, input hashes)`, so it is
+never executed twice for the same inputs.
 """
 
 import heapq
+import itertools
+import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
+from uuid import UUID
 
 from pydantic import JsonValue
 
@@ -23,10 +30,16 @@ from app.core.registry import OperationRegistry
 from app.core.run_issue_codes import RunIssueCode
 from app.core.run_state import RunAction
 from app.core.validation import Issue
-from app.core.workflow import WorkflowDefinition
+from app.core.workflow import Node, WorkflowDefinition
+
+MAX_RETRIES = 2
+BACKOFF_SECONDS = 0.5
 
 Slot = tuple[str, str]
 """A `(node_id, port)` pair."""
+
+NodeKey = tuple[UUID, str, tuple[tuple[str, str], ...]]
+"""The idempotency key: run, node, and the SHA-256 of each input by port."""
 
 
 class OperationError(Exception):
@@ -38,6 +51,10 @@ class OperationError(Exception):
         super().__init__(code)
 
 
+class TransientError(OperationError):
+    """A failure that may pass on its own, for example a busy service. It is retried."""
+
+
 @dataclass(frozen=True)
 class Result:
     """What a handler gives: data by output port, and any warnings about it."""
@@ -46,10 +63,19 @@ class Result:
     warnings: Sequence[Issue] = ()
 
 
+@dataclass(frozen=True)
+class Done:
+    """A node that succeeded: its artifacts by output port, and its warnings."""
+
+    outputs: dict[str, ArtifactRef]
+    warnings: Sequence[Issue]
+
+
 Handler = Callable[[Mapping[str, Data], Mapping[str, JsonValue]], Result]
 """An operation's implementation: input data by port name and the params, to a `Result`."""
 
 Handlers = Mapping[tuple[str, int], Handler]
+Ledger = dict[NodeKey, Done]
 
 
 @dataclass(frozen=True)
@@ -90,9 +116,16 @@ def execute(
     handlers: Handlers,
     store: ArtifactStore,
     inputs: Mapping[str, ArtifactRef],
+    ledger: Ledger | None = None,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> Execution:
-    """Run an approved, queued run to its end state. `inputs` are the workflow's files by name."""
-    return _Runner(transition(run, RunAction.START), registry, handlers, store).run(inputs)
+    """Run an approved, queued run to its end state. `inputs` are the workflow's files by name.
+
+    Pass the same `ledger` to a later attempt of the same run to skip the nodes already done.
+    """
+    runner = _Runner(transition(run, RunAction.START), registry, handlers, store,
+                     {} if ledger is None else ledger, sleep)  # fmt: skip
+    return runner.run(inputs)
 
 
 @dataclass
@@ -101,6 +134,8 @@ class _Runner:
     registry: OperationRegistry
     handlers: Handlers
     store: ArtifactStore
+    ledger: Ledger
+    sleep: Callable[[float], None]
     produced: dict[Slot, ArtifactRef] = field(default_factory=dict)
     issues: list[Issue] = field(default_factory=list)
 
@@ -109,41 +144,57 @@ class _Runner:
         feeds = {(t.node_id, t.port): inputs[i.name] for i in definition.inputs for t in i.targets}
         wires = {(e.target.node_id, e.target.port): (e.source.node_id, e.source.port)
                  for e in definition.edges}  # fmt: skip
+        index = {node.id: i for i, node in enumerate(definition.nodes)}
         for node_id in topological_order(definition):
-            if not self._node(node_id, feeds, wires):
+            node = definition.nodes[index[node_id]]
+            if not self._node(node, f"nodes/{index[node_id]}", feeds, wires):
                 return self._end(RunAction.REQUEST_REVIEW)
         return self._end(self._outcome())
 
-    def _node(self, node_id: str, feeds: dict, wires: dict) -> bool:
+    def _node(self, node: Node, path: str, feeds: dict, wires: dict) -> bool:
         """Run one node. False when its warnings stop the run for review."""
-        index, node = next((i, n) for i, n in enumerate(self.run_.definition.nodes)
-                           if n.id == node_id)  # fmt: skip
-        path = f"nodes/{index}"
         contract = self.registry.get(node.operation.id, node.operation.version)
-        bound = {port: ref for (target, port), ref in feeds.items() if target == node_id}
+        bound = {port: ref for (target, port), ref in feeds.items() if target == node.id}
         for (target, port), source in wires.items():
-            if target == node_id and source in self.produced:
+            if target == node.id and source in self.produced:
                 bound[port] = self.produced[source]
         for port in contract.inputs:
             if port.required and port.name not in bound:
-                source = wires[node_id, port.name][0]
-                self._issue(RunIssueCode.NODE_SKIPPED, path, node_id, port=port.name, source=source)
+                source = wires[node.id, port.name][0]
+                self._issue(RunIssueCode.NODE_SKIPPED, path, node.id, port=port.name, source=source)
                 return True
+        key = (self.run_.id, node.id, tuple(sorted((p, r.sha256) for p, r in bound.items())))
+        if key not in self.ledger:
+            try:
+                self.ledger[key] = self._call(node, bound, contract.outputs)
+            except _Failed as failed:
+                self._issue(RunIssueCode.NODE_FAILED, path, node.id, **failed.params)
+                return True
+        done = self.ledger[key]
+        self.produced |= {(node.id, port): ref for port, ref in done.outputs.items()}
+        for warning in done.warnings:
+            self._issue(warning.code, f"{path}/{warning.path}", node.id, **warning.params)
+        return not (done.warnings and self.run_.definition.review_policy.on_warning == "review")
+
+    def _call(self, node: Node, bound: dict[str, ArtifactRef], ports) -> Done:
+        """Call the handler, retrying a transient error, and store what it gives."""
         handler = self.handlers[node.operation.id, node.operation.version]
-        try:
-            result = handler({p: self.store.read(r) for p, r in bound.items()}, node.params)
-        except OperationError as error:
-            self._issue(RunIssueCode.NODE_FAILED, path, node_id, error=error.code, **error.params)
-            return True
-        lineage = ArtifactLineage(run_id=self.run_.id, node_id=node_id, operation=node.operation,
+        data = {port: self.store.read(ref) for port, ref in bound.items()}
+        for attempt in itertools.count(1):
+            try:
+                result = handler(data, node.params)
+                break
+            except TransientError as error:
+                if attempt > MAX_RETRIES:
+                    raise _Failed(error, attempt) from error
+                self.sleep(BACKOFF_SECONDS * 2 ** (attempt - 1))
+            except OperationError as error:
+                raise _Failed(error, attempt) from error
+        lineage = ArtifactLineage(run_id=self.run_.id, node_id=node.id, operation=node.operation,
                                   parents=[ref.id for _, ref in sorted(bound.items())])  # fmt: skip
-        for port in contract.outputs:
-            ref = self.store.put(result.outputs[port.name], port.artifact_type, lineage)
-            self.produced[node_id, port.name] = ref
-        for warning in result.warnings:
-            self._issue(warning.code, f"{path}/{warning.path}", node_id, **warning.params)
-        policy = self.run_.definition.review_policy.on_warning
-        return not (result.warnings and policy == "review")
+        outputs = {p.name: self.store.put(result.outputs[p.name], p.artifact_type, lineage)
+                   for p in ports}  # fmt: skip
+        return Done(outputs, result.warnings)
 
     def _outcome(self) -> RunAction:
         for index, out in enumerate(self.run_.definition.outputs):
@@ -164,3 +215,10 @@ class _Runner:
                    for o in self.run_.definition.outputs
                    if (o.source.node_id, o.source.port) in self.produced}  # fmt: skip
         return Execution(transition(self.run_, action), self.produced, outputs, self.issues)
+
+
+class _Failed(Exception):
+    """A node's last attempt failed."""
+
+    def __init__(self, error: OperationError, attempts: int) -> None:
+        self.params = {"error": error.code, "attempts": attempts, **error.params}

@@ -286,6 +286,22 @@ PR **#78** (stacked on #77).
 - Mutation checks: each of the five rules fails 1–3 tests when removed.
 - `uv run pytest -q`: **1367 passed**. ruff is clean.
 
+PR **#79** (stacked on #78).
+
+**P3.5, retry and idempotency** (`executor.py`, `tests/unit/test_engine_retry.py`; TDD: collection failed first).
+- Only a `TransientError` (a subclass of `OperationError`) is retried: at most `MAX_RETRIES = 2` more times, with backoff of 0.5 s then 1 s. `sleep` is injectable, so the tests don't wait.
+- `NODE_FAILED` now has `params.attempts`. Any other `OperationError` gets a single attempt.
+- **Idempotency:** a node that succeeds is recorded in the ledger under `(run_id, node_id, sorted (port, input sha256))`. A later attempt with the same ledger reuses its artifacts and warnings and doesn't call the handler. A failed node isn't recorded, so the next attempt runs it, and the nodes after it run again only if their inputs changed.
+- **T3.4 and T3.5:**
+  - recovery after 2 transient errors;
+  - 3 attempts at most;
+  - a non-transient error is never retried;
+  - a second execution has a spy count of 1 per node and the same outputs;
+  - the key includes the run;
+  - a failed node is re-run later.
+- Mutation checks: the ledger check, the run in the key, the input hashes in the key, retrying any `OperationError`, the backoff growth, and both off-by-ones in the attempt guard each fail 1–4 tests. A redundant `range` bound survived a mutation, so it was replaced by `itertools.count`.
+- `uv run pytest -q`: **1374 passed**. ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 
