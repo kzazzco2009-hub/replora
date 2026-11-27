@@ -510,6 +510,22 @@ PR **#99** (stacked on #98).
 - **T5.3** (now with verify), **T5.8** (single use, the 29/30-minute boundary, sessions revoked) and **T5.11** (same answer and body; timing difference < 50 ms) pass. Mutation checks: used and expired, the kind filter, and session revocation are all caught.
 - Lesson: endpoint docstrings are OpenAPI descriptions, so changing one is contract drift. The S‑27 note is a comment.
 - `uv run pytest -q`: **1750 passed**. No drift.
+PR **#100** (stacked on #99).
+
+**Developer A's standing go (2026-11-27):** finish Phase 5, then do **Phases 6, 7, 8 and 9** without asking. Update this log and push, and message the frontend with progress and open questions at the end of each phase. Keep working if the computer goes idle.
+
+**P5.5 and P5.6, roles and route permissions** (`app/auth/permissions.py`, `app/auth/access.py`, `tests/integration/test_permissions.py`).
+- The roles are owner, admin, member and viewer. `MATRIX` maps 15 permissions to roles, and `security.md` mirrors it, now with the read permissions and `runs.create`. A personal workspace (owner) is created at registration (P5.2).
+- **`TABLE`** declares all 64 routes as public, signed-in, or needing a permission. **`authorize`**, a v1 router dependency next to CSRF, enforces it:
+  - 401 `UNAUTHENTICATED` with no session;
+  - **404 `NOT_FOUND`** when the caller isn't a member, or the id is malformed;
+  - 403 **`PERMISSION_DENIED`** (a new problem code) when the role lacks the permission.
+- **`check_table`** runs at startup and refuses an app whose routes and table differ (S‑21). The routes come from the OpenAPI document, because FastAPI 0.165 keeps included routers lazy. `openapi.json` is unchanged.
+- **T5.9:** 64 routes × 6 callers (owner, admin, member, viewer, non-member, anonymous), generated from the table, plus a malformed id. **T5.10** is covered at the route level: a non-member gets 404 on every workspace resource route. A row in another workspace looked up from your own is None in the repositories (T4.3).
+- The stub tests use `conftest.stub_app()`, with `authorize` turned off, because they test the contract stubs and the matrix test covers access.
+- Mutation checks: membership, role, signed-in and the startup check are all caught (1–64 tests each).
+- **Cross-track:** `PERMISSION_DENIED` is a new `problem_codes` entry. The frontend's parity test on `main` requires `PROBLEM_CODES` to equal the catalogue, so the frontend must add it with AR/EN messages when this lands. This goes in the end-of-phase message.
+- `uv run pytest -q`: **2121 passed**.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

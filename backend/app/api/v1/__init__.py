@@ -14,8 +14,9 @@ from app.api.v1 import (
     workflows,
     workspaces,
 )
+from app.auth.access import authorize
 
-router = APIRouter(prefix="/api/v1", dependencies=[Depends(protect)])
+router = APIRouter(prefix="/api/v1", dependencies=[Depends(protect), Depends(authorize)])
 router.include_router(health.router)
 router.include_router(auth.router)
 router.include_router(workspaces.router)

@@ -5,11 +5,9 @@ import json
 import logging
 
 import pytest
-from conftest import with_csrf
+from conftest import stub_app, with_csrf
 from fastapi.testclient import TestClient
 
-from app.config import Settings
-from app.main import create_app
 from app.observability import JsonFormatter
 
 PASSWORD = "correct horse battery staple"
@@ -22,7 +20,7 @@ def _boom() -> None:
 
 @pytest.fixture(scope="module")
 def client() -> TestClient:
-    app = create_app(Settings(_env_file=None))
+    app = stub_app()
     app.add_api_route("/test/boom", _boom, tags=["test"])
     return with_csrf(TestClient(app, raise_server_exceptions=False))
 
