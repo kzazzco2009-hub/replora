@@ -1,4 +1,5 @@
-"""P0.5: the §6 templates and drafts contract is served as 501 stubs and documented in OpenAPI."""
+"""P0.5: the §6 templates and drafts contract is documented in OpenAPI. The behaviour is in
+`tests/integration/test_drafts_api.py` (P8.1)."""
 
 import pytest
 
@@ -28,15 +29,6 @@ def operation(openapi: dict, method: str, path: str) -> dict:
 @pytest.mark.parametrize(("method", "path", "status", "body"), ENDPOINTS)
 def test_endpoint_is_documented_with_its_success_status(openapi, method, path, status, body):
     assert str(status) in operation(openapi, method, path)["responses"]
-
-
-@pytest.mark.parametrize(("method", "path", "status", "body"), ENDPOINTS)
-def test_stub_answers_501_problem_json(client, method, path, status, body):
-    response = client.request(method, path.format(**IDS), json=body, headers={"If-Match": '"1"'})
-
-    assert response.status_code == 501
-    assert response.headers["content-type"] == "application/problem+json"
-    assert response.json()["code"] == "NOT_IMPLEMENTED"
 
 
 def test_all_contract_paths_and_nothing_else(openapi):

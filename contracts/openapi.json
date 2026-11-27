@@ -4111,7 +4111,7 @@
           "drafts"
         ],
         "summary": "Update",
-        "description": "Replace the whole definition. It is re-validated and gets a new `plan_hash`.",
+        "description": "Replace the whole definition. It is re-validated and gets a new `plan_hash`.\n\nThe planner's warnings were about its own choices, so the edited draft drops them.",
         "operationId": "drafts_update",
         "parameters": [
           {
