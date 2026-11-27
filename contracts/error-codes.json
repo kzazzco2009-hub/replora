@@ -270,6 +270,12 @@
     },
     "LOW_CONFIDENCE": {
       "description": "An operation isn't sure of its result, for example a guessed key column. Under the review policy the run stops as NEEDS_REVIEW (node_id, path nodes/<i>/<port>)."
+    },
+    "INPUT_TYPE_MISMATCH": {
+      "description": "Replay: a new file is a different kind of artifact from the one the workflow version expects, so the run stops as NEEDS_REVIEW (path inputs/<i>, params.input, params.expected, params.actual)."
+    },
+    "INPUT_COLUMNS_MISSING": {
+      "description": "Replay: a new file lacks columns the workflow version expects, so the run stops as NEEDS_REVIEW (path inputs/<i>, params.input, params.missing). Extra columns are fine."
     }
   }
 }
