@@ -8,6 +8,7 @@ from app.config import Settings
 from app.main import create_app
 
 FAKE_KEY = "sk-or-v1-not-a-real-key"
+FAKE_JWT = "not-a-real-signing-key-0123456789abcdef0123"
 
 
 def make_settings(**env: str) -> Settings:
@@ -51,12 +52,16 @@ def test_production_refuses_to_start_without_its_secrets():
 
 def test_production_refuses_to_start_with_debug_on():
     with pytest.raises(ValidationError, match="debug"):
-        make_settings(app_env="production", openrouter_api_key=FAKE_KEY, debug="true")
+        make_settings(
+            app_env="production", openrouter_api_key=FAKE_KEY, jwt_secret=FAKE_JWT, debug="true"
+        )
 
 
 def test_refusal_never_echoes_a_secret():
     with pytest.raises(ValidationError) as excinfo:
-        make_settings(app_env="production", openrouter_api_key=FAKE_KEY, debug="true")
+        make_settings(
+            app_env="production", openrouter_api_key=FAKE_KEY, jwt_secret=FAKE_JWT, debug="true"
+        )
 
     assert "input_value" not in str(excinfo.value)
     assert FAKE_KEY[:4] not in str(excinfo.value)
@@ -71,7 +76,9 @@ def test_development_needs_no_secrets_and_may_debug():
 
 def test_api_docs_are_disabled_in_production():
     client = TestClient(
-        create_app(make_settings(app_env="production", openrouter_api_key=FAKE_KEY))
+        create_app(
+            make_settings(app_env="production", openrouter_api_key=FAKE_KEY, jwt_secret=FAKE_JWT)
+        )
     )
 
     assert client.get("/docs").status_code == 404

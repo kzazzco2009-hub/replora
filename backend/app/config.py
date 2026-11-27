@@ -9,7 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-PRODUCTION_SECRETS = ("openrouter_api_key",)
+PRODUCTION_SECRETS = ("openrouter_api_key", "jwt_secret")
 """S-02: production refuses to start without these. Each phase adds the secrets it needs."""
 
 
@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     debug: bool = False
     openrouter_api_key: SecretStr | None = None
+    jwt_secret: SecretStr | None = None
+    """P5.2: signs access tokens (HS256, 256+ bits). Outside production a random key is made at
+    startup, so a restart ends access tokens (15 minutes), not sessions."""
     database_url: str = f"sqlite:///{(REPO_ROOT / '.data' / 'replora.db').as_posix()}"
     """P4.1: SQLite under `.data/` locally; the Supabase pooler URL in production (Phase 18)."""
     approval_ttl_hours: Annotated[int, Field(ge=1)] = 24
