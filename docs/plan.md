@@ -257,8 +257,8 @@ Goal: frozen domain models that both developers rely on.
 
 ### Phase 7 — First real pipeline: ZIP + CSV + JSON reconciliation (M)
 - [x] P7.1 Adapters: `ZipAdapter` (produces ArchiveManifest), `CsvAdapter` (encoding detection, delimiter sniffing, produces TabularArtifact), `JsonAdapter` (array of objects, produces TabularArtifact).
-- [ ] P7.2 Operations: `extract_member`, `map_columns`, `normalize` (trim, number and decimal parsing, key casing), `compare` (fan-in on key, giving matched / value_diff / missing_left / missing_right), `report_csv`, `summary_json`, `bundle_zip`.
-- [ ] P7.3 CSV output is protected against formula injection (security.md S‑37).
+- [x] P7.2 Operations: `extract_member`, `map_columns`, `normalize` (trim, number and decimal parsing, key casing), `compare` (fan-in on key, giving matched / value_diff / missing_left / missing_right), `report_csv`, `summary_json`, `bundle_zip`.
+- [x] P7.3 CSV output is protected against formula injection (security.md S‑37).
 - [ ] P7.4 Lineage: every output row records its source file, member, row and operation versions.
 - [ ] P7.5 Data correctness rules:
   - money and numbers use `Decimal` only (never float), and the comparison tolerance is a parameter (default exact);
