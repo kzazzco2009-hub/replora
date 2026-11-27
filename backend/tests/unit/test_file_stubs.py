@@ -29,7 +29,13 @@ def test_endpoint_is_documented_with_its_success_status(openapi, method, path, s
     assert str(status) in operation(openapi, method, path)["responses"]
 
 
-@pytest.mark.parametrize(("method", "path", "status", "body"), ENDPOINTS)
+REAL = {("post", f"{FILES}/upload-intent"), ("post", f"{FILES}/{{file_id}}/complete"),
+        ("get", f"{FILES}/{{file_id}}")}  # fmt: skip
+"""Implemented (Phase 6); tested in tests/integration/test_files_api.py."""
+
+
+@pytest.mark.parametrize(("method", "path", "status", "body"),
+                         [e for e in ENDPOINTS if (e[0], e[1]) not in REAL])  # fmt: skip
 def test_stub_answers_501_problem_json(client, method, path, status, body):
     response = client.request(method, path.format(**IDS), json=body)
 

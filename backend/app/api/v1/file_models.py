@@ -8,7 +8,7 @@ from pydantic import Field
 
 from app.api.models import ApiModel, Page
 
-DetectedType = Literal["csv", "zip"]
+DetectedType = Literal["csv", "json", "zip"]
 """From magic bytes, never the extension. Phases 14–16 add values (backend_plan.md)."""
 
 RejectionCode = Literal[

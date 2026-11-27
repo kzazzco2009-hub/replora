@@ -598,6 +598,17 @@ PR **#106** (stacked on #105).
 - **Local stand-ins for Supabase signed URLs:** `PUT` and `GET /api/v1/storage/{token}` are **outside the v1 router and the contract** (`include_in_schema=False`; a test checks that they're absent from OpenAPI). The token is the authorization. A PUT larger than declared gives 413 and nothing is stored; downloads are `attachment`, `nosniff`, `no-store`; forged or expired tokens give 403.
 - Mutation checks: the MAC check and the op check are caught.
 - `uv run pytest -q`: **2205 passed**. No drift.
+PR **#108** (stacked on #107).
+
+**P6.2 and P6.3, upload intent and complete** (`app/files/detect.py`, `app/files/service.py`, migration `0004`; both test files failed first).
+- **Intent:** a declared size over 50 MiB gives 413 `FILE_TOO_LARGE` (S‑31, the boundary on both sides). Otherwise it creates a `pending` row with key `ws/file_id`, a sanitized display name and an `expires_at` of now + 30 days (D11), and returns a 10-minute signed PUT.
+- **Complete:** it reads the stored bytes once. No bytes → `FILE_EMPTY`; size ≠ declared → `FILE_SIZE_MISMATCH`; otherwise the **server's SHA‑256** is stored and the type is detected from the content. Rejected bytes are deleted. A second complete gives 409. `file.uploaded` is audited.
+- **Detection (S‑30):** ZIP magic; JSON (else `FILE_CORRUPT`); CSV text in UTF‑8, UTF‑8 BOM or Windows‑1256. Executables, PDF, images, OLE, HTML/XML and text with control characters give `FILE_TYPE_UNSUPPORTED`, whatever the name.
+- **Display names (S‑33):** no path, no control or bidi characters (U+202E), Windows reserved names prefixed with `_`, at most 255 characters keeping the extension, and Arabic preserved.
+- **Contract (additive, before the G6 freeze):** `DetectedType` gains `json`, which Phase 7 needs (ZIP with CSV and JSON). `openapi.json` and `schema.d.ts` are regenerated.
+- **Migration 0004:** `files.rejection_code` and `files.members`. Autogenerate wrote the bare `Text()` again, fixed as in 0001.
+- **T6.1, T6.2, T6.3 and T6.8** pass. Mutation checks: the size check and the delete of rejected bytes (masked at first) are caught.
+- `uv run pytest -q`: **2245 passed**.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

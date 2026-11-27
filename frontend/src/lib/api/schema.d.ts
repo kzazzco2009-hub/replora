@@ -1326,7 +1326,7 @@ export interface components {
              * Detected Type
              * @description Set on `complete`
              */
-            detected_type: ("csv" | "zip") | null;
+            detected_type: ("csv" | "json" | "zip") | null;
             /** Size */
             size: number;
             /**
@@ -1370,7 +1370,7 @@ export interface components {
              * Detected Type
              * @enum {string}
              */
-            detected_type: "csv" | "zip";
+            detected_type: "csv" | "json" | "zip";
             /** Size */
             size: number;
         };
@@ -5200,7 +5200,7 @@ export interface operations {
                 /** @description Opaque `next_cursor` from the previous page */
                 cursor?: string | null;
                 limit?: number;
-                type?: ("csv" | "zip") | null;
+                type?: ("csv" | "json" | "zip") | null;
             };
             header?: never;
             path: {
