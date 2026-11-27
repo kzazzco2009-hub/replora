@@ -103,8 +103,8 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [x] T4.4 Engine checkpointing: kill the process after node 2 of 4, then resume. Nodes 1–2 are not re-executed.
 - [x] T4.5 UUIDv7 ordering and UTC timestamps round-trip on both databases.
 - [x] T4.6 **Index coverage test:** every FK column has an index, and every index listed in plan.md §6 exists (it inspects `MetaData`).
-- [ ] T4.7 Unique constraints are enforced (duplicate email, case-insensitive; duplicate idempotency key).
-- [ ] T4.8 Concurrency: 2 workers claiming jobs never claim the same job (Postgres `SKIP LOCKED`; SQLite serialized).
+- [x] T4.7 Unique constraints are enforced (duplicate email, case-insensitive; duplicate idempotency key).
+- [x] T4.8 Concurrency: 2 workers claiming jobs never claim the same job (Postgres `SKIP LOCKED`; SQLite serialized).
 
 ## Phase 5 — Auth and authorization
 **Unit**
