@@ -7,6 +7,7 @@ import {
   uploadFile,
   validateBeforeUpload,
   type Limits,
+  type UploadedFile,
   type UploadLimitIssue,
 } from "@/lib/api/upload";
 
@@ -22,6 +23,8 @@ export interface UploadItem {
   rejectionCode?: RejectionCode;
   blockedIssue?: UploadLimitIssue;
   problem?: Problem;
+  /** The server's `File` resource once `complete` resolves (ready or rejected); its `id` is what later steps send on. */
+  serverFile?: UploadedFile;
 }
 
 /** Drives one workspace's upload queue: client pre-check, then intent -> PUT -> complete per file. */
@@ -67,11 +70,13 @@ export function useUploadQueue(wsId: string) {
               patchItem(item.id, {
                 status: "rejected",
                 rejectionCode: result.rejection_code ?? undefined,
+                serverFile: result,
               });
             } else {
               patchItem(item.id, {
                 status: "ready",
                 detectedType: result.detected_type,
+                serverFile: result,
               });
             }
           })

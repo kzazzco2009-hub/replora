@@ -120,6 +120,12 @@
     "draftId": "Draft ID",
     "review": "Review"
   },
+  "newRunWizard": {
+    "stepsLabel": "New run steps",
+    "stepUpload": "Upload",
+    "stepDescribe": "Describe",
+    "next": "Next: Describe"
+  },
   "home": {
     "title": "Replora"
   },

@@ -120,6 +120,12 @@
     "draftId": "رقم المسودة",
     "review": "مراجعة"
   },
+  "newRunWizard": {
+    "stepsLabel": "خطوات التشغيل الجديد",
+    "stepUpload": "الرفع",
+    "stepDescribe": "الوصف",
+    "next": "التالي: الوصف"
+  },
   "home": {
     "title": "Replora"
   },
