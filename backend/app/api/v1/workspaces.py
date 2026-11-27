@@ -7,10 +7,11 @@ from fastapi import APIRouter, Request
 from sqlalchemy import select
 
 from app.api.models import Cursor, Limit
-from app.api.problem import ERROR_RESPONSES, NOT_FOUND_RESPONSE, ProblemError, not_implemented
+from app.api.problem import ERROR_RESPONSES, NOT_FOUND_RESPONSE, ProblemError, invalid
 from app.api.session import database, now
 from app.api.v1.auth_models import TokenRequest
 from app.api.v1.workspace_models import (
+    AuditEvent,
     AuditEventPage,
     CreateWorkspaceRequest,
     Invitation,
@@ -26,6 +27,7 @@ from app.auth.mail import compose
 from app.auth.permissions import Rank, Role
 from app.auth.tokens import digest, new_secret
 from app.db import models as m
+from app.db.repos import page_query
 
 INVITE_TTL = timedelta(days=7)
 
@@ -194,12 +196,29 @@ def accept_invitation(body: TokenRequest, request: Request) -> Workspace:
 
 
 @scoped.get("/audit")
-def list_audit(ws_id: UUID, cursor: Cursor = None, limit: Limit = 25) -> AuditEventPage:
+def list_audit(ws_id: UUID, request: Request, cursor: Cursor = None,
+               limit: Limit = 25) -> AuditEventPage:  # fmt: skip
     """The workspace audit log, newest first (audit.read)."""
-    raise not_implemented()
+    with database(request)() as session:
+        query = select(m.AuditEvent).where(m.AuditEvent.workspace_id == ws_id)
+        after = None if cursor is None else _cursor_event(session, ws_id, cursor)
+        rows = page_query(session, query, m.AuditEvent, limit + 1, after)
+    items = [AuditEvent.model_validate(row, from_attributes=True) for row in rows[:limit]]
+    return AuditEventPage(items=items, next_cursor=str(rows[limit - 1].id)
+                          if len(rows) > limit else None)  # fmt: skip
 
 
 router.include_router(scoped)
+
+
+def _cursor_event(session, ws_id: UUID, cursor: str) -> m.AuditEvent:
+    try:
+        row = session.get(m.AuditEvent, UUID(cursor))
+    except ValueError:
+        row = None
+    if row is None or row.workspace_id != ws_id:
+        raise invalid("query.cursor", "INVALID")
+    return row
 
 
 def memberships(session, user_id: UUID):

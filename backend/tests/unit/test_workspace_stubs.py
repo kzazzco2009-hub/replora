@@ -1,4 +1,4 @@
-"""P0.5: the §3 workspaces contract is served as 501 stubs and documented in OpenAPI."""
+"""P0.5: the §3 workspaces contract is documented in OpenAPI; the rest are 501 stubs."""
 
 import pytest
 
@@ -38,7 +38,7 @@ REAL = {("get", "/api/v1/workspaces"), ("post", "/api/v1/workspaces"), ("delete"
         ("get", f"{WS}/members"), ("patch", f"{WS}/members/{{user_id}}"),
         ("delete", f"{WS}/members/{{user_id}}"), ("post", f"{WS}/invitations"),
         ("get", f"{WS}/invitations"), ("delete", f"{WS}/invitations/{{invitation_id}}"),
-        ("post", "/api/v1/invitations/accept")}  # fmt: skip
+        ("post", "/api/v1/invitations/accept"), ("get", f"{WS}/audit")}  # fmt: skip
 """Implemented in P5.8; their behaviour is tested in tests/integration/test_workspaces_api.py."""
 STUBS = [e for e in ENDPOINTS if (e[0], e[1]) not in REAL]
 

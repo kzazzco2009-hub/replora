@@ -163,3 +163,29 @@ def test_the_owner_cannot_demote_or_remove_themselves(app):
     url = f"/api/v1/workspaces/{ws}/members/{owner.user_id}"
     assert owner.patch(url, json={"role": "admin"}).status_code == 403
     assert owner.delete(url).status_code == 403
+
+
+def test_the_audit_log_is_newest_first_and_paged_for_managers_only(app):
+    ws, owner, admin, member = team(app)
+    admin.patch(f"/api/v1/workspaces/{ws}/members/{member.user_id}", json={"role": "viewer"})
+    url = f"/api/v1/workspaces/{ws}/audit"
+
+    first = owner.get(url, params={"limit": 1}).json()
+    rest = owner.get(url, params={"limit": 1, "cursor": first["next_cursor"]}).json()
+
+    assert [e["action"] for e in first["items"] + rest["items"]] == [
+        "member.role_changed", "workspace.created",
+    ]  # fmt: skip
+    assert first["items"][0]["actor_id"] == admin.user_id
+    assert rest["next_cursor"] is None
+    assert member.get(url).status_code == 403
+
+
+def test_the_audit_log_shows_only_its_own_workspace(app):
+    ws, owner, *_ = team(app)
+    other = owner.post("/api/v1/workspaces", json={"name": "Other"}).json()["id"]
+
+    items = owner.get(f"/api/v1/workspaces/{ws}/audit").json()["items"]
+
+    assert {e["target_id"] for e in items} == {ws}
+    assert other not in {e["target_id"] for e in items}
