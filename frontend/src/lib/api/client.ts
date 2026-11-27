@@ -1,10 +1,21 @@
 import createClient from "openapi-fetch";
-import type { Middleware } from "openapi-fetch";
-import { ensureCsrfToken } from "./csrf";
+import type { MergedOptions, Middleware } from "openapi-fetch";
+import { ensureCsrfToken, refreshCsrfToken } from "./csrf";
 import { ApiError, type Problem } from "./problem";
+import { refreshSession } from "./session";
 import type { paths } from "./schema";
 
 const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+// 401 UNAUTHENTICATED never refreshes for these (api_contract.md §1): a
+// 401 from /auth/refresh itself would recurse.
+const REFRESH_EXEMPT_PATHS = new Set([
+  "/api/v1/auth/refresh",
+  "/api/v1/auth/csrf",
+  "/api/v1/auth/login",
+  "/api/v1/auth/register",
+  "/api/v1/auth/mfa/challenge",
+]);
 
 /**
  * X-CSRF-Token isn't a typed header in openapi.json (api_contract.md §1
@@ -74,6 +85,67 @@ const errorMiddleware: Middleware = {
   },
 };
 
+async function readProblemCode(
+  response: Response,
+): Promise<string | undefined> {
+  try {
+    const body: unknown = await response.clone().json();
+    return isProblem(body) ? body.code : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Clones captured in `onRequest`, before `fetch()` consumes the body. */
+const requestClones = new WeakMap<Request, Request>();
+
+/** Resends the clone's body and headers (Idempotency-Key included), with
+ * X-CSRF-Token from the current cookie on an unsafe method. */
+async function retryRequest(
+  original: Request,
+  options: MergedOptions,
+  csrfToken?: string,
+): Promise<Response> {
+  const clone = requestClones.get(original);
+  if (!clone) return options.fetch(original);
+
+  if (UNSAFE_METHODS.has(clone.method)) {
+    const token = csrfToken ?? (await ensureCsrfToken());
+    clone.headers.set("X-CSRF-Token", token);
+  }
+  return options.fetch(clone);
+}
+
+/**
+ * 401 UNAUTHENTICATED -> refresh once, then retry; 403 CSRF_FAILED ->
+ * fetch a fresh token once, then retry; no loop guard needed, since the
+ * retry never re-enters this middleware. Registered after errorMiddleware
+ * so this `onResponse` runs first (reverse order) and errorMiddleware sees
+ * the retried response, or the original, next.
+ */
+const retryMiddleware: Middleware = {
+  async onRequest({ request }) {
+    requestClones.set(request, request.clone());
+  },
+  async onResponse({ request, response, options }) {
+    if (response.status === 401) {
+      if (REFRESH_EXEMPT_PATHS.has(new URL(request.url).pathname)) return;
+      const code = await readProblemCode(response);
+      if (code !== "UNAUTHENTICATED") return;
+      const refreshed = await refreshSession();
+      if (!refreshed) return;
+      return retryRequest(request, options);
+    }
+
+    if (response.status === 403) {
+      const code = await readProblemCode(response);
+      if (code !== "CSRF_FAILED") return;
+      const token = await refreshCsrfToken();
+      return retryRequest(request, options, token);
+    }
+  },
+};
+
 type ApiClient = ReturnType<typeof createClient<paths>>;
 
 let instance: ApiClient | undefined;
@@ -104,7 +176,7 @@ export function getApiClient(): ApiClient {
       // production, where fetch is never patched after module load.
       fetch: (request) => globalThis.fetch(request),
     });
-    instance.use(csrfMiddleware, errorMiddleware);
+    instance.use(csrfMiddleware, errorMiddleware, retryMiddleware);
   }
   return instance;
 }
