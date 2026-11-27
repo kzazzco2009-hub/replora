@@ -191,19 +191,21 @@ class _Runner:
         for port in contract.inputs:
             if port.required and port.name not in bound:
                 source = wires[node.id, port.name][0]
-                self._issue(RunIssueCode.NODE_SKIPPED, path, node.id, port=port.name, source=source)
+                self._issue(
+                    RunIssueCode.NODE_SKIPPED, path, node.id, {"port": port.name, "source": source}
+                )
                 return True
         key = (self.run_.id, node.id, tuple(sorted((p, r.sha256) for p, r in bound.items())))
         if key not in self.ledger:
             try:
                 self.ledger[key] = self._call(node, bound, contract.outputs)
             except _Failed as failed:
-                self._issue(RunIssueCode.NODE_FAILED, path, node.id, **failed.params)
+                self._issue(RunIssueCode.NODE_FAILED, path, node.id, failed.params)
                 return True
         done = self.ledger[key]
         self.produced |= {(node.id, port): ref for port, ref in done.outputs.items()}
         for warning in done.warnings:
-            self._issue(warning.code, f"{path}/{warning.path}", node.id, **warning.params)
+            self._issue(warning.code, f"{path}/{warning.path}", node.id, warning.params)
         return not (done.warnings and self.run_.definition.review_policy.on_warning == "review")
 
     def _call(self, node: Node, bound: dict[str, ArtifactRef], ports) -> Done:
@@ -229,7 +231,9 @@ class _Runner:
     def _outcome(self) -> RunAction:
         for index, out in enumerate(self.run_.definition.outputs):
             if (out.source.node_id, out.source.port) not in self.produced:
-                self._issue(RunIssueCode.OUTPUT_MISSING, f"outputs/{index}", None, output=out.name)
+                self._issue(
+                    RunIssueCode.OUTPUT_MISSING, f"outputs/{index}", None, {"output": out.name}
+                )
         codes = {issue.code for issue in self.issues}
         if RunIssueCode.OUTPUT_MISSING in codes:
             return RunAction.FAIL
@@ -237,7 +241,7 @@ class _Runner:
             return RunAction.FINISH_PARTIAL
         return RunAction.SUCCEED
 
-    def _issue(self, code: str, path: str, node_id: str | None, **params: Any) -> None:
+    def _issue(self, code: str, path: str, node_id: str | None, params: dict[str, Any]) -> None:
         self.issues.append(Issue(code=code, path=path, node_id=node_id, params=params))
 
     def _end(self, action: RunAction) -> Execution:

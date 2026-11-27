@@ -155,10 +155,10 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 
 ## Phase 7 — First real pipeline
 **Functional / acceptance**
-- [ ] T7.1 **Acceptance:** `orders.csv` (O‑101=100, O‑102=200, O‑103=300) + `payments.json` (O‑101=100, O‑102=190, O‑104=50) inside a ZIP gives O‑101 matched, O‑102 value_diff, O‑103 missing_right and O‑104 missing_left. `comparison_report.csv`, `summary.json` and `results.zip` match the expected fixtures byte for byte (after normalizing timestamps).
-- [ ] T7.2 Every output row has lineage (file, member, row, op versions).
-- [ ] T7.3 A missing required branch (no payments.json) gives FAILED and success is never reported.
-- [ ] T7.4 Schema drift (column `amount` renamed `total`) gives NEEDS_REVIEW.
+- [x] T7.1 **Acceptance:** `orders.csv` (O‑101=100, O‑102=200, O‑103=300) + `payments.json` (O‑101=100, O‑102=190, O‑104=50) inside a ZIP gives O‑101 matched, O‑102 value_diff, O‑103 missing_right and O‑104 missing_left. `comparison_report.csv`, `summary.json` and `results.zip` match the expected fixtures byte for byte (after normalizing timestamps).
+- [x] T7.2 Every output row has lineage (file, member, row, op versions).
+- [x] T7.3 A missing required branch (no payments.json) gives FAILED and success is never reported.
+- [x] T7.4 Schema drift (column `amount` renamed `total`) gives NEEDS_REVIEW.
 
 **Unit / edge cases (adapters)**
 - [x] T7.5 CSV: UTF‑8 with BOM, UTF‑16, Windows‑1256 (Arabic), `;` and tab delimiters, quoted newlines, ragged rows (reported), an empty file, header only, and duplicate headers.

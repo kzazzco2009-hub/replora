@@ -1,0 +1,5 @@
+﻿order_id,status,left_amount,right_amount,difference,left_file,left_member,left_row,right_file,right_member,right_row,operations
+O-101,matched,100,100,0,bundle.zip,orders.csv,2,bundle.zip,payments.json,1,extract_member@1 parse_csv@1 normalize@1 | extract_member@1 parse_json@1 normalize@1
+O-102,value_diff,200,190,10,bundle.zip,orders.csv,3,bundle.zip,payments.json,2,extract_member@1 parse_csv@1 normalize@1 | extract_member@1 parse_json@1 normalize@1
+O-103,missing_right,300,,,bundle.zip,orders.csv,4,,,,extract_member@1 parse_csv@1 normalize@1
+O-104,missing_left,,50,,,,,bundle.zip,payments.json,3,extract_member@1 parse_json@1 normalize@1

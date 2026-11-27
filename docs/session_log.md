@@ -672,6 +672,17 @@ PR **#115** (stacked on #114).
 - **Schema drift:** a column missing in `normalize` gives a `SCHEMA_DRIFT` warning (with `available`) and the table unchanged, so the review policy stops the run as NEEDS_REVIEW (T7.4).
 - **New `contracts/error-codes.json` → `operation_codes`** (18). A test scans `app/ops` for every `OperationError` and `Issue` code and requires each to be in the enum, and the enum to equal the catalogue section.
 - `uv run pytest -q`: **2382 passed**. No drift.
+PR **#116** (stacked on #115). It also relaxed the ZIP-bomb timing bound to 2 s, the likely cause of an occasional full-suite failure.
+
+**P7.4 and P7.6, lineage and acceptance** (`tests/integration/test_acceptance.py`, golden files in `tests/integration/fixtures/acceptance/`).
+- The pipeline is 10 nodes on the **real registry**: extract the two members, parse each, normalize each, compare, then report, summary and bundle. It validates.
+- **T7.1:** O‑101 matched, O‑102 value_diff (diff 10), O‑103 missing_right, O‑104 missing_left. **`comparison_report.csv`, `summary.json` and `results.zip` equal the committed golden files byte for byte.** They were generated once and their content was inspected (statuses, differences, lineage) before commit. `.gitattributes` marks them `-text`, so CRLF survives.
+- **T7.2:** every report row names its file, member, row and operations, for example `extract_member@1 parse_csv@1 normalize@1 | …`.
+- **T7.3:** without `payments.json`, the run is FAILED with `ZIP_MEMBER_MISSING`, and there are no outputs.
+- **T7.4:** with `amount` renamed `total`, the run is NEEDS_REVIEW (`SCHEMA_DRIFT` at `payments_clean`, with `available`).
+- **Engine bug found and fixed:** `_issue(code, path, node_id, **params)` crashed when an operation error carried its own `path` param (`ZIP_MEMBER_MISSING`). Issue params are now one dict.
+- The bundled samples now hold the T7.1 numbers exactly.
+- `uv run pytest -q`: **2391 passed**.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

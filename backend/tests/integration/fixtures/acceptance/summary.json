@@ -1,0 +1,11 @@
+{
+  "key": "order_id",
+  "rows": 4,
+  "summary": {
+    "matched": 1,
+    "missing_left": 1,
+    "missing_right": 1,
+    "value_diff": 1
+  },
+  "value": "amount"
+}
