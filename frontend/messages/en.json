@@ -35,6 +35,17 @@
     }
   },
   "runProgress": {
+    "cancel": "Cancel run",
+    "confirmCancel": "Cancel this run?",
+    "viewResults": "View results",
+    "alreadyFinished": "This run has already finished.",
+    "outcome": {
+      "succeeded": "The run finished successfully.",
+      "partial": "The run finished with warnings. Review the warnings before using the results.",
+      "failed": "The run could not finish. Start a new run to try again.",
+      "cancelled": "The run was cancelled.",
+      "expired": "The run expired. Start a new run to continue."
+    },
     "heading": "Run progress",
     "loading": "Loading run progress",
     "states": {

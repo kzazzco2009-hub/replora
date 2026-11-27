@@ -63,10 +63,8 @@ describe.each([
     await confirm();
     expect(await screen.findByText(RUN_ID)).toBeTruthy();
     expect(
-      screen
-        .getByRole("button", { name: labels.openRun })
-        .hasAttribute("disabled"),
-    ).toBe(true);
+      screen.getByRole("link", { name: labels.openRun }).getAttribute("href"),
+    ).toBe(`/${locale}/runs/${RUN_ID}`);
   });
 
   it("requires a reload before approving a changed plan", async () => {

@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -19,6 +20,7 @@ import { RunPlan } from "./run-plan";
 
 export function RunReview({ wsId, runId }: { wsId: string; runId: string }) {
   const t = useTranslations();
+  const locale = useLocale();
   const query = useRun(wsId, runId);
   const operations = useOperations();
   const [confirmHash, setConfirmHash] = useState<string | null>(null);
@@ -109,9 +111,12 @@ export function RunReview({ wsId, runId }: { wsId: string; runId: string }) {
             t(`runReview.${stateMessage[run.state] ?? "unavailable"}`)}
         </div>
         {approve.isSuccess && (
-          <Button disabled variant="secondary">
+          <Link
+            href={`/${locale}/runs/${encodeURIComponent(run.id)}`}
+            className="inline-flex min-h-11 min-w-11 items-center rounded-control border border-line px-4 text-sm font-medium hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+          >
             {t("runReview.openRun")}
-          </Button>
+          </Link>
         )}
         {run.state === "AWAITING_APPROVAL" && (
           <>

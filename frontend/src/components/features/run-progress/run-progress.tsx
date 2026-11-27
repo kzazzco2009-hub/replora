@@ -20,6 +20,7 @@ import {
   type Run,
   type RunIssue,
 } from "@/lib/api/runs";
+import { canCancelRun, RunActions, useCancelRun } from "./run-actions";
 
 const stationIcons = {
   done: Check,
@@ -142,6 +143,11 @@ export function RunProgress({ wsId, runId }: { wsId: string; runId: string }) {
   const query = useRun(wsId, runId);
   const run = query.data;
   const events = useRunEvents(wsId, runId, run?.state);
+  const cancel = useCancelRun(
+    wsId,
+    runId,
+    async () => (await query.refetch({ throwOnError: true })).data,
+  );
   if (!run && query.isPending) {
     return <Skeleton variant="card" aria-label={t("runProgress.loading")} />;
   }
@@ -158,15 +164,22 @@ export function RunProgress({ wsId, runId }: { wsId: string; runId: string }) {
     );
   }
 
-  const state = runIsLive(run.state)
-    ? (events.data?.state ?? run.state)
-    : run.state;
+  const eventState = events.data?.state;
+  const beforeCancellation =
+    run.state === "CANCEL_REQUESTED" &&
+    (eventState === "QUEUED" || eventState === "RUNNING");
+  const state =
+    runIsLive(run.state) && !beforeCancellation
+      ? (eventState ?? run.state)
+      : run.state;
+  const shown =
+    cancel.isPending && canCancelRun(state) ? "CANCEL_REQUESTED" : state;
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold">{t("runProgress.heading")}</h1>
         <div role="status" aria-live="polite" aria-atomic="true">
-          <StatusChip status={state} label={t(`runProgress.states.${state}`)} />
+          <StatusChip status={shown} label={t(`runProgress.states.${shown}`)} />
         </div>
       </header>
       {events.isError && (
@@ -177,6 +190,7 @@ export function RunProgress({ wsId, runId }: { wsId: string; runId: string }) {
         events={events.data?.events ?? []}
         running={state === "RUNNING"}
       />
+      <RunActions runId={runId} state={state} cancel={cancel} />
     </div>
   );
 }
