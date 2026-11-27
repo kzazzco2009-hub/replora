@@ -500,6 +500,16 @@ PR **#98** (stacked on #97).
 - Test clients use `conftest.with_csrf`, which copies the current cookie into the header on each request, as the browser client does. The production cookie test uses `https://testserver`, because Secure cookies only come back over https.
 - Mutation checks: the Origin check, the compare, and the cookie requirement each fail 1–2 tests.
 - `uv run pytest -q`: **1738 passed**.
+PR **#99** (stacked on #98).
+
+**P5.4, email verification and password reset** (`app/auth/one_time.py`, `app/auth/mail.py`, `tests/integration/test_auth_tokens_api.py`; collection failed first).
+- One-time tokens: 256 bits, stored as SHA‑256 in `auth_tokens` with their kind, a **30-minute** expiry and `used_at`. They work once, and only for their own kind.
+- **Mail** goes through `app.state.mailer`: `ConsoleMailer` locally (it prints the link), `Outbox` in tests. Subjects are in AR and EN, by the user's locale. Links point at `Settings.app_url` (`APP_URL`).
+- **Register** sends a verification link to a new address, and a notice with no token to an existing account. **Verify** sets `email_verified_at`.
+- **Forgot** always answers 202 with an empty body. **Reset** sets the new password (policy applied) and **revokes every session (S‑27)**. A bad, used, expired or wrong-kind token gives 400 `TOKEN_INVALID`.
+- **T5.3** (now with verify), **T5.8** (single use, the 29/30-minute boundary, sessions revoked) and **T5.11** (same answer and body; timing difference < 50 ms) pass. Mutation checks: used and expired, the kind filter, and session revocation are all caught.
+- Lesson: endpoint docstrings are OpenAPI descriptions, so changing one is contract drift. The S‑27 note is a comment.
+- `uv run pytest -q`: **1750 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

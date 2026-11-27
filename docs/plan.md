@@ -235,7 +235,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] P5.1 Register and login with argon2id hashing (`pwdlib`). Password policy follows NIST 800‑63B (length ≥ 12, breached-password check offline list, no composition rules).
 - [x] P5.2 Sessions: short access token (15 min) and a rotating refresh token (stored hashed, revocable), both in `HttpOnly; Secure; SameSite=Lax` cookies. Logout revokes the session.
 - [x] P5.3 CSRF protection: a double-submit token (`X-CSRF-Token`) on all unsafe methods.
-- [ ] P5.4 Email verification and password reset (single-use, hashed, 30‑min tokens). The email goes to the console sink locally.
+- [x] P5.4 Email verification and password reset (single-use, hashed, 30‑min tokens). The email goes to the console sink locally.
 - [ ] P5.5 Workspaces and roles: `owner`, `admin`, `member`, `viewer`. The permission matrix is defined in code (security.md S‑21). Each user gets a personal workspace on signup.
 - [ ] P5.6 A `require(permission)` FastAPI dependency. Resources from another workspace return **404** (no existence leak).
 - [ ] P5.7 Login throttling and account lockout with backoff (DB-backed rate limit). Every auth event is written to the audit log.

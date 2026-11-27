@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
 from app.api import problem, v1
+from app.auth.mail import ConsoleMailer
 from app.auth.tokens import new_secret
 from app.config import Settings
 from app.db.engine import make_engine, make_sessions
@@ -37,6 +38,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         settings.jwt_secret.get_secret_value() if settings.jwt_secret else new_secret()
     )
     app.state.clock = lambda: datetime.now(UTC)
+    app.state.mailer = ConsoleMailer()
     app.include_router(v1.router)
     problem.install(app)
     app.add_middleware(RequestIdMiddleware)

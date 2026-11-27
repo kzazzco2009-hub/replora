@@ -44,7 +44,9 @@ from app.api.v1.auth_models import (
     User,
 )
 from app.api.v1.workspace_models import Workspace
-from app.auth import accounts, sessions
+from app.auth import accounts, one_time, sessions
+from app.auth.mail import compose
+from app.auth.passwords import hash_password
 from app.db import models as m
 
 router = APIRouter(prefix="/auth", tags=["auth"], responses=ERROR_RESPONSES)
@@ -63,7 +65,17 @@ def register(body: RegisterRequest, request: Request) -> None:
     A new address gets the verification email; an existing account gets a notice email instead.
     """
     with database(request).begin() as session:
-        accounts.register(session, body.email, body.password, body.display_name, body.locale)
+        user, created = accounts.register(
+            session, body.email, body.password, body.display_name, body.locale
+        )
+        if created:
+            token = one_time.issue(session, user, "verify", now(request))
+            message = compose(
+                user.email, "verify", user.locale, link(request, "verify-email", token)
+            )
+        else:
+            message = compose(user.email, "account_exists", user.locale)
+    request.app.state.mailer.send(message)
     return Response(status_code=202)  # type: ignore[return-value]  (no body at all, not `null`)
 
 
@@ -133,21 +145,38 @@ def delete_me(body: PasswordRequest) -> None:
 
 
 @router.post("/verify-email", status_code=204, responses=WRONG_SECRET_RESPONSE)
-def verify_email(body: TokenRequest) -> None:
+def verify_email(body: TokenRequest, request: Request) -> None:
     """Confirm the email address with the emailed token."""
-    raise not_implemented()
+    with database(request).begin() as session:
+        user = one_time.redeem(session, "verify", body.token, now(request))
+        if user is None:
+            raise token_invalid()
+        user.email_verified_at = now(request)
 
 
 @router.post("/password/forgot", status_code=202)
-def forgot_password(body: EmailRequest) -> None:
+def forgot_password(body: EmailRequest, request: Request) -> None:
     """Send a reset email if the account exists. Always 202 (no enumeration)."""
-    raise not_implemented()
+    with database(request).begin() as session:
+        user = accounts.find_user(session, body.email)
+        if user is None or user.deleted_at is not None:
+            return Response(status_code=202)  # type: ignore[return-value]
+        token = one_time.issue(session, user, "reset", now(request))
+        message = compose(user.email, "reset", user.locale, link(request, "reset-password", token))
+    request.app.state.mailer.send(message)
+    return Response(status_code=202)  # type: ignore[return-value]
 
 
 @router.post("/password/reset", status_code=204, responses=WRONG_SECRET_RESPONSE)
-def reset_password(body: ResetPasswordRequest) -> None:
+def reset_password(body: ResetPasswordRequest, request: Request) -> None:
     """Set a new password with the emailed token."""
-    raise not_implemented()
+    # S‑27: a new password signs every session out.
+    with database(request).begin() as session:
+        user = one_time.redeem(session, "reset", body.token, now(request))
+        if user is None:
+            raise token_invalid()
+        user.password_hash = hash_password(body.password)
+        one_time.revoke_all_sessions(session, user, now(request))
 
 
 @router.post("/mfa/enroll")
@@ -203,3 +232,11 @@ def to_user(row: m.User) -> User:
                 theme=row.theme, timezone=row.timezone, mfa_enabled=row.mfa_secret_enc is not None,
                 email_verified=row.email_verified_at is not None,
                 created_at=row.created_at)  # fmt: skip
+
+
+def token_invalid() -> ProblemError:
+    return ProblemError(400, "TOKEN_INVALID", "Invalid or expired token")
+
+
+def link(request: Request, page: str, token: str) -> str:
+    return f"{request.app.state.settings.app_url}/{page}?token={token}"
