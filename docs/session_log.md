@@ -678,7 +678,7 @@ PR **#116** (stacked on #115). It also relaxed the ZIP-bomb timing bound to 2 s,
 - **Engine bug found and fixed:** `_issue(code, path, node_id, **params)` crashed when an operation error carried its own `path` param (`ZIP_MEMBER_MISSING`). Issue params are now one dict.
 - The bundled samples now hold the T7.1 numbers exactly.
 - `uv run pytest -q`: **2391 passed**.
-**Session 17 ended here** (Developer A's request), during the end-of-Phase-7 check run. Everything above is committed and pushed.
+**Session 17 ended here** (Developer A's request), during the end-of-Phase-7 check run. Everything above is committed and pushed. **The check run then finished, all green:** the golden CSV blob keeps CRLF; ruff and format clean; **2391 passed**; openapi.json and schema drift exit 0; pip-audit clean; schema.d.ts no drift; frontend typecheck and **186 tests** pass; gitleaks no leaks. G7 can be recorded from this evidence (frontend build and pnpm audit weren't in this run).
 
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
