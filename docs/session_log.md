@@ -590,6 +590,14 @@ PR **#106** (stacked on #105).
 | `gitleaks git .` | no leaks found |
 
 **Gate G5 (backend) passed** (pre-approved, recorded in `decisions.md`). I1 is the frontend's part. **Next: Phase 6 (files).**
+## Phase 6 — files
+
+**P6.1, storage** (`app/storage/`, `tests/integration/test_storage.py`; collection failed first).
+- `LocalStorage` under `DATA_DIR/storage`: `create_upload_url`, `put`, `open`, `exists`, `size`, `delete` and `signed_download_url`. Keys are `workspace/file` and can't leave the root: `..`, absolute paths, backslashes and empty keys are refused (S‑33).
+- `app/storage/signing.py`: base64url claims plus HMAC‑SHA256. Each token is single-purpose (`put` or `get`, one key), expiring after **10 minutes for upload** (with the declared size) and **5 minutes for download** (S‑34, S‑36).
+- **Local stand-ins for Supabase signed URLs:** `PUT` and `GET /api/v1/storage/{token}` are **outside the v1 router and the contract** (`include_in_schema=False`; a test checks that they're absent from OpenAPI). The token is the authorization. A PUT larger than declared gives 413 and nothing is stored; downloads are `attachment`, `nosniff`, `no-store`; forged or expired tokens give 403.
+- Mutation checks: the MAC check and the op check are caught.
+- `uv run pytest -q`: **2205 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

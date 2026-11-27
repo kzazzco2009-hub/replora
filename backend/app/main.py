@@ -13,6 +13,8 @@ from app.auth.tokens import new_secret
 from app.config import Settings
 from app.db.engine import make_engine, make_sessions
 from app.observability import RequestIdMiddleware, configure_logging
+from app.storage import routes as storage_routes
+from app.storage.local import LocalStorage
 
 
 def operation_id(route: APIRoute) -> str:
@@ -43,7 +45,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.clock = lambda: datetime.now(UTC)
     app.state.mailer = ConsoleMailer()
+    app.state.storage = LocalStorage(settings.data_dir / "storage", app.state.jwt_key + ":storage")
     app.include_router(v1.router)
+    app.include_router(storage_routes.router)
     problem.install(app)
     paths = app.openapi()["paths"]
     check_table((method.upper(), path) for path, ops in paths.items() for method in ops)
