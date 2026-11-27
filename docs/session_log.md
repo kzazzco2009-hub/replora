@@ -491,6 +491,15 @@ PR **#97** (stacked on #96).
 - Test updates: the production config tests pass a `jwt_secret`; the observability test's 501 example is now `/auth/sessions`; and the stub test skips the 5 endpoints that are real.
 - Mutation checks: the revoked-session check (it survived at first, so a test now replays the access token after logout), Secure, HttpOnly and the password check are all caught.
 - `uv run pytest -q`: **1727 passed**. No drift.
+PR **#98** (stacked on #97).
+
+**P5.3, CSRF** (`app/api/csrf.py`, `tests/integration/test_csrf.py`; failed first).
+- A dependency on the whole v1 router: every POST, PUT, PATCH and DELETE needs `X-CSRF-Token` to equal the readable `replora_csrf` cookie (constant-time compare), login and register included. An `Origin` header, when present, must be in `Settings.allowed_origins` (`ALLOWED_ORIGINS`, default `http://localhost:3000`). A failure gives 403 `CSRF_FAILED`. It reads only the `Request`, so `openapi.json` is unchanged.
+- `GET /auth/csrf` always sets a fresh cookie (as promised on #92), and login and logout rotate it. The cookie is readable (not HttpOnly), SameSite=Lax, Path=/, and Secure in production.
+- **T5.5:** **every unsafe route in `openapi.json` (more than 30)** refuses a request without the token. Also tested: a mismatched token, a header without the cookie, a foreign `Origin` even with the token, safe methods passing, and rotation.
+- Test clients use `conftest.with_csrf`, which copies the current cookie into the header on each request, as the browser client does. The production cookie test uses `https://testserver`, because Secure cookies only come back over https.
+- Mutation checks: the Origin check, the compare, and the cookie requirement each fail 1–2 tests.
+- `uv run pytest -q`: **1738 passed**.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

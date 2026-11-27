@@ -5,6 +5,7 @@ import json
 import logging
 
 import pytest
+from conftest import with_csrf
 from fastapi.testclient import TestClient
 
 from app.config import Settings
@@ -23,7 +24,7 @@ def _boom() -> None:
 def client() -> TestClient:
     app = create_app(Settings(_env_file=None))
     app.add_api_route("/test/boom", _boom, tags=["test"])
-    return TestClient(app, raise_server_exceptions=False)
+    return with_csrf(TestClient(app, raise_server_exceptions=False))
 
 
 @pytest.fixture
