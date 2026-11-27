@@ -109,9 +109,12 @@ export function RunActions({
           <p>{t(`runProgress.outcome.${outcome}`)}</p>
           <div className="flex flex-wrap gap-2">
             {(state === "SUCCEEDED" || state === "PARTIAL") && (
-              <Button variant="secondary" disabled>
+              <Link
+                className={linkClass}
+                href={`/${locale}/runs/${encodeURIComponent(runId)}/results`}
+              >
                 {t("runProgress.viewResults")}
-              </Button>
+              </Link>
             )}
             <Link className={linkClass} href={`/${locale}/new-run`}>
               {t("nav.newRun")}
