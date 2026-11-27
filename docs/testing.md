@@ -148,7 +148,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [x] T6.4 Zip bomb (42.zip style, high ratio): rejected by the ratio or uncompressed-size counter **before** full extraction.
 - [x] T6.5 Zip slip (`../evil`, absolute paths) and symlink members are rejected.
 - [x] T6.6 26 members fails; nested ZIP fails; an encrypted ZIP gives a clear error.
-- [ ] T6.7 Full upload flow: intent, PUT, complete, list and download (signed URL works, and fails once expired).
+- [x] T6.7 Full upload flow: intent, PUT, complete, list and download (signed URL works, and fails once expired).
 - [x] T6.8 A size mismatch on complete is rejected, and the stored `sha256` equals the hash the server computed from the stored bytes.
 - [ ] T6.9 The retention job deletes expired files from both the DB and storage.
 - [ ] T6.10 Quotas: 10 files per run is OK and 11 gives 413 `QUOTA_EXCEEDED`. Reaching the workspace storage quota blocks new upload intents with the same code.

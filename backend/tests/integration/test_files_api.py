@@ -120,3 +120,61 @@ def test_a_zip_is_ready_with_its_members_or_rejected_for_its_contents(web):
     assert good["members"] == [{"path": "orders.csv", "detected_type": "csv", "size": len(CSV)}]
     bad = upload(web, archive({"../evil.csv": CSV}), name="bundle.zip").json()
     assert (bad["status"], bad["rejection_code"]) == ("rejected", "ZIP_UNSAFE_PATH")
+
+
+def test_files_are_listed_newest_first_in_pages(web):
+    names = [upload(web, CSV, name=f"f{k}.csv").json()["display_name"] for k in range(3)]
+    first = web.get(f"/api/v1/workspaces/{web.ws}/files", params={"limit": 2}).json()
+    assert [f["display_name"] for f in first["items"]] == names[::-1][:2]
+    rest = web.get(f"/api/v1/workspaces/{web.ws}/files",
+                   params={"limit": 2, "cursor": first["next_cursor"]}).json()  # fmt: skip
+    assert ([f["display_name"] for f in rest["items"]], rest["next_cursor"]) == ([names[0]], None)
+
+
+def test_the_list_filters_by_type(web):
+    upload(web, CSV)
+    upload(web, b'[{"a": 1}]', name="x.json")
+    listed = web.get(f"/api/v1/workspaces/{web.ws}/files", params={"type": "json"}).json()
+    assert [f["detected_type"] for f in listed["items"]] == ["json"]
+
+
+def test_a_bad_cursor_is_a_validation_error(web):
+    response = web.get(f"/api/v1/workspaces/{web.ws}/files", params={"cursor": "nope"})
+    assert response.status_code == 422
+
+
+def test_a_ready_file_downloads_through_a_short_signed_link(web):
+    file = upload(web, CSV).json()
+    link = web.get(f"/api/v1/workspaces/{web.ws}/files/{file['id']}/download")
+    assert link.status_code == 200
+    downloaded = web.get(link.json()["url"])
+    assert (downloaded.status_code, downloaded.content) == (200, CSV)
+    assert "orders.csv" in downloaded.headers["content-disposition"]
+
+
+def test_a_rejected_file_has_nothing_to_download(web):
+    file = upload(web, b"MZ\x90\x00" + b"\x00" * 60).json()
+    response = web.get(f"/api/v1/workspaces/{web.ws}/files/{file['id']}/download")
+    assert (response.status_code, response.json()["code"]) == (409, "INVALID_STATE_TRANSITION")
+
+
+def test_delete_removes_the_row_and_the_bytes(web):
+    file = upload(web, CSV).json()
+    assert web.delete(f"/api/v1/workspaces/{web.ws}/files/{file['id']}").status_code == 204
+    assert web.get(f"/api/v1/workspaces/{web.ws}/files/{file['id']}").status_code == 404
+    assert not web.app.state.storage.exists(f"{web.ws}/{file['id']}")
+
+
+def test_the_samples_are_the_acceptance_files_ready_to_use(web):
+    response = web.post(f"/api/v1/workspaces/{web.ws}/files/samples")
+    assert response.status_code == 201
+    files = {f["display_name"]: f for f in response.json()}
+    assert set(files) == {"orders.csv", "payments.json"}
+    assert {(f["status"], f["detected_type"]) for f in files.values()} == {
+        ("ready", "csv"), ("ready", "json")}  # fmt: skip
+
+
+def test_another_workspaces_file_is_not_found_from_mine(web):
+    file = upload(web, CSV).json()
+    other = web.post("/api/v1/workspaces", json={"name": "Other"}).json()["id"]
+    assert web.get(f"/api/v1/workspaces/{other}/files/{file['id']}").status_code == 404

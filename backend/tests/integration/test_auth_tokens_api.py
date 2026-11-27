@@ -1,6 +1,7 @@
 """P5.4 email verification and password reset (T5.3 verify part, T5.8, T5.11)."""
 
 import re
+import statistics
 import time
 from datetime import timedelta
 
@@ -116,10 +117,15 @@ def test_forgot_password_answers_the_same_for_known_and_unknown_emails(web):
     sent = len(web.outbox.sent)
     timings, answers = {}, {}
     for email in ("salma@example.com", "nobody@example.com"):
-        start = time.perf_counter()
-        response = web.post("/api/v1/auth/password/forgot", json={"email": email})
-        timings[email] = time.perf_counter() - start
-        answers[email] = (response.status_code, response.content)
+        samples = []
+        for k in range(5):
+            # A fresh address each time, so the 3-per-hour limit doesn't answer instead.
+            client = with_csrf(TestClient(web.app, client=(f"10.9.{len(email)}.{k}", 1)))
+            start = time.perf_counter()
+            response = client.post("/api/v1/auth/password/forgot", json={"email": email})
+            samples.append(time.perf_counter() - start)
+            answers[email] = (response.status_code, response.content)
+        timings[email] = statistics.median(samples)
     assert answers["salma@example.com"] == answers["nobody@example.com"] == (202, b"")
-    assert len(web.outbox.sent) == sent + 1
+    assert len(web.outbox.sent) == sent + 5
     assert abs(timings["salma@example.com"] - timings["nobody@example.com"]) < 0.05
