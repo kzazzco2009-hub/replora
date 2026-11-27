@@ -4,21 +4,27 @@ import { UploadCloud } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useLimits } from "@/lib/api/upload";
+import { useLimits, type Limits } from "@/lib/api/upload";
 import { formatBytes } from "./format-bytes";
 import { FileRow } from "./file-row";
-import { useUploadQueue } from "./use-upload-queue";
+import type { UploadItem } from "./use-upload-queue";
 
 export interface UploadStepProps {
-  wsId: string;
+  items: UploadItem[];
+  addFiles: (files: File[], limits: Limits | undefined) => void;
+  removeItem: (id: string) => void;
 }
 
-/** design.md "New run, Upload": drop zone (the empty state) plus a file picker and per-file rows. */
-export function UploadStep({ wsId }: UploadStepProps) {
+/**
+ * design.md "New run, Upload": drop zone (the empty state) plus a file
+ * picker and per-file rows. The queue itself (`items`/`addFiles`/
+ * `removeItem`) is owned by `NewRunWizard`, not this component, so it
+ * survives moving on to the Describe step.
+ */
+export function UploadStep({ items, addFiles, removeItem }: UploadStepProps) {
   const t = useTranslations();
   const inputRef = useRef<HTMLInputElement>(null);
   const { data: limits } = useLimits();
-  const { items, addFiles, removeItem } = useUploadQueue(wsId);
   const [dragOver, setDragOver] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const previousStatuses = useRef(new Map<string, string>());

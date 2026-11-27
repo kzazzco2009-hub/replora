@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { beforeEach, describe, expect, it } from "vitest";
 import { UploadStep } from "../../src/components/features/upload/upload-step";
+import { useUploadQueue } from "../../src/components/features/upload/use-upload-queue";
 import messages from "../../messages/en.json";
 import { setScenario } from "../msw/scenarios";
 
@@ -14,6 +15,14 @@ function file(name: string, size: number, type = "text/csv"): File {
   return new File([new Uint8Array(size)], name, { type });
 }
 
+/** `UploadStep` is prop-driven; this is the one real `useUploadQueue` caller the queue tests run against. */
+function Harness() {
+  const { items, addFiles, removeItem } = useUploadQueue("ws-1");
+  return (
+    <UploadStep items={items} addFiles={addFiles} removeItem={removeItem} />
+  );
+}
+
 function renderStep(dir: "ltr" | "rtl" = "ltr") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -22,7 +31,7 @@ function renderStep(dir: "ltr" | "rtl" = "ltr") {
     <div dir={dir}>
       <NextIntlClientProvider locale="en" messages={messages}>
         <QueryClientProvider client={client}>
-          <UploadStep wsId="ws-1" />
+          <Harness />
         </QueryClientProvider>
       </NextIntlClientProvider>
     </div>,
