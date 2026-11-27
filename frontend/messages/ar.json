@@ -34,6 +34,9 @@
       "title": "تصدير ملف CSV"
     }
   },
+  "runProgress": {
+    "requestFailed": "تعذّر تحميل تقدّم التشغيل."
+  },
   "runReview": {
     "heading": "مراجعة الخطة",
     "planHash": "بصمة الخطة",
