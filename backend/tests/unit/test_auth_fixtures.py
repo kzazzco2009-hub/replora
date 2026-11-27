@@ -68,6 +68,21 @@ def test_scenario_matches_the_contract(operation_id, name, scenario):
         validate(body, responses[str(status)]["content"]["application/json"]["schema"])
 
 
+def body_fields(operation: dict) -> set[str]:
+    """Top-level property names of an operation's JSON request body."""
+    ref = operation["requestBody"]["content"]["application/json"]["schema"]["$ref"]
+    return set(OPENAPI["components"]["schemas"][ref.rsplit("/", 1)[1]]["properties"])
+
+
+@pytest.mark.parametrize(("operation_id", "name", "scenario"), scenarios())
+def test_error_paths_name_a_request_field(operation_id, name, scenario):
+    errors = scenario["body"].get("errors", []) if scenario["status"] >= 400 else []
+    fields = {item["path"].split(".")[1] for item in errors if item["path"].startswith("body.")}
+
+    if fields:
+        assert fields <= body_fields(AUTH_OPERATIONS[operation_id])
+
+
 def test_the_validator_rejects_a_drifted_body():
     """Guard for the guard: an unknown field must fail, since every model forbids extras."""
     user = json.loads((FIXTURES / "auth_get_me.json").read_text(encoding="utf-8"))["ok"]["body"]
