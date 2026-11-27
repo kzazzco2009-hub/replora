@@ -35,6 +35,28 @@ describe("ErrorView", () => {
     expect(screen.getByText("01J000000000000000000000")).toBeTruthy();
   });
 
+  it.each([
+    { dir: "ltr", label: "Reference" },
+    { dir: "rtl", label: "الرقم المرجعي" },
+  ] as const)(
+    "isolates a correlation ID in a $dir error view",
+    ({ dir, label }) => {
+      const id = "123-ABC-456";
+      render(
+        <ErrorView
+          error={new ApiError(problem({ correlation_id: id }))}
+          reset={() => {}}
+          dir={dir}
+          strings={{ ...strings, reference: label }}
+        />,
+      );
+
+      const reference = screen.getByTestId("error-reference");
+      expect(reference.closest("[dir]")?.getAttribute("dir")).toBe(dir);
+      expect(reference.querySelector('bdi[dir="ltr"]')?.textContent).toBe(id);
+    },
+  );
+
   it("shows no reference line for an ApiError without a correlation_id (rtl)", () => {
     render(
       <ErrorView
