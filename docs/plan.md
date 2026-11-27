@@ -223,8 +223,8 @@ Goal: frozen domain models that both developers rely on.
 
 ### Phase 4 — Persistence layer (SQLite locally, Postgres-ready) (M)
 - [x] P4.1 SQLAlchemy 2 engine and session from `DATABASE_URL`. SQLite uses WAL and `foreign_keys=ON`. Postgres uses psycopg 3, and `NullPool` is configured for serverless.
-- [ ] P4.2 Models: `users`, `workspaces`, `memberships`, `sessions`, `files`, `artifacts`, `workflows`, `workflow_versions`, `drafts`, `runs`, `run_nodes`, `jobs`, `audit_events`, `rate_limits`. All IDs are UUIDv7 and all timestamps are UTC.
-- [ ] P4.3 **Indexes on every table** (see §6 below). They are verified by a test that inspects the metadata.
+- [x] P4.2 Models: `users`, `workspaces`, `memberships`, `sessions`, `files`, `artifacts`, `workflows`, `workflow_versions`, `drafts`, `runs`, `run_nodes`, `jobs`, `audit_events`, `rate_limits`. All IDs are UUIDv7 and all timestamps are UTC.
+- [x] P4.3 **Indexes on every table** (see §6 below). They are verified by a test that inspects the metadata.
 - [ ] P4.4 Alembic setup (`render_as_batch=True` for SQLite). The initial migration. `upgrade` and `downgrade` are tested.
 - [ ] P4.5 Repositories: every query function takes a `workspace_id` and filters by it. No unscoped query is possible.
 - [ ] P4.6 Persist engine state: runs, run_nodes and artifacts are saved after each node (checkpointing for serverless).
@@ -405,11 +405,11 @@ Every foreign key is indexed. Every list query uses `(workspace_id, created_at D
 | auth_tokens | id, user_id, kind (verify/reset), token_hash, expires_at, used_at | `uq_auth_tokens_hash`, `ix_auth_tokens_user_kind` |
 | files | id, workspace_id, uploaded_by, storage_key, display_name, detected_type, size, sha256, status, expires_at, created_at | `ix_files_ws_created (workspace_id,created_at)`, `ix_files_ws_sha256`, `ix_files_expires_at`, `ix_files_uploaded_by` |
 | artifacts | id, workspace_id, run_id, node_id, type, format, sha256, storage_key, lineage (JSON), created_at | `ix_artifacts_run_id`, `ix_artifacts_ws_created`, `ix_artifacts_sha256` |
-| workflows | id, workspace_id, name, created_by, latest_version, created_at, deleted_at | `ix_workflows_ws_created`, `ix_workflows_ws_name` |
+| workflows | id, workspace_id, name, created_by, latest_version, created_at, deleted_at | `ix_workflows_ws_created`, `ix_workflows_ws_name`, `ix_workflows_created_by` |
 | workflow_versions | id, workflow_id, version, definition (JSON), plan_hash, created_at | `uq_wfv_workflow_version`, `ix_wfv_plan_hash` |
 | drafts | id, workspace_id, created_by, prompt, draft (JSON), plan_hash, planner, created_at | `ix_drafts_ws_created`, `ix_drafts_created_by` |
-| runs | id, workspace_id, workflow_version_id, draft_id, state, plan_hash, approved_by, approved_at, idempotency_key, created_at, finished_at | `ix_runs_ws_created`, `ix_runs_ws_state`, `uq_runs_ws_idem (workspace_id,idempotency_key)`, `ix_runs_wfv_id`, `ix_runs_draft_id` |
-| run_nodes | id, run_id, node_id, state, attempt, idempotency_key, started_at, finished_at, error_code | `uq_run_nodes_run_node (run_id,node_id)`, `uq_run_nodes_idem`, `ix_run_nodes_state` |
+| runs | id, workspace_id, workflow_version_id, draft_id, state, state_since, plan_hash, approved_by, approved_at, idempotency_key, issues (JSON), created_at, finished_at | `ix_runs_ws_created`, `ix_runs_ws_state`, `uq_runs_ws_idem (workspace_id,idempotency_key)`, `ix_runs_wfv_id`, `ix_runs_draft_id`, `ix_runs_approved_by` |
+| run_nodes | id, run_id, node_id, state, attempt, idempotency_key, outputs (JSON), warnings (JSON), started_at, finished_at, error_code | `uq_run_nodes_run_node (run_id,node_id)`, `uq_run_nodes_idem`, `ix_run_nodes_state` |
 | run_events | id, run_id, seq, type, payload (JSON), created_at | `uq_run_events_run_seq (run_id,seq)` |
 | jobs | id, kind, payload (JSON), run_at, locked_until, attempts, status | `ix_jobs_status_run_at (status,run_at)`, `ix_jobs_locked_until` |
 | audit_events | id, workspace_id, actor_id, action, target_type, target_id, ip_hash, created_at | `ix_audit_ws_created`, `ix_audit_actor_created`, `ix_audit_target` |

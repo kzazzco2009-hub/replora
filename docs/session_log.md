@@ -405,6 +405,16 @@ PR **#86** (stacked on #85).
 - **T4.7 (part):** a duplicate email in different case → IntegrityError; a duplicate membership → IntegrityError; FKs are enforced.
 - `uv run pytest -q`: **1469 passed**. ruff is clean.
 
+PR **#87** (stacked on #86).
+
+**P4.2 and P4.3 part 2: the work tables** (`app/db/models/work.py`; the tests failed first, 6 failed).
+- Tables: files, workflows, workflow_versions, drafts, runs, run_nodes, artifacts, run_events and jobs. The workspace FKs cascade, and the "by" FKs are SET NULL.
+- `runs` gains `state_since` (for expiry) and `issues`. `run_nodes` gains `outputs` and `warnings`, so a done node is never re-executed (P4.6). §6 is updated, along with the extra FK indexes `ix_workflows_created_by` and `ix_runs_approved_by`.
+- **T4.6:** all 18 §6 tables exist, every documented index exists, and every FK leads an index. **T4.5** is done. **T4.7 (part):** unique run idempotency key per workspace, workflow version, run node and event seq. JSON round-trips, Arabic included.
+- Mutation checks: dropping `unique` on each of three indexes fails a test.
+- **P4.2 and P4.3 are done.**
+- `uv run pytest -q`: **1494 passed**. ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 
