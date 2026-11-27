@@ -8,6 +8,7 @@ from app.db.models.identity import (
     MfaRecoveryCode,
     RateLimit,
     Session,
+    UsedRefreshToken,
     User,
     Workspace,
 )
@@ -38,6 +39,7 @@ __all__ = [
     "RunEvent",
     "RunNode",
     "Session",
+    "UsedRefreshToken",
     "User",
     "Workflow",
     "WorkflowVersion",

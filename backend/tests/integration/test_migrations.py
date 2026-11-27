@@ -14,6 +14,11 @@ from app.db.base import Base
 from app.db.engine import make_engine
 
 BACKEND = Path(__file__).resolve().parents[2]
+INSERT = text(
+    "INSERT INTO users (id, email, password_hash, locale, theme, timezone, created_at) "
+    "VALUES (:id, :email, 'x', 'ar', 'system', 'UTC', '2026-11-26 12:00:00+00:00')"
+)
+"""A user row as the 0001 schema has it."""
 
 
 @pytest.fixture
@@ -51,10 +56,28 @@ def test_the_migrations_match_the_models(url):
 
 def test_the_migrated_schema_keeps_emails_unique_ignoring_case(url):
     command.upgrade(alembic(url), "head")
-    insert = text("INSERT INTO users (id, email, password_hash, locale, theme, timezone, "
-                  "created_at) VALUES (:id, :email, 'x', 'ar', 'system', 'UTC', "
-                  "'2026-11-26 12:00:00+00:00')")  # fmt: skip
     with make_engine(url).begin() as connection:
-        connection.execute(insert, {"id": "0" * 32, "email": "Salma@Example.com"})
+        connection.execute(INSERT, {"id": "0" * 32, "email": "Salma@Example.com"})
     with pytest.raises(IntegrityError), make_engine(url).begin() as connection:
-        connection.execute(insert, {"id": "1" * 32, "email": "salma@example.COM"})
+        connection.execute(INSERT, {"id": "1" * 32, "email": "salma@example.COM"})
+
+
+def test_upgrading_keeps_existing_users(url):
+    command.upgrade(alembic(url), "0001")
+    with make_engine(url).begin() as connection:
+        connection.execute(INSERT, {"id": "0" * 32, "email": "old@example.com"})
+    command.upgrade(alembic(url), "head")
+    with make_engine(url).connect() as connection:
+        names = connection.execute(text("SELECT email, display_name FROM users")).all()
+    assert [tuple(row) for row in names] == [("old@example.com", "")]
+
+
+@pytest.mark.parametrize("revision", ["0001", "head"])
+def test_emails_stay_unique_ignoring_case_after_every_up_and_down(url, revision):
+    command.upgrade(alembic(url), "head")
+    command.downgrade(alembic(url), "0001")
+    command.upgrade(alembic(url), revision)
+    with make_engine(url).begin() as connection:
+        connection.execute(INSERT, {"id": "0" * 32, "email": "Salma@Example.com"})
+    with pytest.raises(IntegrityError), make_engine(url).begin() as connection:
+        connection.execute(INSERT, {"id": "1" * 32, "email": "salma@example.COM"})

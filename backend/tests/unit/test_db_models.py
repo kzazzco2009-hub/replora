@@ -31,7 +31,7 @@ def index_names(table) -> set[str]:
 
 
 def test_plan_section_6_is_parsed():
-    assert len(DOCUMENTED) == 18
+    assert len(DOCUMENTED) == 19
     assert DOCUMENTED["users"] == {"uq_users_email", "ix_users_created_at", "ix_users_deleted_at"}
     assert DOCUMENTED["rate_limits"] == {"ix_rate_limits_window_start"}
 

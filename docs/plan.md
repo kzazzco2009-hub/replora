@@ -396,12 +396,13 @@ Every foreign key is indexed. Every list query uses `(workspace_id, created_at D
 
 | Table | Key columns | Indexes |
 |---|---|---|
-| users | id, email (unique, lower-cased), password_hash, email_verified_at, locale, theme, timezone, mfa_secret_enc, deleted_at, created_at | `uq_users_email`, `ix_users_created_at`, `ix_users_deleted_at` |
+| users | id, email (unique, lower-cased), display_name, password_hash, email_verified_at, locale, theme, timezone, mfa_secret_enc, deleted_at, created_at | `uq_users_email`, `ix_users_created_at`, `ix_users_deleted_at` |
 | invitations | id, workspace_id, email, role, token_hash, invited_by, expires_at, accepted_at, revoked_at | `uq_invitations_token_hash`, `ix_invitations_ws_email`, `ix_invitations_expires_at`, `ix_invitations_invited_by` |
 | mfa_recovery_codes | id, user_id, code_hash, used_at | `ix_mfa_recovery_user_id` |
 | workspaces | id, name, owner_id, personal, created_at | `ix_workspaces_owner_id` |
 | memberships | id, workspace_id, user_id, role | `uq_memberships_ws_user (workspace_id,user_id)`, `ix_memberships_user_id` |
 | sessions | id, user_id, refresh_hash, expires_at, revoked_at, user_agent, ip_hash | `uq_sessions_refresh_hash`, `ix_sessions_user_id`, `ix_sessions_expires_at` |
+| used_refresh_tokens | id, session_id, token_hash, used_at | `uq_used_refresh_hash`, `ix_used_refresh_session_id` |
 | auth_tokens | id, user_id, kind (verify/reset), token_hash, expires_at, used_at | `uq_auth_tokens_hash`, `ix_auth_tokens_user_kind` |
 | files | id, workspace_id, uploaded_by, storage_key, display_name, detected_type, size, sha256, status, expires_at, created_at | `ix_files_ws_created (workspace_id,created_at)`, `ix_files_ws_sha256`, `ix_files_expires_at`, `ix_files_uploaded_by` |
 | artifacts | id, workspace_id, run_id, node_id, type, format, sha256, storage_key, lineage (JSON), created_at | `ix_artifacts_run_id`, `ix_artifacts_ws_created`, `ix_artifacts_sha256` |

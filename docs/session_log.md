@@ -472,6 +472,14 @@ PR **#94** (P4.7 and G4) and PR **#95** (contract: `Limits` depth and fan limits
 - **New `validation_codes` → `PASSWORD_BREACHED`.** The frontend's parity test on `main` allow-lists `validation_codes` exactly, and it is not on this stack's base. **When this PR is rebased onto `main`, add `"PASSWORD_BREACHED"` to `frontend/tests/unit/error-messages-parity.test.ts` in the same commit.**
 - **T5.1 and T5.2:** argon2id and salted; right and wrong passwords; NFKC; rehash on login; breached ignoring case; long English and Arabic passphrases accepted; API 422 codes; no password field on `User` or `Me`. Mutation checks: all 3 rules are caught.
 - `uv run pytest -q`: **1688 passed**. No drift, and pip-audit is clean.
+PR **#96** (stacked on #95).
+
+**P5.2 part 1: session and token logic** (`app/auth/tokens.py`, `app/auth/sessions.py`, migration `0002`; both test files failed first). `uv add pyjwt` locked 2.15.1.
+- **Access token:** a JWT, **HS256 pinned** (`none` and HS512 are refused), 15 minutes, carrying `sub` (user) and `sid` (session). Time is checked against the injected `now`, so PyJWT's wall-clock `iat` check is off. Malformed tokens, other keys and missing claims give None.
+- **Refresh token:** 256 random bits, and the DB keeps only its SHA‑256. `rotate` issues a new token on each use and moves the old hash into the new table `used_refresh_tokens`. **A used token seen again revokes the whole session (T5.4).** Revoked, expired (30 days) and unknown tokens don't refresh.
+- **Migration 0002:** `users.display_name` (NOT NULL, `server_default ''`, so existing users upgrade) and `used_refresh_tokens`. §6 is updated to 19 tables.
+- **Two bugs found and fixed.** Autogenerate added `display_name` as NOT NULL with no default, which would fail on a database that already has users; a test now upgrades one. Worse, **on SQLite a batch rebuild of `users` silently drops the expression index `uq_users_email`**, because reflection can't see it. 0002 now drops and recreates it around each rebuild, and a test checks case-insensitive uniqueness after every up and down. Mutation: without the guard, 3 tests fail. **Every future migration that rebuilds `users` must do the same.**
+- `uv run pytest -q`: **1714 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
