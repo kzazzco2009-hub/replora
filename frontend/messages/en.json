@@ -66,6 +66,9 @@
       "INVALID": "This value isn't valid."
     }
   },
+  "upload": {
+    "tooManyFiles": "That's more files than this run allows. Remove some and try again."
+  },
   "home": {
     "title": "Replora"
   },
