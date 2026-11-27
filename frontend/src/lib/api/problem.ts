@@ -5,7 +5,10 @@ export type Problem = components["schemas"]["ProblemDetails"];
 export class ApiError extends Error {
   readonly problem: Problem;
 
-  constructor(problem: Problem) {
+  constructor(
+    problem: Problem,
+    readonly retryAfter = "",
+  ) {
     super(problem.title);
     this.name = "ApiError";
     this.problem = problem;

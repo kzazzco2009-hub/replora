@@ -70,7 +70,7 @@ const errorMiddleware: Middleware = {
     } catch {
       problem = buildFallbackProblem(response);
     }
-    throw new ApiError(problem);
+    throw new ApiError(problem, response.headers.get("Retry-After") ?? "");
   },
 };
 

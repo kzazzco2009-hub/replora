@@ -84,6 +84,22 @@ export function useOperations() {
   });
 }
 
+export async function cancelRun(wsId: string, runId: string): Promise<Run> {
+  const { data } = await getApiClient().POST(
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/cancel",
+    { params: { path: { ws_id: wsId, run_id: runId } } },
+  );
+  if (!data) throw new Error("Missing cancelled run response");
+  return data;
+}
+
+export function progressErrorKey(error: unknown) {
+  if (!isApiError(error)) return "runProgress.requestFailed";
+  return error.problem.status === 429
+    ? "errors.problem.RATE_LIMITED"
+    : mapProblem(error.problem).messageKey;
+}
+
 export function runErrorMessages(error: unknown) {
   if (!isApiError(error)) return [{ messageKey: "runReview.requestFailed" }];
   if (error.problem.status === 429) {
