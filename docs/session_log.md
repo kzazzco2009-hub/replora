@@ -428,6 +428,15 @@ PR **#88** (stacked on #87).
 - Postgres runs come with P4.7.
 - `uv run pytest -q`: **1497 passed**. ruff is clean.
 
+PR **#89** (stacked on #88).
+
+**P4.5, workspace-scoped repositories** (`app/db/repos.py`, `tests/integration/test_repos.py`, `tests/unit/test_tenant_scoping_lint.py`; both failed first).
+- `scoped(model, workspace_id)`: tenant tables filter on their own `workspace_id`; child tables are joined to the parent's workspace. `get` returns None for another workspace's row (404). `page` is newest first, with a `(created_at, id)` keyset cursor.
+- **S‑14 lint:** no `select`, `update`, `delete` or `session.get` of a tenant model outside `scoped`. **S‑15 lint:** no `text()` built from an f-string, `%` or `.format()`. Each has probe cases. A `decisions.md` row records the choice of an AST lint over semgrep.
+- **T4.3:** for all 8 tenant and child tables, workspace A and B each see only their own rows, and a cross-workspace `get` gives None. SQL payloads are stored and matched as plain data.
+- Mutation checks: dropping the tenant filter, the child filter, the cursor direction, the order, or the scoping in `get` fails 1–14 tests.
+- `uv run pytest -q`: **1652 passed**. ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 
