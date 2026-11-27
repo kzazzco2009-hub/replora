@@ -69,11 +69,22 @@ class ProblemError(Exception):
     """Raise to answer with a problem+json response."""
 
     def __init__(
-        self, status: int, code: str, title: str, headers: dict[str, str] | None = None
+        self,
+        status: int,
+        code: str,
+        title: str,
+        headers: dict[str, str] | None = None,
+        errors: list[ProblemItem] | None = None,
     ) -> None:
         super().__init__(code)
-        self.problem = ProblemDetails(status=status, code=code, title=title)
+        self.problem = ProblemDetails(status=status, code=code, title=title, errors=errors)
         self.headers = headers
+
+
+def invalid(path: str, code: str, **params: Any) -> ProblemError:
+    """A 422 `VALIDATION_FAILED` about one request field, like the schema's own field errors."""
+    item = ProblemItem(path=path, code=code, params=params)
+    return ProblemError(422, "VALIDATION_FAILED", "Validation failed", errors=[item])
 
 
 def not_implemented() -> ProblemError:

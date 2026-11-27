@@ -84,8 +84,14 @@ class Draft(IdMixin, CreatedMixin, Base):
     created_by: Mapped[UUID | None] = _user_or_null()
     prompt: Mapped[str] = mapped_column(Text, default="")
     draft: Mapped[Json] = mapped_column(JsonDocument)
+    file_ids: Mapped[list[Json]] = mapped_column(JsonDocument, default=list)
+    """The files for the definition's inputs, in the same order (P8.1)."""
     plan_hash: Mapped[str] = mapped_column(String(64))
     planner: Mapped[str] = mapped_column(String(16))
+
+    __mapper_args__ = {"version_id_col": plan_hash, "version_id_generator": False}
+    """An update is `… WHERE plan_hash = <the one read>`, so of two concurrent edits from the same
+    version only one is written; the other raises `StaleDataError` (P8.9)."""
 
 
 class Run(IdMixin, CreatedMixin, Base):
