@@ -22,6 +22,12 @@ def enqueue(session: Session, kind: str, payload: dict[str, Any], run_at: dateti
     return job
 
 
+def finish(session: Session, job_id) -> None:
+    """The job is done; it is never claimed again."""
+    job = session.get(Job, job_id)
+    job.status, job.locked_until = "done", None
+
+
 def claim(sessions: sessionmaker[Session], now: datetime, lease: timedelta) -> Job | None:
     """Lease the oldest due job to this worker until `now + lease`, or None when none is due."""
     claimable = (Job.run_at <= now) & or_(
