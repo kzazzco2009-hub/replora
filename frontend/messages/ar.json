@@ -96,6 +96,16 @@
       "submitPending": "جارٍ تسجيل الدخول…",
       "createAccount": "إنشاء حساب",
       "forgotPassword": "نسيت كلمة المرور؟"
+    },
+    "mfa": {
+      "heading": "أدخل رمز التحقق",
+      "codeLabel": "رمز التحقق",
+      "recoveryLabel": "رمز الاسترداد",
+      "useRecovery": "استخدم رمز استرداد بدلاً من ذلك",
+      "useCode": "استخدم رمز التحقق بدلاً من ذلك",
+      "submit": "تحقق",
+      "submitPending": "جارٍ التحقق…",
+      "back": "العودة إلى تسجيل الدخول"
     }
   }
 }

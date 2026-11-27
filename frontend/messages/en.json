@@ -96,6 +96,16 @@
       "submitPending": "Signing in…",
       "createAccount": "Create an account",
       "forgotPassword": "Forgot your password?"
+    },
+    "mfa": {
+      "heading": "Enter your verification code",
+      "codeLabel": "Verification code",
+      "recoveryLabel": "Recovery code",
+      "useRecovery": "Use a recovery code instead",
+      "useCode": "Use your verification code instead",
+      "submit": "Verify",
+      "submitPending": "Verifying…",
+      "back": "Back to sign in"
     }
   }
 }
