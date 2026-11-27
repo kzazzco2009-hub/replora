@@ -772,6 +772,8 @@ export interface paths {
         /**
          * Update
          * @description Replace the whole definition. It is re-validated and gets a new `plan_hash`.
+         *
+         *     The planner's warnings were about its own choices, so the edited draft drops them.
          */
         patch: operations["drafts_update"];
         trace?: never;
