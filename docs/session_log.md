@@ -10,20 +10,20 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 1 — Core contracts (B1), Session 16.** `main` is at **`881de20`** (#60 P1.4), CI green, 491 passed. Developer A is the gate approver for G1.
+| Current phase | **Phase 2 — Registry and validator (B2), Session 16.** **G1 passed** 2026-11-26 (Developer A), on the condition that the Phase 1 stack merges. `main` is at **`881de20`** (#60), 491 passed. Developer A is the gate approver for G2.
 
-**Phase 1 steps:** 6/7. Merged: P1.1 #52, P1.2 #56 + #59, P1.3 #57, P1.4 #60. Open stack: **P1.5** #68 → **P1.5b** #69 → **P1.6** `feat/p1.6-json-schemas`. Tests 4/6 (T1.3–T1.6). Security 0/2.
+**Phase 1:** 7/7 steps, T1.1–T1.6, S‑10 and the Phase 1 part of S‑11 (T3.1 at G3). End-of-phase run on the top of the stack: 1101 backend + 186 frontend tests, no drift, no leaks.
 
-**Open PRs:** #68 (P1.5), #69 (P1.5b), and the P1.6 PR, stacked in that order. Frontend: #58, #61–#65, #67 approved by Developer A (theirs to merge); **#66** has a change request (numeric column alignment in RTL). |
-| Last gate passed | **G0** (2026-11-26, both developers, #1). |
-| Waiting on | **Frontend:** review #68 and the P1.5b PR (a contract change: `schema.d.ts`); fix #66; merge #58 and #61–#65; the #53/#54 follow-ups; the `CSRF_FAILED` retry; close #1.
+**Open backend stack (merge in this order, each rebased onto `main` after the one before):** #68 P1.5 → #69 P1.5b (contract) → #70 P1.6 (contract) → `feat/p1.7-model-audit` (P1.7, S‑10) → Phase 2 branches.
+
+**Frontend PRs:** #58, #61–#65, #67 approved by Developer A (theirs to merge); **#66** has a change request (numeric column alignment in RTL). |
+| Last gate passed | **G1** (2026-11-26, Developer A, `decisions.md`). Before it: G0. |
+| Waiting on | **Frontend:** review the stack #68, #69, #70 and the P1.7 PR (#69 and #70 change `schema.d.ts`); fix #66; merge their approved PRs; the #53/#54 follow-ups; close #1.
 
 **Developer A:** on this machine, `pre-commit install` and `git config --global user.email "143901646+khaledhagar@users.noreply.github.com"` (both blocked for Claude). |
-| Next step | 1) Merge #68, then the P1.5b PR (rebase it onto `main` first), after the frontend approves each.
-2) P1.5b is done in its PR (see the Session 16 log).
-3) P1.6 is done in its PR (contract change: `WorkflowDefinition` is typed now).
-4) **P1.7** audit (T1.1, T1.2 for every model), **S‑10** (semgrep ban in CI), **S‑11**, then the end-of-phase test run and **G1**.
-5) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). Not Phase 1. |
+| Next step | 1) **Phase 2** (P2.1–P2.6, T2.*, S‑12): the `OperationRegistry`, then the DAG validator checks, one PR per step, stacked on the P1.7 PR.
+2) Merge the Phase 1 stack as the frontend approves it.
+3) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
 1. `git fetch --all --prune; git switch main; git pull --ff-only` (if a log PR is still open, switch to its branch and pull). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`. Once per clone: `pre-commit install`.
@@ -45,7 +45,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Phase | Steps | Tests | Security | Gate approved |
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
-| 1 Contracts | 6/7 | 4/6 | 0/2 | ☐ |
+| 1 Contracts | 7/7 | 6/6 | 2/2 (S‑11 re-checked at G3) | ☑ G1 2026-11-26 (Developer A; stack merging) |
 | 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
@@ -164,7 +164,30 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **TDD:** `test_domain_schemas.py` was red first (no `app.export_schemas`), then **60 passed**: drift, schema ↔ fixture file parity, each schema is valid draft 2020-12, valid cases pass the schema and round-trip (dict and JSON, T1.1), invalid cases fail the schema and the model, backend-only cases pass the schema and fail the model (T1.6).
 - **The tests bite:** a typo in a valid fixture's `code` fails 1; `additionalProperties: true` in a committed schema fails the drift test. Restored, 60 pass.
 - Checks: ruff clean, **856 passed**, both drift checks exit 0, frontend typecheck, format and 186 tests pass.
-- **P1.6 and T1.6 ticked.**
+- **P1.6 and T1.6 ticked.** Opened as **#70** (base #69). Answered the frontend's question on #67 (7200812426): their copy for the four client-bug codes and `PRECONDITION_FAILED` matches `error-codes.json`.
+
+**P1.7, S‑10, S‑11** (branch `feat/p1.7-model-audit`, stacked on #70):
+- **`test_model_audit.py` (T1.2):** walks the `app` package and audits **every** Pydantic model it finds (96, so a new model is audited without being listed): `extra="forbid"` and `frozen=True`. It was **red first: 78 failed** (every API body lacked `frozen`, and `Health` was a plain `BaseModel`).
+- Fix: `ApiModel` is now `ConfigDict(extra="forbid", frozen=True)`, and `Health` is an `ApiModel`. The only contract change is `additionalProperties: false` on `Health`. `schema.d.ts` is unchanged.
+- **T1.1:** every golden fixture round-trips (P1.6), as do the per-module round-trip tests of P1.1–P1.3.
+- **S‑10:** `test_no_code_execution.py`, an AST scan of `app/` (no semgrep; see `decisions.md` 2026-11-26). A probe showed ruff's banned-api misses `compile()` and `__import__()`. The scan has 14 probe cases, one per banned form. The first run flagged `from importlib.metadata import version` (`main.py`, `health.py`), which only reads the package version, so `importlib.metadata` is allow-listed. A probe file `app/_s10_probe.py` with `eval("1")` fails the scan; removed, it passes.
+- **S‑11 (Phase 1 part):** T1.3 and T1.4 pass; `approve` and `resolve` need the `plan_hash` the user saw; `Run` has `approved_by` and `approved_at`. Storing and checking the approver is **T3.1**, so S‑11 is re-verified at G3 (`security.md`).
+- **P1.7, T1.1, T1.2 and S‑10 ticked.**
+
+**End-of-phase run (Phase 1), on `feat/p1.7-model-audit` (the top of the stack):**
+| Check | Result |
+|---|---|
+| `uv run ruff check .` · `ruff format --check .` | clean · 62 files |
+| `uv run pytest -q` | **1101 passed** |
+| Phase 1 tests only (`test_core_*`, `test_plan_hash`, `test_run_state`, `test_domain_schemas`, `test_model_audit`, `test_no_code_execution`) | **691 passed** |
+| `export_openapi --check` · `export_schemas --check` | exit 0 · exit 0 |
+| `uv run pip-audit` | no known vulnerabilities |
+| `pnpm gen:api` + `git diff --exit-code schema.d.ts` | no drift |
+| frontend lint · format:check · typecheck · test · build | clean · clean · clean · **186 passed** · built |
+| `pnpm audit --audit-level=high` | no known vulnerabilities |
+| `gitleaks git .` | no leaks found |
+
+**Gate G1: approved by Developer A** (the gate approver for backend gates), in this session's instructions: finish Phase 1 and then continue into Phase 2 without stopping for permission. **Condition:** the stack #68 → #69 → #70 → the P1.7 PR merges with the frontend's review (contract changes in #69 and #70). Phase 2 work is stacked on top until then. Recorded in `decisions.md`.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.

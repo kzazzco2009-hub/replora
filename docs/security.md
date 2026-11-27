@@ -38,9 +38,13 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 - [x] **S‑05:** CODEOWNERS and the PR template are in. The repo is public (2026-11-26), and the admin applied `.github/rulesets/main.json` as ruleset `main` (id 28143100, active, no bypass). `gh api repos/kzazzco2009-hub/replora/rules/branches/main` shows `deletion`, `non_fast_forward`, `pull_request` (1 approval, stale approvals dismissed, squash only) and `required_status_checks` (the 3 CI jobs). Squash is the only merge method. Secret scanning with push protection, Dependabot alerts and fork-PR approval were turned on by the admin (#1, 7185394516).
 
 ## Phase 1–3 — Core engine (secure by design)
+**Phase 1 status** (the evidence is in `session_log.md`, Session 16):
+- [x] **S‑10:** `test_no_code_execution.py` parses every file in `app/` and fails on `eval`, `exec`, `compile`, `__import__`, `breakpoint`, the `pickle`/`dill`/`marshal`/`shelve`/`importlib`/`runpy`/`code` modules (only `importlib.metadata` is allowed, for the version), and `import_module`/`load_module`/`exec_module`. 14 probe cases show each form is caught. Ruff's `S` rules also flag `eval`, `exec` and `pickle`. Every workflow model is closed (`extra="forbid"`, T1.2), so no field like `code` gets in.
+- [x] **S‑11 (Phase 1 part):** `plan_hash` is the canonical SHA‑256 (T1.3, T1.4). `approve` and `resolve` both need the `plan_hash` the user saw, and `resolve` leads to a new hash that must be approved again (P1.5 table). `Run` has `approved_by` and `approved_at`. **Storing and checking them is T3.1 (Phase 3)**, so S‑11 is re-verified at G3.
+
 | ID | Control | Implementation | Verify |
 |---|---|---|---|
-| S‑10 | **No arbitrary code execution** | Only registered operations run. There is no `eval`, `exec` or `pickle`, and no dynamic imports from user or AI data. A semgrep rule bans those calls in `app/`. | semgrep in CI |
+| S‑10 | **No arbitrary code execution** | Only registered operations run. There is no `eval`, `exec` or `pickle`, and no dynamic imports from user or AI data. An AST scan of `app/` bans those calls and imports (`backend/tests/unit/test_no_code_execution.py`; decision 2026-11-26). | AST scan in CI (pytest) |
 | S‑11 | Approval integrity | Approval is bound to `plan_hash` (canonical SHA‑256). Any change invalidates it. The approver ID and time are stored. | T1.3, T1.4, T3.1 |
 | S‑12 | Resource-exhaustion limits in the validator | Limits on nodes, depth, fan-in and fan-out, file counts and sizes are enforced **before** execution. | T2.5 |
 | S‑13 | Execution limits | Node timeout of 120 s and run timeout of 900 s, a memory guard and a temp-dir quota (500 MiB). Retries happen only for transient errors (at most 2). | T3.4, T17.6 |

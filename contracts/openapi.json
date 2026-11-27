@@ -7293,6 +7293,7 @@
             "title": "Version"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "status",
