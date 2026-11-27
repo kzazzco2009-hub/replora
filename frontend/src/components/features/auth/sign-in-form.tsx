@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/routing";
 import { getApiClient } from "@/lib/api/client";
-import { mapProblem } from "@/lib/api/error-messages";
+import { mapProblem, PROBLEM_MESSAGE_KEYS } from "@/lib/api/error-messages";
 import { mapFieldErrors } from "@/lib/api/field-errors";
 import { isApiError } from "@/lib/api/problem";
 import { meQueryKey } from "@/lib/api/use-me";
@@ -64,7 +64,10 @@ export function SignInForm() {
   } | null =
     apiError && apiError.problem.code !== "VALIDATION_FAILED"
       ? mapProblem(apiError.problem)
-      : (fieldErrors?.form[0] ?? null);
+      : (fieldErrors?.form[0] ??
+        (searchParams.get("challengeExpired") === "1"
+          ? { messageKey: PROBLEM_MESSAGE_KEYS.MFA_CHALLENGE_INVALID }
+          : null));
 
   function fieldMessage(name: string) {
     const field = fieldErrors?.fields[name];

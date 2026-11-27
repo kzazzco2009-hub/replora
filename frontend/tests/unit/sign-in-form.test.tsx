@@ -77,6 +77,15 @@ describe.each(["ltr", "rtl"] as const)("SignInForm (dir=%s)", (dir) => {
 });
 
 describe("SignInForm behavior", () => {
+  it("shows the expired-challenge message when sent back from the MFA step", () => {
+    searchParams = new URLSearchParams("challengeExpired=1");
+    renderForm();
+
+    expect(screen.getByRole("alert").textContent).toContain(
+      "This sign-in attempt has expired",
+    );
+  });
+
   it.each([
     ["returnTo=%2Fen%2Fdashboard", "/en/dashboard"],
     ["returnTo=https://evil.com", "/en"],

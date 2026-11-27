@@ -25,6 +25,8 @@ describe("safeReturnTo", () => {
     expect(safeReturnTo("/en/verify-email", "en")).toBeNull();
     expect(safeReturnTo("/en/forgot-password", "en")).toBeNull();
     expect(safeReturnTo("/en/reset-password", "en")).toBeNull();
+    expect(safeReturnTo("/en/mfa", "en")).toBeNull();
+    expect(safeReturnTo("/en/mfa?x=1", "en")).toBeNull();
   });
 
   it.each([
