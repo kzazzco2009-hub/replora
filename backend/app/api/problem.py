@@ -68,9 +68,12 @@ class ProblemDetails(ApiModel):
 class ProblemError(Exception):
     """Raise to answer with a problem+json response."""
 
-    def __init__(self, status: int, code: str, title: str) -> None:
+    def __init__(
+        self, status: int, code: str, title: str, headers: dict[str, str] | None = None
+    ) -> None:
         super().__init__(code)
         self.problem = ProblemDetails(status=status, code=code, title=title)
+        self.headers = headers
 
 
 def not_implemented() -> ProblemError:
@@ -122,7 +125,7 @@ def install(app: FastAPI) -> None:
 
 
 async def _handle_problem(_: Request, error: ProblemError) -> JSONResponse:
-    return _problem_response(error.problem)
+    return _problem_response(error.problem, error.headers)
 
 
 async def _handle_validation(_: Request, error: RequestValidationError) -> JSONResponse:

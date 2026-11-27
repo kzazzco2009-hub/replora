@@ -44,9 +44,10 @@ from app.api.v1.auth_models import (
     User,
 )
 from app.api.v1.workspace_models import Workspace
-from app.auth import accounts, one_time, sessions
+from app.auth import accounts, audit, limits, one_time, sessions
 from app.auth.mail import compose
 from app.auth.passwords import hash_password
+from app.auth.tokens import digest
 from app.db import models as m
 
 router = APIRouter(prefix="/auth", tags=["auth"], responses=ERROR_RESPONSES)
@@ -64,10 +65,17 @@ def register(body: RegisterRequest, request: Request) -> None:
 
     A new address gets the verification email; an existing account gets a notice email instead.
     """
+    ip = client_ip(request)
     with database(request).begin() as session:
-        user, created = accounts.register(
-            session, body.email, body.password, body.display_name, body.locale
-        )
+        if (limited := limits.over(session, limits.REGISTER, [ip], now(request))) is None:
+            limits.hit(session, limits.REGISTER, ip, now(request))
+            user, created = accounts.register(
+                session, body.email, body.password, body.display_name, body.locale
+            )
+            audit.record(session, "auth.register", user.id, ip_hash=ip)
+    if limited is not None:
+        raise limited
+    with database(request).begin() as session:
         if created:
             token = one_time.issue(session, user, "verify", now(request))
             message = compose(
@@ -82,12 +90,24 @@ def register(body: RegisterRequest, request: Request) -> None:
 @router.post("/login")
 def login(body: LoginRequest, request: Request, response: Response) -> User | MfaRequired:
     """Start a session, or return `mfa_required` with a challenge cookie."""
+    ip, account = client_ip(request), digest(accounts.normal_email(body.email))
     with database(request).begin() as session:
-        user = accounts.authenticate(session, body.email, body.password)
-        if user is None:
-            raise ProblemError(401, "INVALID_CREDENTIALS", "Invalid credentials")
-        agent = request.headers.get("user-agent")
-        row, refresh_token = sessions.start(session, user.id, now(request), user_agent=agent)
+        limited = limits.over(session, limits.LOGIN, [ip, account], now(request))
+        user = None if limited else accounts.authenticate(session, body.email, body.password)
+        if limited is None and user is None:
+            for subject in (ip, account):
+                limits.hit(session, limits.LOGIN, subject, now(request))
+            known = accounts.find_user(session, body.email)
+            audit.record(session, "auth.login_failed", known.id if known else None, ip_hash=ip)
+        if user is not None:
+            agent = request.headers.get("user-agent")
+            row, refresh_token = sessions.start(session, user.id, now(request), user_agent=agent,
+                                                ip_hash=ip)  # fmt: skip
+            audit.record(session, "auth.login", user.id, ip_hash=ip)
+    if limited is not None:
+        raise limited
+    if user is None:
+        raise ProblemError(401, "INVALID_CREDENTIALS", "Invalid credentials")
     set_session_cookies(request, response, row, refresh_token)
     issue_csrf(request, response)
     return to_user(user)
@@ -103,6 +123,7 @@ def logout(request: Request, response: Response) -> None:
     if signed_in is not None:
         with database(request).begin() as session:
             sessions.revoke(session, signed_in.session_id, now(request))
+            audit.record(session, "auth.logout", signed_in.user.id, ip_hash=client_ip(request))
     clear_session_cookies(response)
     issue_csrf(request, response)
 
@@ -157,13 +178,19 @@ def verify_email(body: TokenRequest, request: Request) -> None:
 @router.post("/password/forgot", status_code=202)
 def forgot_password(body: EmailRequest, request: Request) -> None:
     """Send a reset email if the account exists. Always 202 (no enumeration)."""
+    ip, message = client_ip(request), None
     with database(request).begin() as session:
-        user = accounts.find_user(session, body.email)
-        if user is None or user.deleted_at is not None:
-            return Response(status_code=202)  # type: ignore[return-value]
-        token = one_time.issue(session, user, "reset", now(request))
-        message = compose(user.email, "reset", user.locale, link(request, "reset-password", token))
-    request.app.state.mailer.send(message)
+        if (limited := limits.over(session, limits.FORGOT, [ip], now(request))) is None:
+            limits.hit(session, limits.FORGOT, ip, now(request))
+            user = accounts.find_user(session, body.email)
+            if user is not None and user.deleted_at is None:
+                token = one_time.issue(session, user, "reset", now(request))
+                page = link(request, "reset-password", token)
+                message = compose(user.email, "reset", user.locale, page)
+    if limited is not None:
+        raise limited
+    if message is not None:
+        request.app.state.mailer.send(message)
     return Response(status_code=202)  # type: ignore[return-value]
 
 
@@ -177,6 +204,7 @@ def reset_password(body: ResetPasswordRequest, request: Request) -> None:
             raise token_invalid()
         user.password_hash = hash_password(body.password)
         one_time.revoke_all_sessions(session, user, now(request))
+        audit.record(session, "auth.password_reset", user.id, ip_hash=client_ip(request))
 
 
 @router.post("/mfa/enroll")
@@ -240,3 +268,9 @@ def token_invalid() -> ProblemError:
 
 def link(request: Request, page: str, token: str) -> str:
     return f"{request.app.state.settings.app_url}/{page}?token={token}"
+
+
+def client_ip(request: Request) -> str:
+    """The caller's IP as an HMAC: it can be counted and compared, never read back."""
+    host = request.client.host if request.client else "unknown"
+    return limits.ip_hash(host, request.app.state.jwt_key)
