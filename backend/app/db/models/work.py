@@ -116,6 +116,12 @@ class Run(IdMixin, CreatedMixin, Base):
     approved_by: Mapped[UUID | None] = _user_or_null()
     approved_at: Mapped[datetime | None]
     idempotency_key: Mapped[str | None] = mapped_column(String(128))
+    approve_key: Mapped[str | None] = mapped_column(String(36))
+    """The `Idempotency-Key` of the approval, so a retried approve answers the same (P8.4)."""
+    file_ids: Mapped[list[Json]] = mapped_column(JsonDocument, default=list)
+    """The files for the definition's inputs, in order (copied from the draft)."""
+    definition: Mapped[Json | None] = mapped_column(JsonDocument)
+    """The plan as created, pinned: a draft can still be edited after its run exists."""
     issues: Mapped[list[Json]] = mapped_column(JsonDocument, default=list)
     finished_at: Mapped[datetime | None]
 
@@ -167,6 +173,7 @@ class RunEvent(IdMixin, CreatedMixin, Base):
     run_id: Mapped[UUID] = mapped_column(ForeignKey("runs.id", ondelete="CASCADE"))
     seq: Mapped[int]
     type: Mapped[str] = mapped_column(String(32))
+    node_id: Mapped[str | None] = mapped_column(String(64))
     payload: Mapped[Json] = mapped_column(JsonDocument)
 
 

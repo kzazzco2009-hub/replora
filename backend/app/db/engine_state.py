@@ -17,7 +17,7 @@ from app.core.draft import WorkflowDraft
 from app.core.engine.executor import Done, NodeKey
 from app.core.engine.run import Approval, Run
 from app.core.engine.store import Data, new_ref
-from app.core.run_state import RunState
+from app.core.run_state import TERMINAL_STATES, RunState
 from app.core.validation import Issue
 from app.core.workflow import WorkflowDefinition
 from app.db import models as m
@@ -111,9 +111,16 @@ def save_run(
                         workflow_version_id=workflow_version_id, draft_id=draft_id,
                         created_at=run.created_at)  # fmt: skip
             session.add(row)
-        row.state, row.state_since = run.state.value, run.state_since
-        if run.approval is not None:
-            row.approved_by, row.approved_at = run.approval.by, run.approval.at
+        apply(row, run)
+
+
+def apply(row: m.Run, run: Run) -> None:
+    """Copy the engine run's state and approval onto its row."""
+    row.state, row.state_since = run.state.value, run.state_since
+    if run.approval is not None:
+        row.approved_by, row.approved_at = run.approval.by, run.approval.at
+    if run.state in TERMINAL_STATES:
+        row.finished_at = run.state_since
 
 
 def load_run(session: Session, workspace_id: UUID, run_id: UUID) -> Run:
@@ -130,6 +137,8 @@ def load_run(session: Session, workspace_id: UUID, run_id: UUID) -> Run:
 
 
 def _definition(session: Session, workspace_id: UUID, row: m.Run) -> WorkflowDefinition:
+    if row.definition is not None:
+        return WorkflowDefinition.model_validate(row.definition)
     if row.workflow_version_id is not None:
         version = get(session, m.WorkflowVersion, workspace_id, row.workflow_version_id)
         return WorkflowDefinition.model_validate(version.definition)
