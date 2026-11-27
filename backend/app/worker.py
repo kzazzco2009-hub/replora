@@ -11,6 +11,7 @@ and runs the node again: nothing was recorded for it. A failed node is not recor
 each later step meets it again (it fails the same way) on the way to the next node.
 """
 
+import logging
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
@@ -31,11 +32,14 @@ from app.db.engine_state import DbArtifactStore, DbLedger, apply, load_run
 from app.db.jobs import claim, enqueue, finish
 from app.db.repos import get, scoped
 from app.db.run_events import emit
+from app.housekeeping import EVERY, housekeep
+from app.observability import configure_logging
 from app.ops.registry import HANDLERS, REGISTRY
 from app.storage.local import LocalStorage
 
 LEASE = timedelta(minutes=5)
 ACTIVE = {RunState.QUEUED, RunState.RUNNING, RunState.CANCEL_REQUESTED}
+logger = logging.getLogger(__name__)
 
 
 class _Stepped(BaseException):
@@ -142,10 +146,16 @@ def work_once(sessions: sessionmaker[Session], storage, clock=lambda: datetime.n
 
 
 def main() -> None:
+    configure_logging()
     settings = Settings()
     sessions = make_sessions(make_engine(settings.database_url))
     storage = LocalStorage(settings.data_dir / "storage", "worker: never signs")
+    due = datetime.now(UTC)
     while True:
+        at = datetime.now(UTC)
+        if at >= due:
+            logger.info("housekeeping %s", housekeep(sessions, storage, settings, at))
+            due = at + EVERY
         if not work_once(sessions, storage):
             time.sleep(1)
 
