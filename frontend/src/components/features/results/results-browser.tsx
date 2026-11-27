@@ -8,13 +8,17 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusChip } from "@/components/ui/status-chip";
-import { Table, type TableColumn } from "@/components/ui/table";
+import {
+  Table,
+  type TableColumn,
+  type TableRowData,
+} from "@/components/ui/table";
 import { Tabs } from "@/components/ui/tabs";
 import {
   isResultStatus,
@@ -24,6 +28,7 @@ import {
   type OutputArtifact,
   type OutputLocation,
 } from "@/lib/api/results";
+import { RowLineage } from "./row-lineage";
 
 const LIMIT = 100;
 const icons = {
@@ -50,6 +55,11 @@ function Preview({ location }: { location: OutputLocation }) {
   const searchId = useId();
   const params = useSearchParams();
   const urlKey = params.toString();
+  const [inspection, setInspection] = useState<{
+    query: string;
+    row: number;
+  } | null>(null);
+  const opener = useRef<HTMLButtonElement | null>(null);
   const q = params.get("q") ?? "";
   const status = params.get("status");
   const offsetValue = Number(params.get("offset") ?? 0);
@@ -83,11 +93,29 @@ function Preview({ location }: { location: OutputLocation }) {
       numeric: ["integer", "decimal", "date"].includes(column.type),
     })),
     { key: "status", header: t("results.status") },
+    { key: "actions", header: t("results.lineage.actions") },
   ];
-  const rows = (page?.rows ?? []).map((row) => ({
+  const rows: TableRowData[] = (page?.rows ?? []).map((row) => ({
     id: String(row.row),
+    onClick: (event) => {
+      if (event.target instanceof Element && !event.target.closest("button"))
+        event.currentTarget.querySelector<HTMLButtonElement>("button")?.click();
+    },
     cells: {
       number: row.row,
+      actions: (
+        <Button
+          variant="secondary"
+          className="min-w-11"
+          aria-label={t("results.lineage.openRow", { row: String(row.row) })}
+          onClick={(event) => {
+            opener.current = event.currentTarget;
+            setInspection({ query: urlKey, row: row.row });
+          }}
+        >
+          {t("results.lineage.open")}
+        </Button>
+      ),
       ...Object.fromEntries(
         row.cells.map((cell, index) => [
           `field-${index}`,
@@ -200,6 +228,16 @@ function Preview({ location }: { location: OutputLocation }) {
             content,
           };
         })}
+      />
+      <RowLineage
+        location={location}
+        row={inspection?.query === urlKey ? inspection.row : null}
+        onClose={() => setInspection(null)}
+        restoreFocus={() => {
+          const fallback = document.getElementById(searchId);
+          (opener.current?.isConnected ? opener.current : fallback)?.focus();
+          opener.current = null;
+        }}
       />
     </div>
   );

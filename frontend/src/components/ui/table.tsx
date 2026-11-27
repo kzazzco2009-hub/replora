@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from "react";
+import { useId, type MouseEvent, type ReactNode } from "react";
 
 export interface TableColumn<K extends string = string> {
   key: K;
@@ -17,6 +17,7 @@ export interface TableColumn<K extends string = string> {
 export interface TableRowData<K extends string = string> {
   id: string;
   cells: Record<K, ReactNode>;
+  onClick?: (event: MouseEvent<HTMLTableRowElement>) => void;
 }
 
 export interface TableProps<K extends string = string> {
@@ -107,7 +108,7 @@ export function Table<K extends string = string>({
             </tr>
           ) : (
             rows.map((row) => (
-              <tr key={row.id}>
+              <tr key={row.id} onClick={row.onClick}>
                 {columns.map((column, index) => {
                   const className = `border-b border-line px-3 py-2 ${ALIGN_CLASS[columnAlign(column)]} ${sticky && index === 0 ? "sticky start-0 z-10 bg-surface" : ""}`;
                   const content = row.cells[column.key];
