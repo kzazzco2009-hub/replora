@@ -6,7 +6,7 @@ hash still matches its definition, so any change to the plan after approval inva
 """
 
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import UUID, uuid7
 
 from app.core.model import ContractModel
 from app.core.plan_hash import plan_hash
@@ -39,7 +39,7 @@ class Run(ContractModel):
 
 
 def new_run(definition: WorkflowDefinition, now: datetime) -> Run:
-    return Run(id=uuid4(), definition=definition, created_at=now)
+    return Run(id=uuid7(), definition=definition, created_at=now)
 
 
 def transition(run: Run, action: RunAction) -> Run:

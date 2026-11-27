@@ -266,6 +266,16 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 | `export_openapi --check` · `export_schemas --check` | exit 0 · exit 0 |
 | `gitleaks git .` | no leaks found |
 
+PR **#77** (stacked on #75).
+
+**P3.3, the in-memory executor** (`app/core/engine/executor.py`, `store.py`, `tests/unit/test_engine_executor.py`; TDD: collection failed first).
+- `topological_order` is Kahn's algorithm. When several nodes are ready, the one listed first in the definition goes first, so the order is stable.
+- `execute` starts the run, so the approval is checked, then runs each node through its handler (keyed by `(op id, version)`). Every output goes into the `ArtifactStore` with its SHA‑256 and its lineage: run, node, operation and parent artifacts. The run ends `SUCCEEDED`.
+- Run and artifact IDs are UUIDv7 (`uuid.uuid7`, Python 3.14).
+- **T3.2:** a diamond graph (fan-out a→b,c and fan-in b,c→d, listed out of order) runs as `a, c, b, d`, with each node run once. The tests check content, hash, lineage, input feeding, and that an unapproved run doesn't execute.
+- Mutation checks: reversing the tie-break, dropping the parents, skipping `START`, or ignoring the indegree each fails 1–3 tests.
+- `uv run pytest -q`: **1360 passed**. ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 
