@@ -648,6 +648,15 @@ PR **#112** (stacked on #111). Phase 6 summary sent to the frontend (#1, 7210626
 - **JSON:** an array of objects. Nested objects become dotted columns, lists stay JSON text, and number text is kept exactly. **Mixed key sets become the union and are reported** (`JSON_KEYS_MIXED`). Not an array, empty, duplicate key and depth over 10 each fail with a code.
 - **ZIP:** `extract_member(path)` adds `member` to the lineage; a missing member gives `ZIP_MEMBER_MISSING` with the paths found.
 - **T7.5 and T7.7** pass. `uv run pytest -q`: **2297 passed**.
+PR **#113** (stacked on #112). (The P7.1 entry's count was wrong: the full run then was **2312 passed**.)
+
+**P7.2 part 1, normalize and compare** (`app/ops/numbers.py`, `dates.py`, `normalize.py`, `compare.py`; collection failed first).
+- **Numbers (P7.5):** `Decimal` only. `1,234.50` and `1.234,50` (the last mark is the decimal); `12,5`; Arabic-Indic and Persian digits and the Arabic separators; `(100)` is negative; empty and `NaN` are missing; anything else is `ValueError`. `0.1 + 0.2 == 0.3`.
+- **Dates (P7.5):** ISO, or day/month/year with the order **proven by the column** (a first part over 12 means DMY, a second over 12 means MDY). An all-ambiguous column returns the choice `["DMY", "MDY"]` instead of guessing; `date_orders` answers it.
+- **`normalize`:** key trim and case; number and date columns; it reports `NUMBER_INVALID` (with rows), `DATE_AMBIGUOUS` (with options) and `DATE_INVALID`; an absent column gives `COLUMN_MISSING`.
+- **`compare`:** key and value with a Decimal `tolerance` (exact by default). Outcomes: matched, value_diff, missing_right, missing_left, with the difference and both rows' lineage. **A key duplicated on either side lists every occurrence as `duplicate_key`** and gives the `KEY_DUPLICATED` warning (T7.9). The summary has the four contract counts.
+- **T7.6, T7.9, T7.10 and T7.11** pass. Mutation checks: both sides' duplicates (the right side survived at first and is now tested), the tolerance boundary, the ambiguity, the decimal mark and the sign are all caught.
+- `uv run pytest -q`: **2356 passed**.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
