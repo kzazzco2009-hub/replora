@@ -657,6 +657,13 @@ PR **#113** (stacked on #112). (The P7.1 entry's count was wrong: the full run t
 - **`compare`:** key and value with a Decimal `tolerance` (exact by default). Outcomes: matched, value_diff, missing_right, missing_left, with the difference and both rows' lineage. **A key duplicated on either side lists every occurrence as `duplicate_key`** and gives the `KEY_DUPLICATED` warning (T7.9). The summary has the four contract counts.
 - **T7.6, T7.9, T7.10 and T7.11** pass. Mutation checks: both sides' duplicates (the right side survived at first and is now tested), the tolerance boundary, the ambiguity, the decimal mark and the sign are all caught.
 - `uv run pytest -q`: **2356 passed**.
+PR **#114** (stacked on #113).
+
+**P7.2 part 2 and P7.3, the outputs** (`app/ops/outputs.py`, `tests/unit/test_outputs.py`).
+- `report_csv`: key, status, both values, the difference, then **each side's file, member and row, plus the operations each row went through**. UTF‑8 **with a BOM** by default, plain UTF‑8 as an option, Arabic kept. `summary_json` is sorted with no timestamps. `bundle_zip` uses fixed ZIP dates, so it is **byte-identical** every time. `map_columns` renames, refusing a missing or clashing name.
+- **S‑37:** `escape_cell` prefixes `'` to cells starting with `= + - @`, tab or CR, **except plain numbers** (`-10`). The `decisions.md` row gives the reason.
+- **T7.8 and T7.12** pass (the Excel check is manual and is logged with the acceptance run). Mutation checks: the number exception, tab and CR, and the default BOM are caught.
+- **P7.2 and P7.3 are done.** `uv run pytest -q`: **2372 passed**.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

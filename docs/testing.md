@@ -164,14 +164,14 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [x] T7.5 CSV: UTF‑8 with BOM, UTF‑16, Windows‑1256 (Arabic), `;` and tab delimiters, quoted newlines, ragged rows (reported), an empty file, header only, and duplicate headers.
 - [x] T7.6 Numbers: `1,234.50`, `1.234,50`, Arabic-Indic digits `١٢٣`, negatives `(100)`, empty and NaN values.
 - [x] T7.7 JSON: not an array, nested objects (flatten rule), mixed key sets, very deep nesting (limit), a duplicate key.
-- [ ] T7.8 **CSV formula injection:** cells starting with `= + - @ \t \r` are escaped in the outputs.
+- [x] T7.8 **CSV formula injection:** cells starting with `= + - @ \t \r` are escaped in the outputs.
 - [x] T7.9 Duplicate keys on one side are reported, never silently dropped.
 - [x] T7.10 Decimal comparison:
   - `0.1 + 0.2` vs `0.3` is matched (no float error);
   - a tolerance of `0.01` turns `100.004` vs `100.00` into matched;
   - the default tolerance is exact.
 - [x] T7.11 Dates: an ambiguous `03/04/2026` column makes the run NEEDS_REVIEW with a format choice, while ISO and unambiguous dates (`25/04/2026`) parse without review.
-- [ ] T7.12 Output CSV with Arabic text starts with the UTF‑8 BOM and opens correctly in Excel (manual check logged). The plain UTF‑8 option has no BOM.
+- [x] T7.12 Output CSV with Arabic text starts with the UTF‑8 BOM and opens correctly in Excel (manual check logged). The plain UTF‑8 option has no BOM.
 
 ## Phase 8 — API and worker
 **Functional**
