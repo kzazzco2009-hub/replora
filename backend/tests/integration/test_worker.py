@@ -8,6 +8,7 @@ import pytest
 from sqlalchemy import select
 from web import signed_in, upload
 
+from app.api.v1.run_models import RunEvents
 from app.db import models as m
 from app.db.jobs import claim
 from app.worker import LEASE, work_once
@@ -68,6 +69,11 @@ def test_the_events_trace_the_run(web):
         ("node_finished", "compare"), ("node_finished", "report"),
         ("state_changed", "SUCCEEDED"),
     ]  # fmt: skip
+    parsed = RunEvents.model_validate(get(web, run, "/events")).events
+    assert [e.seq for e in parsed] == list(range(1, len(events) + 1))
+    assert {type(e.payload).__name__ for e in parsed} == {
+        "StateChangedPayload", "NodeFinishedPayload",
+    }  # fmt: skip
 
 
 def test_a_job_whose_worker_died_is_done_by_another_after_the_lease(web):

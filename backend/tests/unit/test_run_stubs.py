@@ -145,9 +145,36 @@ def test_run_schemas_match_contract(schemas):
     assert set(schemas["RunSummary"]["properties"]) == {
         "id", "state", "title", "created_at", "finished_at", "summary",
     }  # fmt: skip
-    assert set(schemas["RunEvent"]["properties"]) == {
-        "seq", "type", "node_id", "payload", "created_at",
-    }  # fmt: skip
-    assert schemas["RunEvent"]["properties"]["type"]["enum"] == [
-        "state_changed", "node_started", "node_finished", "warning",
-    ]  # fmt: skip
+
+
+EVENTS = {
+    "state_changed": ("StateChangedEvent", "StateChangedPayload", {"state"}),
+    "node_finished": ("NodeFinishedEvent", "NodeFinishedPayload", {"warnings"}),
+    "warning": ("WarningEvent", "WarningPayload", {"issue"}),
+}
+
+
+def test_run_event_is_a_union_discriminated_by_type(schemas):
+    union = schemas["RunEvent"]
+    refs = union["discriminator"]["mapping"]
+    mapping = {kind: ref.rsplit("/", 1)[1] for kind, ref in refs.items()}
+
+    assert union["discriminator"]["propertyName"] == "type"
+    assert mapping == {kind: names[0] for kind, names in EVENTS.items()}
+    for kind, (event, payload, fields) in EVENTS.items():
+        assert set(schemas[event]["properties"]) == {
+            "seq", "type", "node_id", "payload", "created_at",
+        }  # fmt: skip
+        assert schemas[event]["properties"]["type"]["const"] == kind
+        assert schemas[event]["properties"]["payload"]["$ref"].endswith(f"/{payload}")
+        assert set(schemas[payload]["properties"]) == set(schemas[payload]["required"]) == fields
+
+
+def test_a_finished_node_event_names_its_node(schemas):
+    node_id = schemas["NodeFinishedEvent"]["properties"]["node_id"]
+
+    assert node_id["type"] == "string"
+    assert "node_id" in schemas["NodeFinishedEvent"]["required"]
+    assert schemas["StateChangedPayload"]["properties"]["state"] == {
+        "$ref": "#/components/schemas/RunState"
+    }

@@ -25,6 +25,7 @@ from app.api.v1 import run_models as api
 from app.api.v1.drafts import checked
 from app.api.v1.outputs import summary
 from app.api.v1.run_models import (
+    EVENT,
     ApproveRequest,
     ResolveRequest,
     RunEvents,
@@ -242,8 +243,9 @@ def get_run_events(
         query = scoped(m.RunEvent, ws_id).where(m.RunEvent.run_id == run_id,
                                                  m.RunEvent.seq > after)  # fmt: skip
         rows = session.scalars(query.order_by(m.RunEvent.seq)).all()
-    events = [api.RunEvent(seq=e.seq, type=e.type, node_id=e.node_id, payload=e.payload,
-                           created_at=e.created_at) for e in rows]  # fmt: skip
+    events = [EVENT.validate_python({"seq": e.seq, "type": e.type, "node_id": e.node_id,
+                                     "payload": e.payload, "created_at": e.created_at})
+              for e in rows]  # fmt: skip
     return RunEvents(events=events, last_seq=rows[-1].seq if rows else after)
 
 

@@ -1,17 +1,20 @@
 """Request and response bodies for the §7 runs lifecycle (docs/api_contract.md)."""
 
 from datetime import datetime
-from typing import Annotated, Any, Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import Field, JsonValue
+from pydantic import Field, JsonValue, TypeAdapter
 
 from app.api.models import ApiModel, Page
 from app.api.v1.draft_models import Issue, WorkflowDefinition
 from app.core.run_state import RunState
 
 __all__ = [
+    "EVENT",
     "ApproveRequest",
+    "NodeFinishedEvent",
+    "NodeFinishedPayload",
     "ResolveRequest",
     "ReviewChoice",
     "Run",
@@ -24,6 +27,10 @@ __all__ = [
     "RunState",
     "RunSummary",
     "RunSummaryPage",
+    "StateChangedEvent",
+    "StateChangedPayload",
+    "WarningEvent",
+    "WarningPayload",
 ]
 
 
@@ -116,12 +123,45 @@ class RunSummaryPage(Page[RunSummary]):
     pass
 
 
-class RunEvent(ApiModel):
-    seq: int
-    type: Literal["state_changed", "node_started", "node_finished", "warning"]
-    node_id: str | None = None
-    payload: dict[str, Any]
+class StateChangedPayload(ApiModel):
+    state: RunState
+
+
+class NodeFinishedPayload(ApiModel):
+    warnings: list[Issue]
+
+
+class WarningPayload(ApiModel):
+    issue: Issue
+
+
+class _Event(ApiModel):
+    seq: int = Field(description="1, 2, … within the run; strictly increasing")
     created_at: datetime
+
+
+class StateChangedEvent(_Event):
+    type: Literal["state_changed"]
+    node_id: None = None
+    payload: StateChangedPayload
+
+
+class NodeFinishedEvent(_Event):
+    type: Literal["node_finished"]
+    node_id: str
+    payload: NodeFinishedPayload
+
+
+class WarningEvent(_Event):
+    type: Literal["warning"]
+    node_id: str | None = None
+    payload: WarningPayload
+
+
+type RunEvent = Annotated[
+    StateChangedEvent | NodeFinishedEvent | WarningEvent, Field(discriminator="type")
+]
+EVENT = TypeAdapter(RunEvent)
 
 
 class RunEvents(ApiModel):
