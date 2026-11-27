@@ -344,6 +344,27 @@ PR **#82** (stacked on #81).
 - The TTL test now uses `Settings(_env_file=None)`, so a developer's `.env` can't affect it.
 - `uv run pytest -q`: **1406 passed** (unit and integration). ruff is clean.
 
+PR **#83** (stacked on #82).
+
+**P3.9 part 1, the TemplatePlanner's reconcile template** (`app/core/planner/template.py`, `app/core/planner_codes.py`, `tests/unit/test_template_planner.py`; collection failed first).
+- `plan(template_id, files)` takes `FileFacts` (label, format csv|json, and columns with kind and uniqueness, never rows) and returns a deterministic `WorkflowDraft`: `parse_csv|parse_json` ×2 → `compare{key, value}` → `report_csv`. The input contracts carry each file's columns, for replay drift.
+- **Rules:**
+  - Columns match when their names are equal after NFKC and trimming, case-sensitive, so the planner never guesses.
+  - The key is a column both files have and that is unique in both. The value is a shared numeric column other than the key.
+  - Among several candidates, a name hint (`id`, `code`, `رقم`…; `amount`, `المبلغ`…, compared case-insensitively) can settle a tie, but never picks a column on its own.
+  - When it is still unclear, the parameter is left out and the draft carries a warning. The validator then reports `PARAM_INVALID`, so the user must choose.
+- **Operation ids the templates use:** `parse_csv`, `parse_json`, `compare` and `report_csv`. Phase 7 must register them under these ids (P7.1 and P7.2).
+- **New `contracts/error-codes.json` → `planner_codes`** (KEY_NOT_FOUND, KEY_AMBIGUOUS, VALUE_NOT_FOUND, VALUE_AMBIGUOUS), mirrored by `PlannerCode` with a parity test.
+- **T3.11:**
+  - picks `order_id` and `amount` on acceptance-like files;
+  - no shared key → `KEY_NOT_FOUND` and no key;
+  - ambiguous → `KEY_AMBIGUOUS` with the candidates;
+  - deterministic `plan_hash`;
+  - Arabic columns (`رقم الطلب`, `المبلغ`) work.
+- Mutation checks: all 6 rules are caught. Two survived at first (a numeric key excluded from the value, and case-insensitive hints), so tests were added for both.
+- The merge template follows in the next PR, which closes P3.9.
+- `uv run pytest -q`: **1426 passed**. ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 
