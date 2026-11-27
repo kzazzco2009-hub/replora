@@ -290,6 +290,9 @@
     },
     "VALUE_AMBIGUOUS": {
       "description": "Draft warning: several numeric columns could be the value, so it is left for the user to pick (path nodes/<i>/params/value, params.candidates)."
+    },
+    "COLUMNS_DIFFER": {
+      "description": "Draft warning (merge): a file's columns are not the first file's, so merging it may leave gaps (path inputs/<i>, params.file, params.missing, params.extra)."
     }
   }
 }
