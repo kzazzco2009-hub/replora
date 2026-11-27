@@ -328,6 +328,22 @@ PR **#81** (stacked on #80). Answered the frontend's 401 note on #76 (7203186020
 - Mutation checks: each of the five rules fails 1–3 tests.
 - `uv run pytest -q`: **1398 passed**. ruff is clean.
 
+PR **#82** (stacked on #81).
+
+**P3.8, the MockPlanner and fake adapters** (test-only, `tests/integration/fakes.py` and `test_engine_pipeline.py`).
+- Five fake operations with real stdlib logic: `fake_unzip` (one ZIP → CSV and JSON members), `fake_parse_csv`, `fake_parse_json`, `fake_compare` (key and value, giving match, mismatch, only_left and only_right), and `fake_render` (a CSV report).
+- `MockPlanner.plan()` returns the same draft for any task. A test checks that nothing under `app/` mentions `MockPlanner`.
+- **T3.9:** the planner's draft validates. The pipeline runs end to end, and the report equals the expected CSV byte for byte.
+- **T3.10:**
+  - a transient JSON-parse failure is retried twice and recovers;
+  - a second attempt with the same ledger calls no handler (5 calls in total);
+  - a cancel after the unzip stops both branches;
+  - a failed JSON branch gives FAILED, with compare and render skipped;
+  - a replay of the saved pipeline gives the same report hash.
+- A sanity mutation (compare always says "match") fails 2 tests.
+- The TTL test now uses `Settings(_env_file=None)`, so a developer's `.env` can't affect it.
+- `uv run pytest -q`: **1406 passed** (unit and integration). ruff is clean.
+
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
 
