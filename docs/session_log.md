@@ -617,6 +617,16 @@ PR **#109** (stacked on #108).
 - `complete` stores the `members` of a ready ZIP.
 - **T6.4:** a 100 MiB zero bomb is rejected in under 0.5 s. **T6.5** and **T6.6** pass. Mutation checks: the ratio, `..` and nesting checks are caught.
 - `uv run pytest -q`: **2263 passed**. No drift.
+PR **#110** (stacked on #109).
+
+**P6.5, file endpoints and samples** (8 new tests; 7 failed first).
+- List: newest first, `limit`, an opaque `next_cursor` (a file id from this workspace; anything else is 422), and `?type=` filtering. Download: `ready` files only (otherwise 409); a **5-minute signed URL** with `attachment` and the display name, audited as `file.downloaded`. Delete: the row and the bytes, audited as `file.deleted`. A cross-workspace id is 404.
+- **Samples:** `app/files/samples/` holds the Phase 7 acceptance files, `orders.csv` (O‑101, O‑102, O‑103) and `payments.json` (O‑101, O‑102 with another amount, O‑104). They go through the same `complete`.
+- `repos.page_query` pages an already-scoped, filtered query.
+- **All §4 file endpoints are real now**, so the empty 501 stub test is gone. **T6.7** passes.
+- **The flaky test:** T5.11's timing check is now the median of 5 requests per kind, each from its own address. That was the single intermittent failure seen in two full runs.
+- Mutation checks: deleting the bytes, the ready-only download and the cursor are caught.
+- `uv run pytest -q`: **2267 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

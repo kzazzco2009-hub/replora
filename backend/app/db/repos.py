@@ -42,7 +42,13 @@ def page[M](
     session: Session, model: type[M], workspace_id: UUID, limit: int, after: M | None = None
 ) -> list[M]:
     """Newest first, `limit` rows, continuing after the last row of the previous page."""
-    query = scoped(model, workspace_id)
+    return page_query(session, scoped(model, workspace_id), model, limit, after)
+
+
+def page_query[M](
+    session: Session, query: Select[tuple[M]], model: type[M], limit: int, after: M | None = None
+) -> list[M]:
+    """`page` for a query already scoped by `scoped` (and maybe filtered further)."""
     if after is not None:
         query = query.where(tuple_(model.created_at, model.id) < (after.created_at, after.id))
     query = query.order_by(model.created_at.desc(), model.id.desc()).limit(limit)
