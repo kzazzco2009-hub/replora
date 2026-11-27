@@ -118,6 +118,17 @@
       "checkEmailHeading": "Check your email",
       "checkEmailBody": "If that email can be used, we've sent a link to verify it. Check your inbox and follow the link to finish creating your account.",
       "backToSignIn": "Back to sign in"
+    },
+    "verifyEmail": {
+      "loadingHeading": "Verifying your email",
+      "loadingBody": "Just a moment…",
+      "successHeading": "Email verified",
+      "successBody": "Your email address is verified. You can now sign in.",
+      "failureHeading": "We couldn't verify that link",
+      "missingTokenHeading": "Verification link missing",
+      "missingTokenBody": "This link is missing its verification code. Check the link in your email, or request a new one.",
+      "toSignIn": "Go to sign in",
+      "toSignUp": "Create a new account"
     }
   }
 }
