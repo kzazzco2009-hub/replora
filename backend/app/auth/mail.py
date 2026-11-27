@@ -1,18 +1,20 @@
 """Outgoing email (P5.4). Locally it goes to the console; a real provider comes with deployment.
 
-Only these three messages exist. A message carries a link with a one-time token, or nothing
-secret at all (`account_exists`).
+Only these four messages exist. A message carries a link with a one-time token (verify, reset,
+invite), or nothing secret at all (`account_exists`).
 """
 
 import sys
 from dataclasses import dataclass, field
 from typing import Literal, Protocol
 
-Kind = Literal["verify", "reset", "account_exists"]
+Kind = Literal["verify", "reset", "account_exists", "invite"]
 
 SUBJECTS = {
     "verify": {"ar": "تأكيد بريدك الإلكتروني في Replora", "en": "Confirm your Replora email"},
     "reset": {"ar": "إعادة تعيين كلمة المرور في Replora", "en": "Reset your Replora password"},
+    "invite": {"ar": "دعوة للانضمام إلى مساحة عمل في Replora",
+               "en": "You're invited to a Replora workspace"},
     "account_exists": {"ar": "لديك حساب في Replora بالفعل",
                        "en": "You already have a Replora account"},
 }  # fmt: skip

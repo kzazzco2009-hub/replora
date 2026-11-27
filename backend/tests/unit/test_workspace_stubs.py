@@ -36,7 +36,9 @@ def test_endpoint_is_documented_with_its_success_status(openapi, method, path, s
 
 REAL = {("get", "/api/v1/workspaces"), ("post", "/api/v1/workspaces"), ("delete", WS),
         ("get", f"{WS}/members"), ("patch", f"{WS}/members/{{user_id}}"),
-        ("delete", f"{WS}/members/{{user_id}}")}  # fmt: skip
+        ("delete", f"{WS}/members/{{user_id}}"), ("post", f"{WS}/invitations"),
+        ("get", f"{WS}/invitations"), ("delete", f"{WS}/invitations/{{invitation_id}}"),
+        ("post", "/api/v1/invitations/accept")}  # fmt: skip
 """Implemented in P5.8; their behaviour is tested in tests/integration/test_workspaces_api.py."""
 STUBS = [e for e in ENDPOINTS if (e[0], e[1]) not in REAL]
 

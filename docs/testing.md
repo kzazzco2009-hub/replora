@@ -122,7 +122,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [x] T5.10 **IDOR:** user B requesting user A's file, run, workflow or draft by ID gets 404 for every resource type.
 - [x] T5.11 The "forgot password" response is identical for existing and unknown emails (no enumeration). Timing difference < 50 ms.
 - [x] T5.12 Audit events are written for login success and failure, logout, reset and role change.
-- [ ] T5.13 Invitations:
+- [x] T5.13 Invitations:
   - accept as an existing user and as a new sign-up;
   - an expired, revoked or reused token is rejected;
   - an invite for email X cannot be accepted by a user signed in as Y;

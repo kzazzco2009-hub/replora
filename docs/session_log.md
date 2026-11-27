@@ -543,6 +543,14 @@ PR **#102** (stacked on #101).
 - `GET members`. `PATCH` and `DELETE members/{user}` (audited as `member.role_changed` and `member.removed`): the owner can't be changed or removed, not even by themselves; managers handle only members ranked below them and never grant above their own role; a non-member target is 404.
 - Mutation checks: the owner guard (it survived at first, so a self-demotion test was added), the rank rule and the personal-workspace guard are all caught.
 - `uv run pytest -q`: **2143 passed**. No drift.
+PR **#103** (stacked on #102).
+
+**P5.9, invitations** (`app/api/v1/workspaces.py`, `tests/integration/test_invitations_api.py`; 10 failed first).
+- Invite (members.manage): the email is normalized; the token is 256 bits stored only as SHA‑256; it expires after **7 days**; it is emailed as `{APP_URL}/invite?token=…` (a new `invite` mail kind, AR/EN); `member.invited` is audited. List shows status: pending, accepted, revoked or expired. Revoke is audited.
+- Accept (signed in): a dead token (unknown, expired, revoked or used) gives 400 `TOKEN_INVALID`; **a signed-in email that doesn't match gives 403 `PERMISSION_DENIED`**; otherwise the user joins with the invited role (`member.joined`). It works for an existing user, and for a new sign-up after registering with the invited email.
+- **S‑29 "no role above the inviter's" holds by structure:** only owners and admins hold members.manage, and `GrantableRole` stops at admin. A test pins both. A runtime check I wrote first was unreachable (a mutant survived), so it was removed.
+- **T5.13** passes. Mutation checks: the email binding and the status checks are caught.
+- `uv run pytest -q`: **2149 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
