@@ -257,5 +257,19 @@
     "LIMIT_FILE_SIZE": {
       "description": "A file is larger than the resource policy allows (path files/<i>, params.limit, params.actual in bytes)."
     }
+  },
+  "run_codes": {
+    "NODE_FAILED": {
+      "description": "A node's operation failed (node_id; params.error is the operation's own code, with its params). In a PARTIAL run this is a warning."
+    },
+    "NODE_SKIPPED": {
+      "description": "A node didn't run because a required input came from a node that failed or was skipped (node_id, params.port, params.source)."
+    },
+    "OUTPUT_MISSING": {
+      "description": "A workflow output wasn't produced, so the run FAILED (path outputs/<i>, params.output)."
+    },
+    "LOW_CONFIDENCE": {
+      "description": "An operation isn't sure of its result, for example a guessed key column. Under the review policy the run stops as NEEDS_REVIEW (node_id, path nodes/<i>/<port>)."
+    }
   }
 }

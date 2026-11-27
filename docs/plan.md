@@ -213,7 +213,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] P3.1 State machine: `transition(run, event)` enforces the P1.5 table. Illegal transitions raise errors.
 - [x] P3.2 Approval: `approve(run, plan_hash)` must match the current plan hash exactly. A changed plan invalidates the approval.
 - [x] P3.3 In-memory executor: topological order, node-by-node execution, outputs stored as artifacts with lineage.
-- [ ] P3.4 Failure semantics: a failed required branch makes the run FAILED, a failed optional branch makes it PARTIAL with warnings, and a low-confidence result makes it NEEDS_REVIEW.
+- [x] P3.4 Failure semantics: a failed required branch makes the run FAILED, a failed optional branch makes it PARTIAL with warnings, and a low-confidence result makes it NEEDS_REVIEW.
 - [ ] P3.5 Retry: only `TransientError`, at most 2 extra attempts with backoff. Idempotency key = `(run_id, node_id, input_hashes)`, so a node is never executed twice for the same inputs.
 - [ ] P3.6 Cancellation: CANCEL_REQUESTED is checked between nodes and leads to CANCELLED. EXPIRED applies when approval times out (AWAITING_APPROVAL older than 24 h, configurable).
 - [ ] P3.7 Replay: re-run a pinned workflow version on new inputs. A contract mismatch leads to NEEDS_REVIEW.

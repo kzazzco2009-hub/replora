@@ -1,50 +1,22 @@
 """P3.3 in-memory executor: topological order, node by node, outputs stored with lineage (T3.2)."""
 
 import hashlib
-from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-from validator_samples import REGISTRY, definition, edge, node, output
+from engine_samples import NOW, Spy, diamond, queued
+from validator_samples import REGISTRY, definition, node, output
 
 from app.core.artifact_type import ArtifactType as T
 from app.core.artifacts import ArtifactLineage
 from app.core.engine.executor import execute, topological_order
-from app.core.engine.run import PlanHashMismatchError, approve, new_run, transition
+from app.core.engine.run import PlanHashMismatchError, new_run
 from app.core.engine.store import ArtifactStore, Data
 from app.core.operations import OperationRef
-from app.core.run_state import RunAction, RunState
+from app.core.run_state import RunState
 from app.core.workflow import InputContract, PortRef
 
-NOW = datetime(2026, 11, 26, 12, tzinfo=UTC)
 PASS = OperationRef(id="pass", version=1)
-
-
-def diamond():
-    """a fans out to b and c, which fan in to d. Listed out of order on purpose."""
-    return definition(
-        [node("d", tag="d"), node("c", tag="c"), node("b", tag="b"), node("a", tag="a")],
-        [edge("a", "b"), edge("a", "c"), edge("b", "d", "out", "in_0"),
-         edge("c", "d", "out", "in_1")],
-        outputs=[output("result", "d", "out", T.TABULAR)],
-    )  # fmt: skip
-
-
-class Spy:
-    """The `pass` handler: its tag, then its inputs in port order. Records the call order."""
-
-    def __init__(self) -> None:
-        self.calls: list[str] = []
-
-    def __call__(self, inputs, params):
-        self.calls.append(params["tag"])
-        joined = b"".join(inputs[port].content for port in sorted(inputs))
-        return {"out": Data(content=params["tag"].encode() + b"(" + joined + b")", format="csv")}
-
-
-def queued(defn):
-    run = transition(transition(new_run(defn, NOW), RunAction.VALIDATE), RunAction.REQUEST_APPROVAL)
-    return approve(run, run.plan_hash, uuid4(), NOW)
 
 
 def run_it(defn, spy=None):
@@ -61,7 +33,7 @@ def test_the_order_is_topological_and_stable():
 def test_each_node_runs_once_after_its_sources():
     result, _, spy = run_it(diamond())
     assert spy.calls == ["a", "c", "b", "d"]
-    assert result.run.state is RunState.SUCCEEDED
+    assert (result.run.state, result.issues) == (RunState.SUCCEEDED, [])
 
 
 def test_outputs_are_stored_with_content_hash_and_lineage():
