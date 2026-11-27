@@ -34,6 +34,7 @@ from app.core.draft import WorkflowDraft
 from app.core.engine.executor import OperationError
 from app.core.plan_hash import plan_hash
 from app.core.planner.template import TEMPLATES, plan
+from app.core.validation import ValidationReport
 from app.core.validator import validate
 from app.db import models as m
 from app.db.repos import get, scoped
@@ -159,13 +160,18 @@ def _facts(request: Request, row: m.File, index: int):
         raise invalid(f"body.file_ids.{index}", error.code, **error.params) from error
 
 
-def _answer(session: Session, ws_id: UUID, row: m.Draft, response: Response) -> Draft:
-    """The draft as the API shows it, validated now against its files, with its `ETag` set."""
+def checked(session: Session, ws_id: UUID, row: m.Draft) -> tuple[WorkflowDraft, ValidationReport]:
+    """The draft and its validation now, against its files, with the planner's warnings."""
     drafted = WorkflowDraft.model_validate(row.draft)
     ids = [UUID(value) for value in row.file_ids]
     sizes = session.scalars(scoped(m.File, ws_id).where(m.File.id.in_(ids))).all()
     report = validate(drafted.definition, REGISTRY, [f.size for f in sizes])
-    report = report.model_copy(update={"warnings": [*report.warnings, *drafted.warnings]})
+    return drafted, report.model_copy(update={"warnings": [*report.warnings, *drafted.warnings]})
+
+
+def _answer(session: Session, ws_id: UUID, row: m.Draft, response: Response) -> Draft:
+    """The draft as the API shows it, with its `ETag` set."""
+    drafted, report = checked(session, ws_id, row)
     response.headers["ETag"] = _etag(row)
     return Draft(id=row.id, prompt=row.prompt, planner=row.planner,
                  definition=drafted.definition, plan_hash=row.plan_hash,
