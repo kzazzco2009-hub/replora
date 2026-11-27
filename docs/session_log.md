@@ -10,20 +10,21 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 2 — Registry and validator (B2), Session 16.** **G1 passed** 2026-11-26 (Developer A), on the condition that the Phase 1 stack merges. `main` is at **`881de20`** (#60), 491 passed. Developer A is the gate approver for G2.
+| Current phase | **Phase 2 — Registry and validator (B2): complete, G2 awaiting Developer A.** Session 16. **G1 passed** 2026-11-26 (Developer A), on the condition that the Phase 1 stack merges after the frontend's review. `main` is at **`881de20`** (#60) on the backend side; the frontend has since merged #58, #61, #62, #64, #65, #67.
 
-**Phase 1:** 7/7 steps, T1.1–T1.6, S‑10 and the Phase 1 part of S‑11 (T3.1 at G3). End-of-phase run on the top of the stack: 1101 backend + 186 frontend tests, no drift, no leaks.
+**Phase 1:** 7/7 steps, T1.1–T1.6, S‑10, S‑11 (Phase 1 part; T3.1 at G3).
+**Phase 2:** 6/6 steps, T2.1–T2.8, S‑12. End-of-phase run on the top of the stack: 1196 backend + 186 frontend tests, no drift, no leaks.
 
-**Open backend stack (merge in this order, each rebased onto `main` after the one before):** #68 P1.5 → #69 P1.5b (contract) → #70 P1.6 (contract) → `feat/p1.7-model-audit` (P1.7, S‑10) → Phase 2 branches.
+**Merged:** #68 P1.5 (`1eb5085`). **Open backend stack (merge in order; after each merge, rebase the next onto `main`, show the range-diff and ping the frontend to re-approve):** #69 P1.5b (contract; rebased, head `06c1568`, waiting for re-approval) → #70 P1.6 (contract) → #71 P1.7/S‑10/G1 → #72 P2.1 → #73 P2.2+P2.5 → #74 P2.3 → `feat/p2.4-validator-limits` (P2.4, P2.6, G2 record).
 
-**Frontend PRs:** #58, #61–#65, #67 approved by Developer A (theirs to merge); **#66** has a change request (numeric column alignment in RTL). |
-| Last gate passed | **G1** (2026-11-26, Developer A, `decisions.md`). Before it: G0. |
-| Waiting on | **Frontend:** review the stack #68, #69, #70 and the P1.7 PR (#69 and #70 change `schema.d.ts`); fix #66; merge their approved PRs; the #53/#54 follow-ups; close #1.
+**Frontend PRs:** #63 re-approved at `e5e5b27`; #66 has a change request (RTL numeric alignment), a fix is coming. |
+| Last gate passed | **G1** (2026-11-26, Developer A, `decisions.md`). **G2 is ready and awaiting Developer A.** |
+| Waiting on | **Developer A:** **approve G2** (or not), then Phase 3 can start. Also, on this machine, `pre-commit install` and `git config --global user.email "143901646+khaledhagar@users.noreply.github.com"` (both blocked for Claude).
 
-**Developer A:** on this machine, `pre-commit install` and `git config --global user.email "143901646+khaledhagar@users.noreply.github.com"` (both blocked for Claude). |
-| Next step | 1) **Phase 2** (P2.1–P2.6, T2.*, S‑12): the `OperationRegistry`, then the DAG validator checks, one PR per step, stacked on the P1.7 PR.
-2) Merge the Phase 1 stack as the frontend approves it.
-3) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). |
+**Frontend:** review the stack, #69 and #70 first (they change `schema.d.ts`); the `workflow_codes` translations; push the #66 fix. |
+| Next step | 1) After the G2 go: **Phase 3** (engine, in-memory with fake adapters; P3.1 enforces the P1.5 table, T3.1 finishes S‑11).
+2) Merge the stack in order as the frontend approves it. When the base of a stacked PR merges, retarget the child to `main` and `git rebase --onto origin/main <old base tip>`, check `git range-diff`, regenerate `openapi.json`/`schema.d.ts`/`contracts/schemas` if needed.
+3) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). The API request body size cap belongs to Phase 8 (S‑12 note). |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
 1. `git fetch --all --prune; git switch main; git pull --ff-only` (if a log PR is still open, switch to its branch and pull). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`. Once per clone: `pre-commit install`.
@@ -46,7 +47,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
 | 1 Contracts | 7/7 | 6/6 | 2/2 (S‑11 re-checked at G3) | ☑ G1 2026-11-26 (Developer A; stack merging) |
-| 2 Validator | 4/6 | 7/8 | 0/1 | ☐ |
+| 2 Validator | 6/6 | 8/8 | 1/1 | ☐ G2 awaiting Developer A |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
 | 5 Auth | 0/11 | 0/15 | 0/10 | ☐ |
@@ -224,7 +225,35 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **`jsonschema` moved from the dev group to the runtime dependencies** (`uv remove --dev jsonschema; uv add "jsonschema>=4.26.0"`). The lock keeps the same versions (4.26.0, `referencing` 0.37.0, `rpds-py` 2026.9.1), and pip-audit is clean.
 - **TDD:** `test_validator_types.py` was 9 red first, then **12 passed** (T2.3 TabularArtifact ← TextDocumentArtifact rejected; T2.6 one case per rule). **The tests bite:** skipping the type compare fails 3; dropping the `required` check fails 2.
 - Checks: ruff clean, **1158 passed**, no drift, pip-audit clean.
-- **P2.3, T2.3 and T2.6 ticked.**
+- **P2.3, T2.3 and T2.6 ticked.** Opened as **#74** (base #73).
+
+**Frontend update (#1, 7201098960):** they merged #58, #61, #62, #64, #65 and #67. #63 was re-approved at `e5e5b27` after their merge from `main` (against `main` the diff is only Tabs). They are fixing #66. **They asked that #68–#71 not be merged before their review** (agreed, 7201146791).
+
+**P2.4 + P2.6: limits and the location guarantee** (branch `feat/p2.4-validator-limits`, stacked on #74):
+- `app/core/limits.py`: `MAX_NODES = 30`, `MAX_DEPTH = 10` (nodes on the longest path), `MAX_FAN_IN = MAX_FAN_OUT = 10`.
+- `app/core/validator/limits.py`, run **first**: `LIMIT_NODES` (`nodes`), `LIMIT_DEPTH` (`edges`; measured only when there's no cycle, since that is `DAG_CYCLE`), `LIMIT_FAN_IN` / `LIMIT_FAN_OUT` (`nodes/i`), `LIMIT_FILES` (`inputs` for workflow inputs, `files` for the files given), `LIMIT_FILE_SIZE` (`files/i`). All carry `params.limit` and `params.actual`. File limits come from the definition's `ResourcePolicy`, so a stricter policy lowers them.
+- `validate(definition, registry, file_sizes=())`: the run path will pass the bound files' sizes.
+- **TDD:** `test_validator_limits.py` was red first (no module), then **18 passed**. T2.5 tests each boundary on both sides: 30/31 nodes, depth 10/11, fan-in and fan-out 10/11, files 2/3 under `max_files=2` and 10/11 given, size 50 MiB / +1 byte. A 5000-node chain is reported in about 0.2 s (bound: 2 s). **The tests bite:** `>=` instead of `>` fails 7; counting depth in edges fails 1; dropping the given-files count fails 1.
+- **P2.6:** `test_validator_codes.py` has one scenario per `IssueCode` (**18 codes**). A code without a scenario fails the parity test (checked by adding a fake one). Each issue's path resolves inside the definition (all but the last segment; `files/…` refers to the given files). Node-scoped codes name a real node, and port codes name the port. These passed on the first run, because they assert properties the code already had.
+- **`workflow_codes` is complete for Phase 2**: OP_UNKNOWN, OP_VERSION_INVALID, NODE_ID_DUPLICATE, NODE_UNKNOWN, PORT_UNKNOWN, PORT_UNBOUND, PORT_BOUND_TWICE, EDGE_DUPLICATE, DAG_CYCLE, PORT_TYPE_MISMATCH, PARAM_INVALID and LIMIT_NODES/DEPTH/FAN_IN/FAN_OUT/FILES/FILE_SIZE.
+- **P2.4, P2.6, T2.5 and S‑12 ticked.**
+
+**End-of-phase run (Phase 2), on `feat/p2.4-validator-limits` (the top of the stack):**
+| Check | Result |
+|---|---|
+| `uv run ruff check .` · `ruff format --check .` | clean · 76 files |
+| `uv run pytest -q` | **1196 passed** |
+| Phase 2 tests only (`test_registry`, `test_validator_*`, `test_error_codes`) | **117 passed** |
+| `export_openapi --check` · `export_schemas --check` | exit 0 · exit 0 (Phase 2 doesn't change `openapi.json`) |
+| `uv run pip-audit` | no known vulnerabilities |
+| `pnpm gen:api` + `git diff --exit-code schema.d.ts` | no drift |
+| frontend lint · format:check · typecheck · test | clean · clean · clean · **186 passed** (on this stack's base; the frontend's newer merges are on `main`) |
+| `pnpm audit --audit-level=high` | no known vulnerabilities |
+| `gitleaks git .` | no leaks found |
+
+**Merges after the frontend's review (#1, 7201202275):** they approved #68–#71 at their heads and asked for in-order merges with a ping after each rebase (a push dismisses approvals). **#68 merged** (`1eb5085`). **#69** was rebased with `git rebase --onto origin/main f552b36` (range-diff `a3bf12e = 06c1568`) and retargeted to `main`. On the rebased branch: 795 passed, no drift, and the frontend typecheck plus 367 tests pass with their merged PRs. Pinged on #69 (7201289845). **#66** re-approved at `f80642e` (the RTL fix is right).
+
+**Gate G2: Phase 2 is complete and waiting for Developer A's approval.** Developer A's instruction was to finish Phase 2, not to go past it. So Phase 3 doesn't start until G2 is approved.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.

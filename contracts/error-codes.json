@@ -238,6 +238,24 @@
     },
     "PARAM_INVALID": {
       "description": "A node parameter breaks the operation's parameter schema (node_id, params.field, params.rule: the JSON Schema keyword, such as required, type, enum or pattern)."
+    },
+    "LIMIT_NODES": {
+      "description": "The workflow has too many steps (params.limit, params.actual)."
+    },
+    "LIMIT_DEPTH": {
+      "description": "The longest chain of steps is too long (params.limit, params.actual: nodes on the longest path)."
+    },
+    "LIMIT_FAN_IN": {
+      "description": "Too many edges go into one step (node_id, params.limit, params.actual)."
+    },
+    "LIMIT_FAN_OUT": {
+      "description": "Too many edges leave one step (node_id, params.limit, params.actual)."
+    },
+    "LIMIT_FILES": {
+      "description": "More files than the resource policy allows: workflow inputs (path inputs) or the files given (path files) (params.limit, params.actual)."
+    },
+    "LIMIT_FILE_SIZE": {
+      "description": "A file is larger than the resource policy allows (path files/<i>, params.limit, params.actual in bytes)."
     }
   }
 }
