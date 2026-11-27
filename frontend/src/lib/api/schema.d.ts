@@ -1693,6 +1693,32 @@ export interface components {
             /** Label */
             label?: string | null;
         };
+        /** NodeFinishedEvent */
+        NodeFinishedEvent: {
+            /**
+             * Seq
+             * @description 1, 2, … within the run; strictly increasing
+             */
+            seq: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "node_finished";
+            /** Node Id */
+            node_id: string;
+            payload: components["schemas"]["NodeFinishedPayload"];
+        };
+        /** NodeFinishedPayload */
+        NodeFinishedPayload: {
+            /** Warnings */
+            warnings: components["schemas"]["Issue"][];
+        };
         /**
          * OperationContract
          * @description A known operation. The frontend renders its parameter form from `params_schema`.
@@ -2016,27 +2042,7 @@ export interface components {
             /** Missing Right */
             missing_right: number;
         };
-        /** RunEvent */
-        RunEvent: {
-            /** Seq */
-            seq: number;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "state_changed" | "node_started" | "node_finished" | "warning";
-            /** Node Id */
-            node_id?: string | null;
-            /** Payload */
-            payload: {
-                [key: string]: unknown;
-            };
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-        };
+        RunEvent: components["schemas"]["StateChangedEvent"] | components["schemas"]["NodeFinishedEvent"] | components["schemas"]["WarningEvent"];
         /**
          * RunEvents
          * @description Poll with `after=last_seq` while the state is `QUEUED`, `RUNNING` or `CANCEL_REQUESTED`.
@@ -2151,6 +2157,31 @@ export interface components {
             expires_at: string;
             /** Current */
             current: boolean;
+        };
+        /** StateChangedEvent */
+        StateChangedEvent: {
+            /**
+             * Seq
+             * @description 1, 2, … within the run; strictly increasing
+             */
+            seq: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "state_changed";
+            /** Node Id */
+            node_id?: null;
+            payload: components["schemas"]["StateChangedPayload"];
+        };
+        /** StateChangedPayload */
+        StateChangedPayload: {
+            state: components["schemas"]["RunState"];
         };
         /** Template */
         Template: {
@@ -2292,6 +2323,31 @@ export interface components {
             errors: components["schemas"]["Issue"][];
             /** Warnings */
             warnings: components["schemas"]["Issue"][];
+        };
+        /** WarningEvent */
+        WarningEvent: {
+            /**
+             * Seq
+             * @description 1, 2, … within the run; strictly increasing
+             */
+            seq: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "warning";
+            /** Node Id */
+            node_id?: string | null;
+            payload: components["schemas"]["WarningPayload"];
+        };
+        /** WarningPayload */
+        WarningPayload: {
+            issue: components["schemas"]["Issue"];
         };
         /** Workflow */
         Workflow: {

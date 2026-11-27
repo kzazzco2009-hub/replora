@@ -7911,6 +7911,59 @@
         "title": "Node",
         "description": "One step: a pinned operation version and its parameters."
       },
+      "NodeFinishedEvent": {
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "title": "Seq",
+            "description": "1, 2, … within the run; strictly increasing"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "type": {
+            "type": "string",
+            "const": "node_finished",
+            "title": "Type"
+          },
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/NodeFinishedPayload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "seq",
+          "created_at",
+          "type",
+          "node_id",
+          "payload"
+        ],
+        "title": "NodeFinishedEvent"
+      },
+      "NodeFinishedPayload": {
+        "properties": {
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "warnings"
+        ],
+        "title": "NodeFinishedPayload"
+      },
       "OperationContract": {
         "properties": {
           "id": {
@@ -8666,52 +8719,25 @@
         "description": "Reconciliation row counts."
       },
       "RunEvent": {
-        "properties": {
-          "seq": {
-            "type": "integer",
-            "title": "Seq"
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/StateChangedEvent"
           },
-          "type": {
-            "type": "string",
-            "enum": [
-              "state_changed",
-              "node_started",
-              "node_finished",
-              "warning"
-            ],
-            "title": "Type"
+          {
+            "$ref": "#/components/schemas/NodeFinishedEvent"
           },
-          "node_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Node Id"
-          },
-          "payload": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Payload"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
+          {
+            "$ref": "#/components/schemas/WarningEvent"
           }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "seq",
-          "type",
-          "payload",
-          "created_at"
         ],
-        "title": "RunEvent"
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "node_finished": "#/components/schemas/NodeFinishedEvent",
+            "state_changed": "#/components/schemas/StateChangedEvent",
+            "warning": "#/components/schemas/WarningEvent"
+          }
+        }
       },
       "RunEvents": {
         "properties": {
@@ -9001,6 +9027,54 @@
           "current"
         ],
         "title": "Session"
+      },
+      "StateChangedEvent": {
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "title": "Seq",
+            "description": "1, 2, … within the run; strictly increasing"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "type": {
+            "type": "string",
+            "const": "state_changed",
+            "title": "Type"
+          },
+          "node_id": {
+            "type": "null",
+            "title": "Node Id"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/StateChangedPayload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "seq",
+          "created_at",
+          "type",
+          "payload"
+        ],
+        "title": "StateChangedEvent"
+      },
+      "StateChangedPayload": {
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/RunState"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state"
+        ],
+        "title": "StateChangedPayload"
       },
       "Template": {
         "properties": {
@@ -9328,6 +9402,61 @@
           "warnings"
         ],
         "title": "ValidationReport"
+      },
+      "WarningEvent": {
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "title": "Seq",
+            "description": "1, 2, … within the run; strictly increasing"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "type": {
+            "type": "string",
+            "const": "warning",
+            "title": "Type"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/WarningPayload"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "seq",
+          "created_at",
+          "type",
+          "payload"
+        ],
+        "title": "WarningEvent"
+      },
+      "WarningPayload": {
+        "properties": {
+          "issue": {
+            "$ref": "#/components/schemas/Issue"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "issue"
+        ],
+        "title": "WarningPayload"
       },
       "Workflow": {
         "properties": {

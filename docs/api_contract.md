@@ -180,7 +180,12 @@ Both endpoints are **public**: no session is needed, and the answer is the same 
   - `action`: `workspace.created`, `member.invited`, `member.invitation_revoked`, `member.joined`, `member.role_changed`, `member.removed`, `file.uploaded`, `file.downloaded`, `file.deleted`, `workflow.saved`, `workflow.deleted`, `run.created`, `run.approved`, `run.cancelled`, `output.downloaded`, `planner.called`. Auth events (login, logout, reset) are audited too (P5.7) but have no workspace, so this endpoint never returns them.
   - `target_type`: `workspace`, `invitation`, `member` (`target_id` is the user id), `file`, `workflow`, `draft`, `run`, `output`.
 
-`RunEvent = {seq, type: "state_changed"|"node_started"|"node_finished"|"warning", node_id?, payload, created_at}`
+`RunEvent = {seq, type, node_id?, payload, created_at}`, a union discriminated by `type` (agreed on #1, 7218456147):
+- `state_changed`: `payload = {state: RunState}`; `node_id` is null. Every state the run enters gets one, `RUNNING` included.
+- `node_finished`: `payload = {warnings: Issue[]}`; `node_id` is required.
+- `warning`: `payload = {issue: Issue}`.
+
+`seq` is 1, 2, … within a run, strictly increasing (unique per run in the DB). There is no `node_started`: the worker records a node only when it finishes, so the node after the last finished one is the running one.
 
 **Stub details (P0.5 parts 4c and 4d, proposed):**
 - `Idempotency-Key` is a required UUID header. When it's missing, the answer is 422 `MISSING` at `header.Idempotency-Key`. A reuse with a different body is 409 `IDEMPOTENCY_KEY_MISMATCH`.
