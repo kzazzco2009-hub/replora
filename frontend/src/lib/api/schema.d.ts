@@ -841,6 +841,8 @@ export interface paths {
          *
          *     Only from `NEEDS_REVIEW`; otherwise 409 `INVALID_STATE_TRANSITION`.
          *     409 `PLAN_HASH_MISMATCH` if the plan changed since it was reviewed.
+         *     Every question (an issue with `params.options`) needs one of its options. The run's recorded
+         *     nodes are dropped, so the approved run computes everything again with the answers.
          */
         post: operations["runs_resolve"];
         delete?: never;
