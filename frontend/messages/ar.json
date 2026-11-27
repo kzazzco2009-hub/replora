@@ -1,5 +1,53 @@
 {
+  "operations": {
+    "extract_member": {
+      "title": "استخراج ملف من أرشيف"
+    },
+    "parse_csv": {
+      "title": "قراءة ملف CSV"
+    },
+    "parse_json": {
+      "title": "قراءة ملف JSON"
+    },
+    "normalize": {
+      "title": "توحيد صيغة البيانات"
+    },
+    "map_columns": {
+      "title": "مطابقة الأعمدة"
+    },
+    "compare": {
+      "title": "مقارنة البيانات"
+    },
+    "report_csv": {
+      "title": "إنشاء تقرير بصيغة CSV"
+    },
+    "summary_json": {
+      "title": "إنشاء ملخّص بصيغة JSON"
+    },
+    "bundle_zip": {
+      "title": "جمع الملفات في أرشيف ZIP"
+    },
+    "append_rows": {
+      "title": "دمج الصفوف"
+    },
+    "export_csv": {
+      "title": "تصدير ملف CSV"
+    }
+  },
   "runReview": {
+    "loadingPlan": "جارٍ تحميل الخطة",
+    "retry": "حاول مرة أخرى",
+    "pipeline": "خطوات الخطة",
+    "emptyPlan": "لا تتضمن هذه الخطة أي خطوات.",
+    "unknownOperation": "خطوة في سير العمل",
+    "inputs": "المدخلات",
+    "outputs": "المخرجات",
+    "noPorts": "لا توجد عناصر مدرجة",
+    "warnings": "التحذيرات",
+    "issues": "مسائل تحتاج إلى مراجعة",
+    "genericIssue": "تحتاج هذه المسألة إلى مراجعة.",
+    "reviewAnswersLater": "ستتمكّن من الرد على هذه المسائل في تحديث لاحق.",
+
     "requestFailed": "تعذّر إكمال الطلب. حاول مرة أخرى."
   },
   "theme": {
