@@ -1,5 +1,53 @@
 {
+  "operations": {
+    "extract_member": {
+      "title": "Extract a file from an archive"
+    },
+    "parse_csv": {
+      "title": "Read a CSV file"
+    },
+    "parse_json": {
+      "title": "Read a JSON file"
+    },
+    "normalize": {
+      "title": "Standardize data"
+    },
+    "map_columns": {
+      "title": "Match columns"
+    },
+    "compare": {
+      "title": "Compare data"
+    },
+    "report_csv": {
+      "title": "Create a CSV report"
+    },
+    "summary_json": {
+      "title": "Create a JSON summary"
+    },
+    "bundle_zip": {
+      "title": "Package files in a ZIP archive"
+    },
+    "append_rows": {
+      "title": "Combine rows"
+    },
+    "export_csv": {
+      "title": "Export a CSV file"
+    }
+  },
   "runReview": {
+    "loadingPlan": "Loading plan",
+    "retry": "Try again",
+    "pipeline": "Plan steps",
+    "emptyPlan": "This plan has no steps.",
+    "unknownOperation": "Workflow step",
+    "inputs": "Inputs",
+    "outputs": "Outputs",
+    "noPorts": "None listed",
+    "warnings": "Warnings",
+    "issues": "Review issues",
+    "genericIssue": "This issue needs attention.",
+    "reviewAnswersLater": "Answering these issues will be available in a later update.",
+
     "requestFailed": "The request failed. Please try again."
   },
   "theme": {
