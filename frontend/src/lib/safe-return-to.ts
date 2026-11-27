@@ -7,6 +7,7 @@ const AUTH_SEGMENTS = new Set([
   "verify-email",
   "forgot-password",
   "reset-password",
+  "mfa",
 ]);
 
 function hasControlOrWhitespace(value: string): boolean {

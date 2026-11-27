@@ -59,12 +59,18 @@ describe("proxy protected-route guard (S-64: UX only)", () => {
     "sign-in",
     "sign-up",
     "verify-email",
+    "mfa",
     "forgot-password",
     "reset-password",
     "privacy",
     "terms",
   ])("lets the public page %s through without cookies", async (page) => {
     const response = await proxy(request(`/en/${page}`));
+    expect(response.headers.get("location")).toBeNull();
+  });
+
+  it("lets a signed-out request through to /ar/mfa", async () => {
+    const response = await proxy(request("/ar/mfa"));
     expect(response.headers.get("location")).toBeNull();
   });
 
