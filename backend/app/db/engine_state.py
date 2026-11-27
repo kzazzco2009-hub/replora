@@ -6,7 +6,6 @@ from `run_nodes`, and skips every node already done for the same inputs (T4.4).
 
 import hashlib
 import json
-from pathlib import Path
 from uuid import UUID
 
 from sqlalchemy.orm import Session, sessionmaker
@@ -71,29 +70,35 @@ class DbLedger:
 
 
 class DbArtifactStore:
-    """Artifact rows in the database; their content in a local folder until Phase 6 storage."""
+    """Artifact rows in the database; their bytes in the workspace's storage (P6.1).
 
-    def __init__(self, sessions: sessionmaker[Session], workspace_id: UUID, root: Path) -> None:
-        self.sessions, self.workspace_id, self.root = sessions, workspace_id, root
+    With `run_id`, every row it adds belongs to that run, inputs too (their lineage is empty).
+    """
+
+    def __init__(self, sessions: sessionmaker[Session], workspace_id: UUID, storage,
+                 run_id: UUID | None = None) -> None:  # fmt: skip
+        self.sessions, self.workspace_id, self.storage = sessions, workspace_id, storage
+        self.run_id = run_id
 
     def _key(self, ref: ArtifactRef) -> str:
         return f"{self.workspace_id}/{ref.id}"
 
     def put(self, data: Data, artifact_type: ArtifactType, lineage: ArtifactLineage) -> ArtifactRef:
         ref = new_ref(data, artifact_type, lineage, self.workspace_id)
-        path = self.root / self._key(ref)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(data.content)
+        self.storage.put(self._key(ref), data.content)
         with self.sessions.begin() as session:
             session.add(m.Artifact(
-                id=ref.id, workspace_id=self.workspace_id, run_id=lineage.run_id,
+                id=ref.id, workspace_id=self.workspace_id, run_id=lineage.run_id or self.run_id,
                 node_id=lineage.node_id, type=ref.type, format=ref.format, sha256=ref.sha256,
                 storage_key=self._key(ref), lineage=lineage.model_dump(mode="json"),
+                source=data.source, size=len(data.content),
             ))  # fmt: skip
         return ref
 
     def read(self, ref: ArtifactRef) -> Data:
-        return Data((self.root / self._key(ref)).read_bytes(), ref.format)
+        with self.sessions() as session:
+            row = get(session, m.Artifact, self.workspace_id, ref.id)
+        return Data(self.storage.open(row.storage_key), row.format, row.source)
 
 
 def save_run(

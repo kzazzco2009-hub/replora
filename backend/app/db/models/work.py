@@ -164,6 +164,9 @@ class Artifact(IdMixin, CreatedMixin, Base):
     sha256: Mapped[str] = mapped_column(String(64))
     storage_key: Mapped[str] = mapped_column(String(255))
     lineage: Mapped[Json] = mapped_column(JsonDocument)
+    source: Mapped[Json] = mapped_column(JsonDocument, default=dict)
+    """Where the bytes came from (`Data.source`: file, file_id, ZIP member), for row lineage."""
+    size: Mapped[int] = mapped_column(default=0)
 
 
 class RunEvent(IdMixin, CreatedMixin, Base):

@@ -20,6 +20,7 @@ from app.db.base import Base
 from app.db.engine import make_engine, make_sessions
 from app.db.engine_state import DbArtifactStore, DbLedger, load_run, save_run
 from app.db.repos import scoped
+from app.storage.local import LocalStorage
 
 NOW = datetime(2026, 11, 26, 12, tzinfo=UTC)
 
@@ -70,7 +71,7 @@ def attempt(world, handlers):
     """One worker process: fresh engine and sessions, the run loaded from the database."""
     url, blobs, ws, run_id = world
     sessions = make_sessions(make_engine(url))
-    store = DbArtifactStore(sessions, ws, blobs)
+    store = DbArtifactStore(sessions, ws, LocalStorage(blobs, "k"))
     with sessions() as session:
         run = load_run(session, ws, run_id)
     upload = store.put(Data(bundle(), "zip"), T.RAW_FILE, ArtifactLineage())
@@ -120,7 +121,7 @@ def test_artifacts_are_rows_with_their_lineage_and_content(world):
         row = session.scalars(scoped(m.Artifact, ws).where(m.Artifact.id == report.id)).one()
         assert (row.run_id, row.node_id, row.sha256) == (result.run.id, "render", report.sha256)
         assert row.lineage == report.lineage.model_dump(mode="json")
-    store = DbArtifactStore(make_sessions(make_engine(url)), ws, blobs)
+    store = DbArtifactStore(make_sessions(make_engine(url)), ws, LocalStorage(blobs, "k"))
     assert store.read(report).content.startswith(b"key,status,left,right\n")
 
 
@@ -146,3 +147,17 @@ def test_a_done_node_with_other_inputs_is_not_in_the_ledger(world):
     ledger[key] = Done({}, [])
     assert key in ledger
     assert (run_id, "unzip", (("archive", "b" * 64),)) not in ledger
+
+
+def test_an_artifact_keeps_its_source_and_size_through_the_database(world):
+    url, blobs, ws, _ = world
+    sessions = make_sessions(make_engine(url))
+    store = DbArtifactStore(sessions, ws, LocalStorage(blobs, "k"))
+
+    ref = store.put(Data(b"a,b\n", "csv", {"file": "a.csv", "file_id": "f"}), T.RAW_FILE,
+                    ArtifactLineage())  # fmt: skip
+
+    assert DbArtifactStore(sessions, ws, LocalStorage(blobs, "k")).read(ref).source == {
+        "file": "a.csv", "file_id": "f"}  # fmt: skip
+    with sessions() as session:
+        assert session.scalars(scoped(m.Artifact, ws)).one().size == 4
