@@ -35,6 +35,19 @@
     }
   },
   "results": {
+    "lineage": {
+      "title": "Row lineage",
+      "loading": "Loading row lineage",
+      "empty": "No lineage is available for this row.",
+      "sources": "Source rows",
+      "operations": "Operations",
+      "file": "File",
+      "page": "Page",
+      "version": "Version",
+      "actions": "Actions",
+      "open": "Inspect row",
+      "openRow": "Inspect row {row}"
+    },
     "chooseOutput": "Preview file",
     "preview": "Output table",
     "search": "Search table",

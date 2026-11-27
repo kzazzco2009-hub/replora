@@ -11,6 +11,7 @@ export interface SheetProps {
   title: string;
   closeLabel: string;
   description?: string;
+  onCloseAutoFocus?: (event: Event) => void;
   children: ReactNode;
 }
 
@@ -29,6 +30,7 @@ export function Sheet({
   title,
   closeLabel,
   description,
+  onCloseAutoFocus,
   children,
 }: SheetProps) {
   return (
@@ -38,6 +40,7 @@ export function Sheet({
             whatever is behind it, so it must not flip with --ink. */}
         <RadixDialog.Overlay className="fixed inset-0 bg-black/50" />
         <RadixDialog.Content
+          onCloseAutoFocus={onCloseAutoFocus}
           aria-describedby={undefined}
           className="fixed inset-y-0 end-0 flex w-[90vw] max-w-sm flex-col gap-3 overflow-y-auto bg-surface-raised p-6 text-ink outline-none data-[state=open]:animate-[sheet-slide-in_var(--duration-base)_ease-out] data-[state=closed]:animate-[sheet-slide-out_var(--duration-base)_ease-in]"
         >
