@@ -163,6 +163,36 @@ def test_cancel_before_approval_asks_the_worker_to_stop_it(web):
     assert [j.kind for j in jobs(web)] == ["run_step"]
 
 
+def test_events_are_numbered_and_polled_after_a_seq(web):
+    run = start(web, make_draft(web)).json()
+    approve(web, run)
+
+    every = web.get(runs(web, f"/{run['id']}/events")).json()
+    newer = web.get(runs(web, f"/{run['id']}/events?after=1")).json()
+
+    assert [(e["seq"], e["payload"]["state"]) for e in every["events"]] == [
+        (1, "AWAITING_APPROVAL"), (2, "QUEUED")]  # fmt: skip
+    assert every["last_seq"] == 2
+    assert [e["seq"] for e in newer["events"]] == [2]
+    empty = web.get(runs(web, f"/{run['id']}/events?after=2")).json()
+    assert empty == {"events": [], "last_seq": 2}
+
+
+def test_the_list_is_newest_first_filtered_and_paged(web):
+    draft = make_draft(web)
+    made = [start(web, draft).json() for _ in range(3)]
+    approve(web, made[0])
+
+    first = web.get(runs(web, "?limit=2")).json()
+    rest = web.get(runs(web, f"?limit=2&cursor={first['next_cursor']}")).json()
+    queued = web.get(runs(web, "?state=QUEUED")).json()
+
+    assert [r["id"] for r in first["items"] + rest["items"]] == [r["id"] for r in made[::-1]]
+    assert rest["next_cursor"] is None
+    assert [r["id"] for r in queued["items"]] == [made[0]["id"]]
+    assert first["items"][0]["title"] == "orders.csv · payments.json"
+
+
 def test_another_workspaces_run_is_not_found(web, db_url, tmp_path):
     run = start(web, make_draft(web)).json()
     other = signed_in(db_url, tmp_path / "other", email="o@example.com")
