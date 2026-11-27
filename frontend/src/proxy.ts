@@ -10,6 +10,7 @@ const PUBLIC_SEGMENTS = new Set([
   "sign-in",
   "sign-up",
   "verify-email",
+  "mfa",
   "forgot-password",
   "reset-password",
   "privacy",
