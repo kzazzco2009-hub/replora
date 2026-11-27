@@ -1,5 +1,6 @@
 """§3 workspaces, members, invitations and audit (docs/api_contract.md). 501 stubs until Phase 5."""
 
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from fastapi import APIRouter, Request
@@ -7,7 +8,7 @@ from sqlalchemy import select
 
 from app.api.models import Cursor, Limit
 from app.api.problem import ERROR_RESPONSES, NOT_FOUND_RESPONSE, ProblemError, not_implemented
-from app.api.session import database
+from app.api.session import database, now
 from app.api.v1.auth_models import TokenRequest
 from app.api.v1.workspace_models import (
     AuditEventPage,
@@ -20,8 +21,13 @@ from app.api.v1.workspace_models import (
 )
 from app.auth import audit
 from app.auth.access import not_found
+from app.auth.accounts import normal_email
+from app.auth.mail import compose
 from app.auth.permissions import Rank, Role
+from app.auth.tokens import digest, new_secret
 from app.db import models as m
+
+INVITE_TTL = timedelta(days=7)
 
 router = APIRouter(tags=["workspaces"], responses=ERROR_RESPONSES)
 scoped = APIRouter(prefix="/workspaces/{ws_id}", responses=NOT_FOUND_RESPONSE)
@@ -121,27 +127,70 @@ def _manageable(session, request: Request, ws_id: UUID, user_id: UUID, grant: st
 
 
 @scoped.post("/invitations", status_code=201)
-def invite(ws_id: UUID, body: InvitationRequest) -> Invitation:
+def invite(ws_id: UUID, body: InvitationRequest, request: Request) -> Invitation:
     """Invite by email. The role cannot be above the inviter's (members.manage)."""
-    raise not_implemented()
+    # S‑29 holds by structure: only owners and admins hold members.manage, and the body can't
+    # ask for more than admin (GrantableRole). A test pins both facts.
+    actor, at = request.state.caller.user, now(request)
+    token = new_secret()
+    with database(request).begin() as session:
+        row = m.Invitation(workspace_id=ws_id, email=normal_email(body.email), role=body.role,
+                           token_hash=digest(token), invited_by=actor.id,
+                           expires_at=at + INVITE_TTL)  # fmt: skip
+        session.add(row)
+        session.flush()
+        audit.record(session, "member.invited", actor.id, workspace_id=ws_id,
+                     target_type="invitation", target_id=str(row.id))  # fmt: skip
+    page = f"{request.app.state.settings.app_url}/invite?token={token}"
+    request.app.state.mailer.send(compose(row.email, "invite", actor.locale, page))
+    return _invitation(row, at)
 
 
 @scoped.get("/invitations")
-def list_invitations(ws_id: UUID) -> list[Invitation]:
+def list_invitations(ws_id: UUID, request: Request) -> list[Invitation]:
     """The workspace invitations (members.manage)."""
-    raise not_implemented()
+    with database(request)() as session:
+        rows = session.scalars(select(m.Invitation).where(m.Invitation.workspace_id == ws_id)
+                               .order_by(m.Invitation.created_at)).all()  # fmt: skip
+    return [_invitation(row, now(request)) for row in rows]
 
 
 @scoped.delete("/invitations/{invitation_id}", status_code=204)
-def revoke_invitation(ws_id: UUID, invitation_id: UUID) -> None:
+def revoke_invitation(ws_id: UUID, invitation_id: UUID, request: Request) -> None:
     """Revoke a pending invitation (members.manage)."""
-    raise not_implemented()
+    with database(request).begin() as session:
+        row = session.get(m.Invitation, invitation_id)
+        if row is None or row.workspace_id != ws_id:
+            raise not_found()
+        row.revoked_at = row.revoked_at or now(request)
+        audit.record(session, "member.invitation_revoked", request.state.caller.user.id,
+                     workspace_id=ws_id, target_type="invitation",
+                     target_id=str(invitation_id))  # fmt: skip
 
 
 @router.post("/invitations/accept")
-def accept_invitation(body: TokenRequest) -> Workspace:
+def accept_invitation(body: TokenRequest, request: Request) -> Workspace:
     """Join the workspace with the emailed token. The signed-in email must match the invitation."""
-    raise not_implemented()
+    user, at = request.state.caller.user, now(request)
+    with database(request).begin() as session:
+        row = session.scalars(
+            select(m.Invitation).where(m.Invitation.token_hash == digest(body.token))
+        ).one_or_none()
+        if row is None or _status(row, at) != "pending":
+            raise ProblemError(400, "TOKEN_INVALID", "Invalid or expired token")
+        if row.email != normal_email(user.email):
+            raise ProblemError(403, "PERMISSION_DENIED", "This invitation is for someone else")
+        row.accepted_at = at
+        member = session.scalars(select(m.Membership).where(
+            m.Membership.workspace_id == row.workspace_id, m.Membership.user_id == user.id
+        )).one_or_none()  # fmt: skip
+        if member is None:
+            member = m.Membership(workspace_id=row.workspace_id, user_id=user.id, role=row.role)
+            session.add(member)
+        audit.record(session, "member.joined", user.id, workspace_id=row.workspace_id,
+                     target_type="member", target_id=str(user.id))  # fmt: skip
+        space = session.get(m.Workspace, row.workspace_id)
+    return Workspace(id=space.id, name=space.name, role=member.role, created_at=space.created_at)
 
 
 @scoped.get("/audit")
@@ -161,3 +210,16 @@ def memberships(session, user_id: UUID):
         .where(m.Membership.user_id == user_id)
         .order_by(m.Workspace.created_at)
     ).all()
+
+
+def _status(row: m.Invitation, at: datetime) -> str:
+    if row.accepted_at is not None:
+        return "accepted"
+    if row.revoked_at is not None:
+        return "revoked"
+    return "expired" if row.expires_at <= at else "pending"
+
+
+def _invitation(row: m.Invitation, at: datetime) -> Invitation:
+    return Invitation(id=row.id, email=row.email, role=row.role, invited_by=row.invited_by,
+                      expires_at=row.expires_at, status=_status(row, at))  # fmt: skip
