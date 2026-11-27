@@ -1,5 +1,5 @@
-"""Shared fixtures: an app that never reads the developer's `.env`, its OpenAPI document, and a
-database URL for the persistence tests (P4.7)."""
+"""Shared fixtures: an app that never reads the developer's `.env` or `.data/replora.db`, its
+OpenAPI document, and a database URL for the persistence tests (P4.7)."""
 
 import os
 
@@ -9,6 +9,7 @@ from sqlalchemy import text
 
 from app.auth.access import authorize
 from app.config import Settings
+from app.db.base import Base
 from app.db.engine import make_engine
 from app.main import create_app
 
@@ -48,17 +49,23 @@ def with_csrf(client: TestClient) -> TestClient:
     return client
 
 
-def stub_app():
-    """The app for contract-stub tests: access control is off here, because
-    `tests/integration/test_permissions.py` covers it for every route."""
-    app = create_app(Settings(_env_file=None))
+def stub_app(database_url: str):
+    """The app for contract-stub tests, on an empty database of its own. Access control is off
+    here, because `tests/integration/test_permissions.py` covers it for every route."""
+    Base.metadata.create_all(make_engine(database_url))
+    app = create_app(Settings(_env_file=None, database_url=database_url))
     app.dependency_overrides[authorize] = lambda: None
     return app
 
 
 @pytest.fixture(scope="module")
-def client() -> TestClient:
-    return with_csrf(TestClient(stub_app()))
+def stub_db(tmp_path_factory) -> str:
+    return f"sqlite:///{(tmp_path_factory.mktemp('stub') / 'stub.db').as_posix()}"
+
+
+@pytest.fixture(scope="module")
+def client(stub_db) -> TestClient:
+    return with_csrf(TestClient(stub_app(stub_db)))
 
 
 @pytest.fixture(scope="module")

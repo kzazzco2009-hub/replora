@@ -19,8 +19,8 @@ def _boom() -> None:
 
 
 @pytest.fixture(scope="module")
-def client() -> TestClient:
-    app = stub_app()
+def client(stub_db) -> TestClient:
+    app = stub_app(stub_db)
     app.add_api_route("/test/boom", _boom, tags=["test"])
     return with_csrf(TestClient(app, raise_server_exceptions=False))
 

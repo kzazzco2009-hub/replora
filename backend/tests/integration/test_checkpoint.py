@@ -29,10 +29,14 @@ class Killed(BaseException):
 
 
 def bundle() -> bytes:
+    """The same bytes on every call. A member named by a plain string would carry the current
+    time, so the two attempts could get different hashes and redo `unzip`."""
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as archive:
-        archive.writestr("orders.csv", "order_id,amount\nA1,10\n")
-        archive.writestr("payments.json", json.dumps([{"order_id": "A1", "amount": 10}]))
+        archive.writestr(zipfile.ZipInfo("orders.csv", NOW.timetuple()[:6]),
+                         "order_id,amount\nA1,10\n")  # fmt: skip
+        archive.writestr(zipfile.ZipInfo("payments.json", NOW.timetuple()[:6]),
+                         json.dumps([{"order_id": "A1", "amount": 10}]))  # fmt: skip
     return buffer.getvalue()
 
 
