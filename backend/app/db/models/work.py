@@ -37,6 +37,9 @@ class File(IdMixin, CreatedMixin, Base):
     size: Mapped[int]
     sha256: Mapped[str | None] = mapped_column(String(64))
     status: Mapped[str] = mapped_column(String(16))
+    rejection_code: Mapped[str | None] = mapped_column(String(32))
+    members: Mapped[list[Json] | None] = mapped_column(JsonDocument)
+    """For a ZIP: `[{path, detected_type, size}]` (P6.4)."""
     expires_at: Mapped[datetime | None]
 
 

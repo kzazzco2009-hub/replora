@@ -247,8 +247,8 @@ Goal: frozen domain models that both developers rely on.
 
 ### Phase 6 — File intake and storage (M)
 - [x] P6.1 `Storage` interface: `create_upload_url`, `put` (local only), `open`, `delete`, `signed_download_url`. Implement `LocalStorage` (`./.data/storage`, keys never derived from user filenames).
-- [ ] P6.2 Upload flow: `upload-intent` returns a file_id and an upload URL, the client PUTs the file, then calls `complete`, which triggers validation. This flow is identical in production with Supabase signed upload URLs.
-- [ ] P6.3 Validation on `complete`: size ≤ 50 MiB, sha256, **magic-byte detection** (not the extension), an allowed type list, and the filename is sanitized for display only.
+- [x] P6.2 Upload flow: `upload-intent` returns a file_id and an upload URL, the client PUTs the file, then calls `complete`, which triggers validation. This flow is identical in production with Supabase signed upload URLs.
+- [x] P6.3 Validation on `complete`: size ≤ 50 MiB, sha256, **magic-byte detection** (not the extension), an allowed type list, and the filename is sanitized for display only.
 - [ ] P6.4 ZIP safety: ≤ 25 members, ≤ 200 MiB uncompressed, ratio ≤ 100:1, no nested ZIP, no absolute or `..` paths, no symlinks, and streaming extraction with counters.
 - [ ] P6.5 Files list, get, delete and download (signed, short-lived) endpoints, workspace-scoped.
 - [ ] P6.6 Retention: an `expires_at` on files and a cleanup job (periods per D11).
@@ -404,7 +404,7 @@ Every foreign key is indexed. Every list query uses `(workspace_id, created_at D
 | sessions | id, user_id, refresh_hash, expires_at, revoked_at, user_agent, ip_hash | `uq_sessions_refresh_hash`, `ix_sessions_user_id`, `ix_sessions_expires_at` |
 | used_refresh_tokens | id, session_id, token_hash, used_at | `uq_used_refresh_hash`, `ix_used_refresh_session_id` |
 | auth_tokens | id, user_id, kind (verify/reset), token_hash, expires_at, used_at | `uq_auth_tokens_hash`, `ix_auth_tokens_user_kind` |
-| files | id, workspace_id, uploaded_by, storage_key, display_name, detected_type, size, sha256, status, expires_at, created_at | `ix_files_ws_created (workspace_id,created_at)`, `ix_files_ws_sha256`, `ix_files_expires_at`, `ix_files_uploaded_by` |
+| files | id, workspace_id, uploaded_by, storage_key, display_name, detected_type, size, sha256, status, rejection_code, members (JSON), expires_at, created_at | `ix_files_ws_created (workspace_id,created_at)`, `ix_files_ws_sha256`, `ix_files_expires_at`, `ix_files_uploaded_by` |
 | artifacts | id, workspace_id, run_id, node_id, type, format, sha256, storage_key, lineage (JSON), created_at | `ix_artifacts_run_id`, `ix_artifacts_ws_created`, `ix_artifacts_sha256` |
 | workflows | id, workspace_id, name, created_by, latest_version, created_at, deleted_at | `ix_workflows_ws_created`, `ix_workflows_ws_name`, `ix_workflows_created_by` |
 | workflow_versions | id, workflow_id, version, definition (JSON), plan_hash, created_at | `uq_wfv_workflow_version`, `ix_wfv_plan_hash` |

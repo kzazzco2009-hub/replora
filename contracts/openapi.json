@@ -3302,6 +3302,7 @@
                 {
                   "enum": [
                     "csv",
+                    "json",
                     "zip"
                   ],
                   "type": "string"
@@ -7118,6 +7119,7 @@
                 "type": "string",
                 "enum": [
                   "csv",
+                  "json",
                   "zip"
                 ]
               },
@@ -7233,6 +7235,7 @@
             "type": "string",
             "enum": [
               "csv",
+              "json",
               "zip"
             ],
             "title": "Detected Type"
