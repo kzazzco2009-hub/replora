@@ -80,7 +80,9 @@
   },
   "shell": {
     "primaryNav": "التنقل الرئيسي",
-    "skipToContent": "تخطي إلى المحتوى الرئيسي"
+    "skipToContent": "تخطي إلى المحتوى الرئيسي",
+    "signOut": "تسجيل الخروج",
+    "signOutPending": "جارٍ تسجيل الخروج…"
   },
   "localeSwitch": {
     "groupLabel": "اللغة",
