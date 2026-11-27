@@ -35,6 +35,22 @@
     }
   },
   "runReview": {
+    "heading": "Review the plan",
+    "planHash": "Plan fingerprint",
+    "approve": "Approve and run",
+    "confirmTitle": "Approve this plan?",
+    "close": "Close",
+    "approving": "Approving the plan…",
+    "approved": "Run started. Run ID:",
+    "openRun": "Open run",
+    "reloadPlan": "Reload plan",
+    "expired": "This plan expired. Create a new run from the draft.",
+    "alreadyApproved": "This plan has already been approved.",
+    "cancelled": "This run was cancelled.",
+    "needsReview": "This run needs further review.",
+    "unavailable": "This run is no longer awaiting approval.",
+    "openingReview": "Opening review…",
+
     "loadingPlan": "Loading plan",
     "retry": "Try again",
     "pipeline": "Plan steps",
