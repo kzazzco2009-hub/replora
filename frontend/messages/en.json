@@ -35,6 +35,28 @@
     }
   },
   "runProgress": {
+    "heading": "Run progress",
+    "loading": "Loading run progress",
+    "states": {
+      "DRAFT": "Draft",
+      "VALIDATED": "Validated",
+      "AWAITING_APPROVAL": "Awaiting approval",
+      "QUEUED": "Queued",
+      "RUNNING": "Running",
+      "NEEDS_REVIEW": "Needs review",
+      "SUCCEEDED": "Succeeded",
+      "PARTIAL": "Partial results",
+      "FAILED": "Failed",
+      "CANCEL_REQUESTED": "Cancellation requested",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired"
+    },
+    "station": {
+      "done": "Done",
+      "active": "In progress",
+      "waiting": "Waiting",
+      "warning": "Warning"
+    },
     "requestFailed": "Run progress could not be loaded."
   },
   "runReview": {

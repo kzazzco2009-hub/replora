@@ -35,6 +35,28 @@
     }
   },
   "runProgress": {
+    "heading": "تقدّم التشغيل",
+    "loading": "جارٍ تحميل تقدّم التشغيل",
+    "states": {
+      "DRAFT": "مسودة",
+      "VALIDATED": "تم التحقق",
+      "AWAITING_APPROVAL": "بانتظار الموافقة",
+      "QUEUED": "في قائمة الانتظار",
+      "RUNNING": "قيد التشغيل",
+      "NEEDS_REVIEW": "يحتاج إلى مراجعة",
+      "SUCCEEDED": "نجح",
+      "PARTIAL": "نتائج جزئية",
+      "FAILED": "فشل",
+      "CANCEL_REQUESTED": "تم طلب الإلغاء",
+      "CANCELLED": "تم الإلغاء",
+      "EXPIRED": "انتهت الصلاحية"
+    },
+    "station": {
+      "done": "مكتملة",
+      "active": "قيد التنفيذ",
+      "waiting": "بانتظار التنفيذ",
+      "warning": "تحذير"
+    },
     "requestFailed": "تعذّر تحميل تقدّم التشغيل."
   },
   "runReview": {

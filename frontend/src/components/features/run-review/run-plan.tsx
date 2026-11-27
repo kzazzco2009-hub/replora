@@ -13,7 +13,7 @@ import {
 } from "@/lib/api/runs";
 import { operationTitleKey } from "./operation-labels";
 
-function orderedNodes({ nodes, edges }: Run["definition"]) {
+export function orderedNodes({ nodes, edges }: Run["definition"]) {
   const remaining = new Map(nodes.map((node) => [node.id, node]));
   const ordered: typeof nodes = [];
   while (remaining.size) {
@@ -32,7 +32,13 @@ function orderedNodes({ nodes, edges }: Run["definition"]) {
   return ordered;
 }
 
-function IssueList({ title, issues }: { title: string; issues: RunIssue[] }) {
+export function IssueList({
+  title,
+  issues,
+}: {
+  title: string;
+  issues: RunIssue[];
+}) {
   const t = useTranslations();
   if (!issues.length) return null;
 
