@@ -1,4 +1,5 @@
-"""P0.5: the §7 run outputs (list, preview, download, lineage) are served as 501 stubs."""
+"""P0.5: the §7 run outputs are documented. List and download are real (P8.1,
+`tests/integration/test_outputs_api.py`); preview and lineage are still 501."""
 
 import pytest
 
@@ -31,8 +32,8 @@ def test_endpoint_is_documented(openapi, path, operation_id):
         assert documented["responses"][error]["content"] == PROBLEM
 
 
-@pytest.mark.parametrize(("path", "operation_id"), ENDPOINTS)
-def test_stub_answers_501_problem_json(client, path, operation_id):
+@pytest.mark.parametrize(("path", "operation_id"), [ENDPOINTS[1], ENDPOINTS[3]])
+def test_preview_and_lineage_are_still_501_stubs(client, path, operation_id):
     response = client.get(path.format(**IDS))
 
     assert response.status_code == 501

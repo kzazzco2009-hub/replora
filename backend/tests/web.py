@@ -1,6 +1,8 @@
 """A signed-in browser client on a fresh database, and the upload flow, for the API tests."""
 
 import itertools
+import json
+from uuid import uuid4
 
 from conftest import with_csrf
 from fastapi.testclient import TestClient
@@ -10,6 +12,7 @@ from app.config import Settings
 from app.db.base import Base
 from app.db.engine import make_engine
 from app.main import create_app
+from app.worker import work_once
 
 PASSWORD = "a long and unusual passphrase"
 ADDRESSES = itertools.count(1)
@@ -35,3 +38,26 @@ def upload(client: TestClient, name: str, data: bytes) -> dict:
     target = created["upload"]
     client.request(target["method"], target["url"], content=data, headers=target["headers"])
     return client.post(f"/api/v1/workspaces/{client.ws}/files/{created['file_id']}/complete").json()
+
+
+ORDERS = b"order_id,amount\nO-101,100\nO-102,200\nO-103,300\n"
+PAYMENTS = json.dumps([{"order_id": "O-101", "amount": 100}, {"order_id": "O-102", "amount": 190},
+                       {"order_id": "O-104", "amount": 50}]).encode()  # fmt: skip
+
+
+def reconciled(client: TestClient) -> dict:
+    """The Phase 7 files reconciled end to end: draft, run, approve, then the worker to the end."""
+    ids = [
+        upload(client, "orders.csv", ORDERS)["id"],
+        upload(client, "payments.json", PAYMENTS)["id"],
+    ]
+    body = {"file_ids": ids, "planner": "template", "template_id": "reconcile"}
+    draft = client.post(f"/api/v1/workspaces/{client.ws}/drafts", json=body).json()
+    runs = f"/api/v1/workspaces/{client.ws}/runs"
+    run = client.post(runs, json={"draft_id": draft["id"]},
+                      headers={"Idempotency-Key": str(uuid4())}).json()  # fmt: skip
+    client.post(f"{runs}/{run['id']}/approve", json={"plan_hash": run["plan_hash"]},
+                headers={"Idempotency-Key": str(uuid4())})  # fmt: skip
+    while work_once(client.app.state.sessions, client.app.state.storage):
+        pass
+    return client.get(f"{runs}/{run['id']}").json()
