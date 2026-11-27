@@ -464,6 +464,14 @@ PR **#93** (stacked on #91).
 
 **Gate G4 passed** (pre-approved by Developer A, recorded in `decisions.md`). Phase 4: 7/7 steps, T4.1–T4.8, S‑14 and S‑15. **Next: the small contract PR** (`Limits.max_depth`, `max_fan_in`, `max_fan_out` and `Run.approval_expires_at`), **then Phase 5.**
 
+PR **#94** (P4.7 and G4) and PR **#95** (contract: `Limits` depth and fan limits, `Run.approval_expires_at`).
+
+**Phase 5 starts. P5.1, passwords** (`app/auth/passwords.py`, `app/auth/breached_passwords.txt`, `tests/unit/test_passwords.py`; collection failed first). The step text says "register and login", but the endpoints come with P5.2; this step is the hashing and the policy.
+- `uv add "pwdlib[argon2]"` locked pwdlib 0.4.2. Hashes are argon2id with recommended parameters. `verify_and_update` upgrades old parameter sets at login (S‑20). Text is NFKC-normalized first.
+- **Policy (NIST 800‑63B):** 12–256 characters (request models) and no composition rules. The breached list has 1183 entries of 12+ characters, lower-cased, from SecLists `100k-most-used-passwords-NCSC.txt` (MIT, downloaded with curl, filtered). It is checked ignoring case and outer spaces through an `AfterValidator` on `Password`, so `openapi.json` is unchanged and the 422 carries `PASSWORD_BREACHED` at `body.password`.
+- **New `validation_codes` → `PASSWORD_BREACHED`.** The frontend's parity test on `main` allow-lists `validation_codes` exactly, and it is not on this stack's base. **When this PR is rebased onto `main`, add `"PASSWORD_BREACHED"` to `frontend/tests/unit/error-messages-parity.test.ts` in the same commit.**
+- **T5.1 and T5.2:** argon2id and salted; right and wrong passwords; NFKC; rehash on login; breached ignoring case; long English and Arabic passphrases accepted; API 422 codes; no password field on `User` or `Me`. Mutation checks: all 3 rules are caught.
+- `uv run pytest -q`: **1688 passed**. No drift, and pip-audit is clean.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

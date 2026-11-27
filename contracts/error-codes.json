@@ -124,6 +124,9 @@
     "STRING_TOO_SHORT": {
       "description": "The text is too short (minimum in params.min_length)."
     },
+    "PASSWORD_BREACHED": {
+      "description": "The new password is on the list of breached passwords (P5.1, NIST 800-63B). Ask for another one; length and any script are fine."
+    },
     "STRING_TOO_LONG": {
       "description": "The text is too long (maximum in params.max_length)."
     },
