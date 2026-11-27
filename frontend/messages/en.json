@@ -81,7 +81,12 @@
     }
   },
   "upload": {
-    "tooManyFiles": "That's more files than this run allows. Remove some and try again."
+    "tooManyFiles": "That's more files than this run allows. Remove some and try again.",
+    "remove": "Remove {name}",
+    "uploading": "Uploading… {percent}%",
+    "ready": "Ready — detected as {type}",
+    "rejected": "Rejected",
+    "failed": "Upload failed"
   },
   "home": {
     "title": "Replora"
