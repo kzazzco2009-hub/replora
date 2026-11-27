@@ -1,4 +1,8 @@
-"""P0.5: the §2 auth contract is served as 501 stubs and documented in OpenAPI."""
+"""P0.5: the §2 auth contract is documented in OpenAPI.
+
+Every endpoint is real since P5.11; their behaviour is tested in tests/integration/ (auth_api,
+auth_tokens_api, csrf, throttle_audit, workspaces_api, privacy_api, mfa_api).
+"""
 
 import re
 
@@ -46,34 +50,6 @@ def test_auth_endpoint_is_documented_with_its_success_status(openapi, method, pa
     operation = openapi["paths"][openapi_path(path)][method]
 
     assert str(status) in operation["responses"]
-
-
-IMPLEMENTED = {"/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login",
-               "/api/v1/auth/logout", "/api/v1/auth/refresh", "/api/v1/auth/verify-email",
-               "/api/v1/auth/password/forgot", "/api/v1/auth/password/reset",
-               ("get", "/api/v1/auth/me"), ("patch", "/api/v1/auth/me"), "/api/v1/auth/sessions",
-               f"/api/v1/auth/sessions/{SESSION_ID}", ("delete", "/api/v1/auth/me"),
-               "/api/v1/auth/me/export", f"/api/v1/auth/me/export/{SESSION_ID}",
-               "/api/v1/auth/mfa/enroll", "/api/v1/auth/mfa/enroll/confirm",
-               "/api/v1/auth/mfa"}  # fmt: skip
-"""Phase 5 endpoints that are real now; the rest still answer 501."""
-STUBS = [e for e in AUTH_ENDPOINTS
-         if e[1] not in IMPLEMENTED and (e[0], e[1]) not in IMPLEMENTED]  # fmt: skip
-
-
-@pytest.mark.parametrize(("method", "path", "status", "body"), STUBS)
-def test_auth_stub_answers_501_problem_json(client, method, path, status, body):
-    response = client.request(method, path, json=body)
-
-    assert response.status_code == 501
-    assert response.headers["content-type"] == "application/problem+json"
-    assert response.json() == {
-        "type": "about:blank",
-        "title": "Not implemented",
-        "status": 501,
-        "code": "NOT_IMPLEMENTED",
-        "correlation_id": response.headers["x-request-id"],
-    }
 
 
 def test_all_contract_auth_paths_and_nothing_else(openapi):
@@ -290,7 +266,8 @@ def test_mfa_challenge_field_errors_use_form_field_paths(client, body, field):
 def test_mfa_challenge_accepts_a_recovery_code(client):
     response = client.post("/api/v1/auth/mfa/challenge", json={"recovery_code": "abcd-efgh"})
 
-    assert response.status_code == 501
+    # The body is valid; with no challenge cookie the real endpoint refuses it.
+    assert (response.status_code, response.json()["code"]) == (401, "MFA_CHALLENGE_INVALID")
 
 
 def test_email_keeps_its_openapi_format(openapi):

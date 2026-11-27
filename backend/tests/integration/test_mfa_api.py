@@ -123,3 +123,87 @@ def test_disabling_when_not_enabled_is_a_conflict(app):
     response = client.request("DELETE", "/api/v1/auth/mfa", json={"password": PASSWORD,
                                                                   "code": "123456"})  # fmt: skip
     assert (response.status_code, response.json()["code"]) == (409, "MFA_NOT_ENABLED")
+
+
+def mfa_user(app):
+    """A signed-out client whose account has MFA on, the secret and the recovery codes."""
+    client = person(app)
+    secret, codes = enroll(app, client)
+    enabled(app, client, secret)
+    client.post("/api/v1/auth/logout")
+    app.state.at[0] += timedelta(seconds=30)
+    return client, secret, codes
+
+
+def password_step(client):
+    return client.post("/api/v1/auth/login", json={"email": "salma@example.com",
+                                                   "password": PASSWORD})  # fmt: skip
+
+
+def challenge(client, **body):
+    return client.post("/api/v1/auth/mfa/challenge", json=body)
+
+
+def cookie_names(response) -> set[str]:
+    return {header.split("=")[0] for header in response.headers.get_list("set-cookie")}
+
+
+def test_login_with_mfa_asks_for_a_code_and_issues_no_session(app):
+    client, _, _ = mfa_user(app)
+    response = password_step(client)
+    assert (response.status_code, response.json()) == (200, {"mfa_required": True})
+    assert "replora_mfa_challenge" in cookie_names(response)
+    assert not {"replora_access", "replora_refresh"} & cookie_names(response)
+    assert "httponly" in next(h for h in response.headers.get_list("set-cookie")
+                              if h.startswith("replora_mfa_challenge")).lower()  # fmt: skip
+    assert client.get("/api/v1/auth/me").status_code == 401
+
+
+def test_the_right_code_completes_the_login(app):
+    client, secret, _ = mfa_user(app)
+    password_step(client)
+    response = challenge(client, code=code(app, secret))
+    assert (response.status_code, response.json()["mfa_enabled"]) == (200, True)
+    assert {"replora_access", "replora_refresh"} <= cookie_names(response)
+    assert client.get("/api/v1/auth/me").status_code == 200
+
+
+def test_a_challenge_works_once(app):
+    client, secret, _ = mfa_user(app)
+    password_step(client)
+    stolen = client.cookies["replora_mfa_challenge"]
+    challenge(client, code=code(app, secret))
+    client.cookies.set("replora_mfa_challenge", stolen)
+    app.state.at[0] += timedelta(seconds=30)
+    response = challenge(client, code=code(app, secret))
+    assert (response.status_code, response.json()["code"]) == (401, "MFA_CHALLENGE_INVALID")
+
+
+@pytest.mark.parametrize("case", ["expired", "missing"])
+def test_an_expired_or_missing_challenge_is_refused(app, case):
+    client, secret, _ = mfa_user(app)
+    password_step(client)
+    if case == "expired":
+        app.state.at[0] += timedelta(minutes=5)
+    else:
+        client.cookies.delete("replora_mfa_challenge")
+    response = challenge(client, code=code(app, secret))
+    assert (response.status_code, response.json()["code"]) == (401, "MFA_CHALLENGE_INVALID")
+
+
+def test_wrong_codes_are_throttled_with_the_login_limit(app):
+    client, secret, _ = mfa_user(app)
+    password_step(client)
+    statuses = [challenge(client, code=wrong_code(app, secret)).status_code for _ in range(6)]
+    assert statuses == [400] * 5 + [429]
+
+
+def test_a_recovery_code_works_exactly_once(app):
+    client, _, codes = mfa_user(app)
+    password_step(client)
+    assert challenge(client, recovery_code=codes[0]).status_code == 200
+    client.post("/api/v1/auth/logout")
+    password_step(client)
+    response = challenge(client, recovery_code=codes[0])
+    assert (response.status_code, response.json()["code"]) == (400, "MFA_CODE_INVALID")
+    assert challenge(client, recovery_code=codes[1]).status_code == 200

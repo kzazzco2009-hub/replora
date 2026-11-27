@@ -14,22 +14,34 @@ from app.auth.tokens import digest, new_secret
 from app.db import models as m
 
 TOKEN_TTL = timedelta(minutes=30)
-TokenKind = Literal["verify", "reset"]
+TokenKind = Literal["verify", "reset", "mfa"]
+MFA_CHALLENGE_TTL = timedelta(minutes=5)
+"""S-28: the login challenge lives 5 minutes."""
 
 
-def issue(session: Session, user: m.User, kind: TokenKind, now: datetime) -> str:
+def issue(
+    session: Session, user: m.User, kind: TokenKind, now: datetime, ttl: timedelta = TOKEN_TTL
+) -> str:
     token = new_secret()
     session.add(m.AuthToken(user_id=user.id, kind=kind, token_hash=digest(token),
-                            expires_at=now + TOKEN_TTL))  # fmt: skip
+                            expires_at=now + ttl))  # fmt: skip
     return token
 
 
-def redeem(session: Session, kind: TokenKind, token: str, now: datetime) -> m.User | None:
-    """The token's user, marking it used; None if unknown, of another kind, used or expired."""
+def find(session: Session, kind: TokenKind, token: str, now: datetime) -> m.AuthToken | None:
+    """The live token row: known, of this kind, unused and unexpired. Nothing is consumed."""
     row = session.scalars(
         select(m.AuthToken).where(m.AuthToken.token_hash == digest(token), m.AuthToken.kind == kind)
     ).one_or_none()
     if row is None or row.used_at is not None or row.expires_at <= now:
+        return None
+    return row
+
+
+def redeem(session: Session, kind: TokenKind, token: str, now: datetime) -> m.User | None:
+    """The token's user, marking it used; None if unknown, of another kind, used or expired."""
+    row = find(session, kind, token, now)
+    if row is None:
         return None
     row.used_at = now
     user = session.get(m.User, row.user_id)

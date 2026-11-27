@@ -130,7 +130,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [x] T5.14 Account deletion and export:
   - the export ZIP contains only the user's own data;
   - after deletion the user cannot log in, their sessions are revoked, files are removed from storage after the grace period, and audit entries remain anonymized.
-- [ ] T5.15 MFA:
+- [x] T5.15 MFA:
   - TOTP enroll, verify and login;
   - a wrong code is throttled;
   - a recovery code works exactly once;
