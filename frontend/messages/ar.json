@@ -110,6 +110,16 @@
       }
     }
   },
+  "describe": {
+    "chooseTemplate": "اختر قالبًا",
+    "selectFile": "اختر ملفًا",
+    "back": "رجوع",
+    "createDraft": "إنشاء المسودة",
+    "creatingDraft": "جارٍ إنشاء المسودة…",
+    "draftCreatedHeading": "تم إنشاء المسودة",
+    "draftId": "رقم المسودة",
+    "review": "مراجعة"
+  },
   "home": {
     "title": "Replora"
   },
