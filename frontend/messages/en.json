@@ -92,6 +92,24 @@
     "browse": "Choose files",
     "limitsHint": "Up to {maxFiles} files, {maxSize} each"
   },
+  "templates": {
+    "reconcile": {
+      "title": "Match orders with payments",
+      "description": "Compare two files row by row and show what matches and what differs.",
+      "inputs": {
+        "0": "Orders",
+        "1": "Payments"
+      }
+    },
+    "merge": {
+      "title": "Combine files into one",
+      "description": "Stack two files with the same columns into a single result.",
+      "inputs": {
+        "0": "First file",
+        "1": "Second file"
+      }
+    }
+  },
   "home": {
     "title": "Replora"
   },
