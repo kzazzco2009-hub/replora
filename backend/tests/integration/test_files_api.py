@@ -102,3 +102,21 @@ def test_a_completed_file_cannot_be_completed_again(web):
     file = upload(web, CSV).json()
     again = web.post(f"/api/v1/workspaces/{web.ws}/files/{file['id']}/complete")
     assert (again.status_code, again.json()["code"]) == (409, "INVALID_STATE_TRANSITION")
+
+
+def test_a_zip_is_ready_with_its_members_or_rejected_for_its_contents(web):
+    import io
+    import zipfile
+
+    def archive(members):
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as handle:
+            for name, data in members.items():
+                handle.writestr(name, data)
+        return buffer.getvalue()
+
+    good = upload(web, archive({"orders.csv": CSV}), name="bundle.zip").json()
+    assert (good["status"], good["detected_type"]) == ("ready", "zip")
+    assert good["members"] == [{"path": "orders.csv", "detected_type": "csv", "size": len(CSV)}]
+    bad = upload(web, archive({"../evil.csv": CSV}), name="bundle.zip").json()
+    assert (bad["status"], bad["rejection_code"]) == ("rejected", "ZIP_UNSAFE_PATH")
