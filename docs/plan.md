@@ -203,7 +203,7 @@ Goal: frozen domain models that both developers rely on.
 ### Phase 2 — Operation registry and DAG validator (M)
 - [x] P2.1 `OperationRegistry`: register and look up by `(id, version)`. Duplicates are rejected. `list()` is used for the API.
 - [x] P2.2 Validator, structural checks: unique node IDs, edges reference existing nodes and ports, **no cycles** (Kahn topological sort), no orphan required inputs.
-- [ ] P2.3 Validator, type checks: port artifact types match exactly (**no implicit conversion**), and parameters validate against the operation's params schema.
+- [x] P2.3 Validator, type checks: port artifact types match exactly (**no implicit conversion**), and parameters validate against the operation's params schema.
 - [ ] P2.4 Validator, limit checks: ≤ 30 nodes, depth ≤ 10, fan-in and fan-out ≤ 10, plus file count and size limits from the resource policy.
 - [x] P2.5 Validator, version checks: unknown or unpinned operation versions are rejected.
 - [ ] P2.6 Every error returns a stable `code` (for example `DAG_CYCLE` or `PORT_TYPE_MISMATCH`) plus the node and port location. The frontend translates codes to AR/EN.

@@ -46,7 +46,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
 | 1 Contracts | 7/7 | 6/6 | 2/2 (S‑11 re-checked at G3) | ☑ G1 2026-11-26 (Developer A; stack merging) |
-| 2 Validator | 3/6 | 5/8 | 0/1 | ☐ |
+| 2 Validator | 4/6 | 7/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
 | 5 Auth | 0/11 | 0/15 | 0/10 | ☐ |
@@ -216,7 +216,15 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 - **TDD:** `test_validator_structure.py` was red first (no module), then **22 passed**. They include T2.2 (self-loop, 2-cycle, a 6-cycle with nodes before and after it), T2.4 and T2.7, and three hypothesis tests: **T2.8** random DAGs validate and one back-edge always gives `DAG_CYCLE` (200 examples each), and random malformed definitions never raise (300). One real bug was found on the way: the `issue()` helper's `node_id` parameter swallowed `params.node_id`, and it was renamed.
 - **The tests bite:** skipping the reverse peel fails 1; dropping the bound-twice rule fails 1; ignoring self-loops fails 1.
 - Checks: ruff clean (70 files), **1145 passed**, no drift.
-- **P2.2, P2.5, T2.2, T2.4, T2.7 and T2.8 ticked.**
+- **P2.2, P2.5, T2.2, T2.4, T2.7 and T2.8 ticked.** Opened as **#73** (base #72). It's 508 added lines, over the 400 guideline (code 175, tests and the shared samples 286); I noted that in the PR.
+
+**P2.3: `app/core/validator/types.py`** (branch `feat/p2.3-type-checks`, stacked on #73):
+- **Ports match exactly, with no implicit conversion**, on edges (`edges/i`), workflow inputs (`inputs/i/targets/j`) and outputs (`outputs/i/source`): `PORT_TYPE_MISMATCH` with `params.port`, `expected` and `got`. A port that doesn't resolve is skipped, since it's already `PORT_UNKNOWN`.
+- **Params:** `PARAM_INVALID` at `nodes/i/params/<field>` with `params.field` and `params.rule` (the JSON Schema keyword: `required`, `type`, `enum`, `pattern`, `additionalProperties`, …). Never the library's English message. One issue per field.
+- **`jsonschema` moved from the dev group to the runtime dependencies** (`uv remove --dev jsonschema; uv add "jsonschema>=4.26.0"`). The lock keeps the same versions (4.26.0, `referencing` 0.37.0, `rpds-py` 2026.9.1), and pip-audit is clean.
+- **TDD:** `test_validator_types.py` was 9 red first, then **12 passed** (T2.3 TabularArtifact ← TextDocumentArtifact rejected; T2.6 one case per rule). **The tests bite:** skipping the type compare fails 3; dropping the `required` check fails 2.
+- Checks: ruff clean, **1158 passed**, no drift, pip-audit clean.
+- **P2.3, T2.3 and T2.6 ticked.**
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.

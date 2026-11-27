@@ -784,6 +784,7 @@ source = { editable = "." }
 dependencies = [
     { name = "email-validator" },
     { name = "fastapi" },
+    { name = "jsonschema" },
     { name = "pydantic-settings" },
     { name = "uvicorn" },
 ]
@@ -792,7 +793,6 @@ dependencies = [
 dev = [
     { name = "httpx2" },
     { name = "hypothesis" },
-    { name = "jsonschema" },
     { name = "pip-audit" },
     { name = "pytest" },
     { name = "ruff" },
@@ -802,6 +802,7 @@ dev = [
 requires-dist = [
     { name = "email-validator", specifier = ">=2.4.0" },
     { name = "fastapi", specifier = ">=0.165.0" },
+    { name = "jsonschema", specifier = ">=4.26.0" },
     { name = "pydantic-settings", specifier = ">=2.16.3" },
     { name = "uvicorn", specifier = ">=0.54.0" },
 ]
@@ -810,7 +811,6 @@ requires-dist = [
 dev = [
     { name = "httpx2", specifier = ">=2.16.2" },
     { name = "hypothesis", specifier = ">=6.170.17" },
-    { name = "jsonschema", specifier = ">=4.26.0" },
     { name = "pip-audit", specifier = ">=2.10.1" },
     { name = "pytest", specifier = ">=9.2.0" },
     { name = "ruff", specifier = ">=0.17.6" },
