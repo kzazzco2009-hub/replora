@@ -106,6 +106,18 @@
       "submit": "Verify",
       "submitPending": "Verifying…",
       "back": "Back to sign in"
+    },
+    "signUp": {
+      "heading": "Create your account",
+      "emailLabel": "Email",
+      "displayNameLabel": "Display name",
+      "passwordLabel": "Password",
+      "submit": "Create account",
+      "submitPending": "Creating your account…",
+      "haveAccount": "Already have an account? Sign in",
+      "checkEmailHeading": "Check your email",
+      "checkEmailBody": "If that email can be used, we've sent a link to verify it. Check your inbox and follow the link to finish creating your account.",
+      "backToSignIn": "Back to sign in"
     }
   }
 }
