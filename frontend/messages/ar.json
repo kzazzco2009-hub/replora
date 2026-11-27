@@ -34,6 +34,17 @@
       "title": "تصدير ملف CSV"
     }
   },
+  "results": {
+    "requestFailed": "تعذّر تحميل النتائج.",
+    "statuses": {
+      "matched": "مطابق",
+      "value_diff": "مختلف",
+      "missing_left": "مفقود في الملف الأيسر",
+      "missing_right": "مفقود في الملف الأيمن",
+      "unknown": "حالة غير معروفة",
+      "none": "لا توجد حالة مطابقة"
+    }
+  },
   "runProgress": {
     "cancel": "إلغاء التشغيل",
     "confirmCancel": "هل تريد إلغاء هذا التشغيل؟",

@@ -34,6 +34,17 @@
       "title": "Export a CSV file"
     }
   },
+  "results": {
+    "requestFailed": "Results could not be loaded.",
+    "statuses": {
+      "matched": "Matched",
+      "value_diff": "Different",
+      "missing_left": "Missing on the left",
+      "missing_right": "Missing on the right",
+      "unknown": "Unrecognized status",
+      "none": "No reconciliation status"
+    }
+  },
   "runProgress": {
     "cancel": "Cancel run",
     "confirmCancel": "Cancel this run?",
