@@ -305,5 +305,61 @@
     "COLUMNS_DIFFER": {
       "description": "Draft warning (merge): a file's columns are not the first file's, so merging it may leave gaps (path inputs/<i>, params.file, params.missing, params.extra)."
     }
+  },
+  "operation_codes": {
+    "CSV_EMPTY": {
+      "description": "The CSV file has no content (operation failure)."
+    },
+    "CSV_DUPLICATE_HEADER": {
+      "description": "Two CSV columns have the same name, so they can't be told apart (params.columns)."
+    },
+    "CSV_ROW_RAGGED": {
+      "description": "Warning: some rows have more or fewer cells than the header; they were padded or cut (params.rows, params.expected)."
+    },
+    "JSON_INVALID": {
+      "description": "The JSON file can't be read."
+    },
+    "JSON_NOT_ARRAY": {
+      "description": "The JSON file isn't an array of objects."
+    },
+    "JSON_EMPTY": {
+      "description": "The JSON array is empty."
+    },
+    "JSON_DUPLICATE_KEY": {
+      "description": "An object has the same key twice (params.key)."
+    },
+    "JSON_TOO_DEEP": {
+      "description": "The JSON is nested deeper than allowed (params.limit)."
+    },
+    "JSON_KEYS_MIXED": {
+      "description": "Warning: some objects have different keys from the first; missing cells are empty (params.rows)."
+    },
+    "ZIP_MEMBER_MISSING": {
+      "description": "The archive has no file at this path (params.path, params.found)."
+    },
+    "COLUMN_MISSING": {
+      "description": "A column the step needs isn't in its table (params.column, params.side)."
+    },
+    "COLUMN_CLASH": {
+      "description": "Renaming would give two columns the same name (params.columns)."
+    },
+    "COLUMNS_DIFFER": {
+      "description": "Tables to merge don't have the same columns (params.columns)."
+    },
+    "NUMBER_INVALID": {
+      "description": "Warning: some cells in a number column aren't numbers; they were left empty (params.column, params.rows)."
+    },
+    "DATE_INVALID": {
+      "description": "Warning: a date column has values that aren't dates (params.column)."
+    },
+    "DATE_AMBIGUOUS": {
+      "description": "Review: every date could be day-first or month-first; choose one (params.column, params.options: DMY, MDY)."
+    },
+    "KEY_DUPLICATED": {
+      "description": "Warning: a key appears more than once on one side; its rows are listed as duplicate_key, not compared (params.side, params.keys)."
+    },
+    "SCHEMA_DRIFT": {
+      "description": "Review: a column the workflow expects isn't in the file, for example renamed; choose how to continue (params.column, params.available)."
+    }
   }
 }

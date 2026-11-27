@@ -664,6 +664,14 @@ PR **#114** (stacked on #113).
 - **S‑37:** `escape_cell` prefixes `'` to cells starting with `= + - @`, tab or CR, **except plain numbers** (`-10`). The `decisions.md` row gives the reason.
 - **T7.8 and T7.12** pass (the Excel check is manual and is logged with the acceptance run). Mutation checks: the number exception, tab and CR, and the default BOM are caught.
 - **P7.2 and P7.3 are done.** `uv run pytest -q`: **2372 passed**.
+PR **#115** (stacked on #114).
+
+**P7.2 part 3, the operation registry** (`app/ops/registry.py`, `app/ops/codes.py`; collection failed first).
+- **11 operations, v1:** `extract_member`, `parse_csv`, `parse_json`, `normalize`, `map_columns`, `compare`, `report_csv`, `summary_json`, `bundle_zip`, `append_rows` and `export_csv`. The **TemplatePlanner's ids are all there**. Params fit the form subset (lists and enums; `map_columns` takes `source` and `target` lists; `normalize` takes one `date_order`).
+- `Data.source` carries `file` and `member`. Every handler adds `op@1` to each row's lineage `ops` (P7.4).
+- **Schema drift:** a column missing in `normalize` gives a `SCHEMA_DRIFT` warning (with `available`) and the table unchanged, so the review policy stops the run as NEEDS_REVIEW (T7.4).
+- **New `contracts/error-codes.json` → `operation_codes`** (18). A test scans `app/ops` for every `OperationError` and `Issue` code and requires each to be in the enum, and the enum to equal the catalogue section.
+- `uv run pytest -q`: **2382 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
