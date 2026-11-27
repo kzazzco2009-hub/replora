@@ -2,6 +2,7 @@
 
 import hashlib
 import itertools
+from uuid import UUID
 
 import pytest
 from conftest import with_csrf
@@ -178,3 +179,53 @@ def test_another_workspaces_file_is_not_found_from_mine(web):
     file = upload(web, CSV).json()
     other = web.post("/api/v1/workspaces", json={"name": "Other"}).json()["id"]
     assert web.get(f"/api/v1/workspaces/{other}/files/{file['id']}").status_code == 404
+
+
+def test_the_retention_job_deletes_expired_files_from_the_db_and_storage(web):
+    from datetime import timedelta
+
+    from app.files.service import INPUT_RETENTION, purge_expired
+
+    kept, gone = upload(web, CSV).json(), upload(web, CSV, name="old.csv").json()
+    app = web.app
+    with app.state.sessions.begin() as session:
+        from app.db import models as m
+
+        session.get(m.File, UUID(gone["id"])).expires_at = app.state.clock() - timedelta(seconds=1)
+    with app.state.sessions.begin() as session:
+        assert purge_expired(session, app.state.storage, app.state.clock()) == 1
+    assert web.get(f"/api/v1/workspaces/{web.ws}/files/{gone['id']}").status_code == 404
+    assert not app.state.storage.exists(f"{web.ws}/{gone['id']}")
+    assert web.get(f"/api/v1/workspaces/{web.ws}/files/{kept['id']}").status_code == 200
+    assert timedelta(days=30) == INPUT_RETENTION
+
+
+def test_the_workspace_quota_blocks_new_upload_intents(db_url, tmp_path):
+    Base.metadata.create_all(make_engine(db_url))
+    app = create_app(Settings(_env_file=None, database_url=db_url, data_dir=tmp_path,
+                              workspace_quota_bytes=len(CSV) * 2))  # fmt: skip
+    app.state.mailer = Outbox()
+    client = with_csrf(TestClient(app, client=("10.8.9.9", 1)))
+    body = {"email": "q@example.com", "password": PASSWORD, "display_name": "Q", "locale": "en"}
+    client.post("/api/v1/auth/register", json=body)
+    client.post("/api/v1/auth/login", json={"email": body["email"], "password": PASSWORD})
+    client.ws = client.get("/api/v1/auth/me").json()["memberships"][0]["id"]
+    junk = b"MZ" + b"\x00" * (len(CSV) * 2 - 2)
+    assert upload(client, junk).json()["status"] == "rejected"  # rejected bytes don't count
+    assert upload(client, CSV).json()["status"] == "ready"
+    assert intent(client, len(CSV)).status_code == 201
+    response = intent(client, len(CSV) + 1)
+    assert (response.status_code, response.json()["code"]) == (413, "QUOTA_EXCEEDED")
+
+
+@pytest.mark.parametrize(("count", "allowed"), [(10, True), (11, False)])
+def test_at_most_10_files_go_into_one_run(count, allowed):
+    from app.api.problem import ProblemError
+    from app.files.service import check_files_per_run
+
+    if allowed:
+        check_files_per_run(count)
+    else:
+        with pytest.raises(ProblemError) as caught:
+            check_files_per_run(count)
+        assert (caught.value.problem.status, caught.value.problem.code) == (413, "QUOTA_EXCEEDED")

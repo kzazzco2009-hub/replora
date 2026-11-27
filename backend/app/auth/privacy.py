@@ -12,7 +12,6 @@ import io
 import json
 import zipfile
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import Any
 from uuid import UUID
 
@@ -21,13 +20,13 @@ from sqlalchemy.orm import Session
 
 from app.api.problem import ProblemError
 from app.auth.one_time import revoke_all_sessions
-from app.config import Settings
 from app.db import models as m
 from app.db.repos import scoped
 
 
-def archive_path(settings: Settings, user_id: UUID | str, export_id: UUID | str) -> Path:
-    return Path(settings.data_dir) / "exports" / str(user_id) / f"{export_id}.zip"
+def export_key(user_id: UUID | str, export_id: UUID | str) -> str:
+    """Where an export lives in storage; only its owner's id can reach it."""
+    return f"exports/{user_id}/{export_id}"
 
 
 def _rows(rows, *fields: str) -> list[dict[str, Any]]:
@@ -75,11 +74,14 @@ def request_deletion(session: Session, user: m.User, now: datetime) -> None:
     revoke_all_sessions(session, user, now)
 
 
-def purge_deleted(session: Session, now: datetime, grace: timedelta) -> int:
-    """Remove the users whose grace period is over, with their personal workspace. The count."""
+def purge_deleted(session: Session, storage, now: datetime, grace: timedelta) -> int:
+    """Remove the users whose grace period is over, with their personal workspace and its files'
+    bytes in storage (S-29). The count."""
     users = session.scalars(select(m.User).where(m.User.deleted_at <= now - grace)).all()
     for user in users:
         for space in session.scalars(select(m.Workspace).where(m.Workspace.owner_id == user.id)):
+            for file in session.scalars(scoped(m.File, space.id)):
+                storage.delete(file.storage_key)
             session.delete(space)
         session.flush()
         session.delete(user)

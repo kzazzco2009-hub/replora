@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.auth.mail import Outbox
-from app.auth.privacy import archive_path, purge_deleted
+from app.auth.privacy import purge_deleted
 from app.config import Settings
 from app.db import models as m
 from app.db.base import Base
@@ -51,8 +51,11 @@ def test_the_export_holds_only_the_users_own_data(app):
     started = salma.post("/api/v1/auth/me/export")
     assert started.status_code == 202
     export_id = started.json()["export_id"]
-    assert salma.get(f"/api/v1/auth/me/export/{export_id}").json()["status"] == "ready"
-    data = archive_path(app.state.settings, salma.user_id, export_id).read_bytes()
+    status = salma.get(f"/api/v1/auth/me/export/{export_id}").json()
+    assert status["status"] == "ready"
+    download = salma.get(status["url"])
+    assert "replora-export.zip" in download.headers["content-disposition"]
+    data = download.content
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         names = set(archive.namelist())
         everything = b"".join(archive.read(name) for name in names)
@@ -95,10 +98,28 @@ def test_the_purge_waits_for_the_grace_period_then_removes_the_user_and_anonymiz
     salma.request("DELETE", "/api/v1/auth/me", json={"password": PASSWORD})
     grace = app.state.settings.deletion_grace
     deleted_at = app.state.clock()
+    stored = f"{salma.personal}/kept-file"
+    app.state.storage.put(stored, b"x")
     with app.state.db.begin() as session:
-        assert purge_deleted(session, deleted_at + grace - timedelta(seconds=1), grace) == 0
+        session.add(
+            m.File(
+                workspace_id=UUID(salma.personal),
+                storage_key=stored,
+                display_name="x",
+                size=1,
+                status="ready",
+            )
+        )
     with app.state.db.begin() as session:
-        assert purge_deleted(session, deleted_at + grace, grace) == 1
+        assert (
+            purge_deleted(
+                session, app.state.storage, deleted_at + grace - timedelta(seconds=1), grace
+            )
+            == 0
+        )
+    with app.state.db.begin() as session:
+        assert purge_deleted(session, app.state.storage, deleted_at + grace, grace) == 1
+    assert not app.state.storage.exists(stored)
     with app.state.db() as session:
         assert session.get(m.User, UUID(salma.user_id)) is None
         assert session.get(m.Workspace, UUID(salma.personal)) is None

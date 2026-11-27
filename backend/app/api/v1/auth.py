@@ -302,20 +302,21 @@ def start_export(request: Request) -> ExportAccepted:
     user, export_id = request.state.caller.user, uuid7()
     with database(request)() as session:
         data = privacy.export_archive(session, session.get(m.User, user.id))
-    path = privacy.archive_path(request.app.state.settings, user.id, export_id)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(data)
+    request.app.state.storage.put(privacy.export_key(user.id, export_id), data)
     return ExportAccepted(export_id=export_id)
 
 
 @router.get("/me/export/{export_id}", responses=NOT_FOUND_RESPONSE)
 def get_export(export_id: UUID, request: Request) -> ExportStatus:
     """Poll an export; `url` is set when it is ready."""
-    path = privacy.archive_path(request.app.state.settings, request.state.caller.user.id, export_id)
-    if not path.exists():
+    storage, key = (
+        request.app.state.storage,
+        privacy.export_key(request.state.caller.user.id, export_id),
+    )
+    if not storage.exists(key):
         raise ProblemError(404, "NOT_FOUND", "Not found")
-    # The signed download URL comes with storage (Phase 6); until then the archive is local.
-    return ExportStatus(status="ready")
+    url, _ = storage.signed_download_url(key, "replora-export.zip", now(request))
+    return ExportStatus(status="ready", url=url)
 
 
 @router.get("/sessions")
