@@ -2,6 +2,7 @@ import { setupServer } from "msw/node";
 import { authHandlers } from "./handlers/auth";
 import { draftsHandlers } from "./handlers/drafts";
 import { filesHandlers } from "./handlers/files";
+import { resultsHandlers } from "./handlers/results";
 
 import { runsHandlers } from "./handlers/runs";
 
@@ -10,4 +11,5 @@ export const server = setupServer(
   ...filesHandlers,
   ...draftsHandlers,
   ...runsHandlers,
+  ...resultsHandlers,
 );
