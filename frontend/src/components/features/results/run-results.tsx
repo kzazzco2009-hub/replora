@@ -1,14 +1,21 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusChip } from "@/components/ui/status-chip";
-import { resultStatuses, resultsErrorKey, useOutputs } from "@/lib/api/results";
+import {
+  isTabular,
+  resultStatuses,
+  resultsErrorKey,
+  useOutputs,
+} from "@/lib/api/results";
 import { useRun, type Run } from "@/lib/api/runs";
 import { DownloadOutput } from "./download-output";
+import { ResultsBrowser } from "./results-browser";
 
 function OutputFiles({ wsId, runId }: { wsId: string; runId: string }) {
   const t = useTranslations();
@@ -29,6 +36,7 @@ function OutputFiles({ wsId, runId }: { wsId: string; runId: string }) {
     );
   if (query.data.length === 0)
     return <EmptyState title={t("results.noFiles")} />;
+  const previews = query.data.filter(isTabular);
   return (
     <section className="min-w-0 space-y-3">
       <h2 className="text-lg font-semibold">{t("results.files")}</h2>
@@ -57,6 +65,15 @@ function OutputFiles({ wsId, runId }: { wsId: string; runId: string }) {
           </li>
         ))}
       </ul>
+      {previews.length > 0 && (
+        <Suspense
+          fallback={
+            <Skeleton variant="card" aria-label={t("results.loading")} />
+          }
+        >
+          <ResultsBrowser wsId={wsId} runId={runId} files={previews} />
+        </Suspense>
+      )}
     </section>
   );
 }
