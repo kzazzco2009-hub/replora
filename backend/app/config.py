@@ -35,8 +35,16 @@ class Settings(BaseSettings):
     startup, so a restart ends access tokens (15 minutes), not sessions."""
     database_url: str = f"sqlite:///{(REPO_ROOT / '.data' / 'replora.db').as_posix()}"
     """P4.1: SQLite under `.data/` locally; the Supabase pooler URL in production (Phase 18)."""
+    data_dir: Path = REPO_ROOT / ".data"
+    """Local data (exports until Phase 6 storage). Git-ignored."""
+    deletion_grace_days: Annotated[int, Field(ge=0)] = 30
+    """P5.10: an account is purged this long after the user deletes it."""
     approval_ttl_hours: Annotated[int, Field(ge=1)] = 24
     """P3.6: a run awaiting approval for longer than this expires."""
+
+    @property
+    def deletion_grace(self) -> timedelta:
+        return timedelta(days=self.deletion_grace_days)
 
     @property
     def approval_ttl(self) -> timedelta:

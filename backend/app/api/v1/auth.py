@@ -1,7 +1,7 @@
 """§2 auth endpoints (docs/api_contract.md). Contract stubs: each one answers 501 until Phase 5."""
 
 from typing import Annotated
-from uuid import UUID
+from uuid import UUID, uuid7
 
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy import select
@@ -44,9 +44,9 @@ from app.api.v1.auth_models import (
     User,
 )
 from app.api.v1.workspace_models import Workspace
-from app.auth import accounts, audit, limits, one_time, sessions
+from app.auth import accounts, audit, limits, one_time, privacy, sessions
 from app.auth.mail import compose
-from app.auth.passwords import hash_password
+from app.auth.passwords import hash_password, verify_password
 from app.auth.tokens import digest
 from app.db import models as m
 
@@ -164,9 +164,16 @@ def update_me(body: UpdateMeRequest, request: Request) -> User:
 
 
 @router.delete("/me", status_code=202, responses=WRONG_SECRET_RESPONSE)
-def delete_me(body: PasswordRequest) -> None:
+def delete_me(body: PasswordRequest, request: Request, response: Response) -> None:
     """Schedule account deletion after the grace period."""
-    raise not_implemented()
+    with database(request).begin() as session:
+        user = session.get(m.User, request.state.caller.user.id)
+        if not verify_password(body.password, user.password_hash)[0]:
+            raise ProblemError(400, "PASSWORD_INCORRECT", "Wrong password")
+        privacy.request_deletion(session, user, now(request))
+        audit.record(session, "auth.deletion_requested", user.id, ip_hash=client_ip(request))
+    clear_session_cookies(response)
+    response.status_code = 202
 
 
 @router.post("/verify-email", status_code=204, responses=WRONG_SECRET_RESPONSE)
@@ -236,15 +243,25 @@ def disable_mfa(body: MfaDisableRequest) -> None:
 
 
 @router.post("/me/export", status_code=202)
-def start_export() -> ExportAccepted:
+def start_export(request: Request) -> ExportAccepted:
     """Start an export of the user's data."""
-    raise not_implemented()
+    user, export_id = request.state.caller.user, uuid7()
+    with database(request)() as session:
+        data = privacy.export_archive(session, session.get(m.User, user.id))
+    path = privacy.archive_path(request.app.state.settings, user.id, export_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    return ExportAccepted(export_id=export_id)
 
 
 @router.get("/me/export/{export_id}", responses=NOT_FOUND_RESPONSE)
-def get_export(export_id: UUID) -> ExportStatus:
+def get_export(export_id: UUID, request: Request) -> ExportStatus:
     """Poll an export; `url` is set when it is ready."""
-    raise not_implemented()
+    path = privacy.archive_path(request.app.state.settings, request.state.caller.user.id, export_id)
+    if not path.exists():
+        raise ProblemError(404, "NOT_FOUND", "Not found")
+    # The signed download URL comes with storage (Phase 6); until then the archive is local.
+    return ExportStatus(status="ready")
 
 
 @router.get("/sessions")
