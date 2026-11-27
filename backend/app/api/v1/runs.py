@@ -17,6 +17,7 @@ from app.api.problem import (
     NOT_FOUND_RESPONSE,
     ProblemError,
     ProblemItem,
+    invalid,
     not_implemented,
 )
 from app.api.session import database, now
@@ -46,7 +47,7 @@ from app.core.run_state import InvalidTransitionError, RunAction
 from app.db import models as m
 from app.db.engine_state import apply, load_run
 from app.db.jobs import enqueue
-from app.db.repos import get, scoped
+from app.db.repos import get, page_query, scoped
 from app.db.run_events import emit
 
 IdempotencyKey = Annotated[
@@ -174,10 +175,21 @@ def cancel_run(ws_id: UUID, run_id: UUID, request: Request) -> api.Run:
 
 @router.get("", name="list")
 def list_runs(
-    ws_id: UUID, cursor: Cursor = None, limit: Limit = 25, state: RunState | None = None
-) -> RunSummaryPage:
+    ws_id: UUID, request: Request, cursor: Cursor = None, limit: Limit = 25,
+    state: RunState | None = None,
+) -> RunSummaryPage:  # fmt: skip
     """The workspace runs, newest first."""
-    raise not_implemented()
+    with database(request)() as session:
+        after = None
+        if cursor is not None:
+            after = _cursor_run(session, ws_id, cursor)
+        query = scoped(m.Run, ws_id)
+        if state is not None:
+            query = query.where(m.Run.state == state.value)
+        rows = page_query(session, query, m.Run, limit + 1, after)
+        items = [_summary(session, ws_id, row) for row in rows[:limit]]
+    return RunSummaryPage(items=items, next_cursor=str(rows[limit - 1].id)
+                          if len(rows) > limit else None)  # fmt: skip
 
 
 @router.get("/{run_id}", name="get")
@@ -188,9 +200,18 @@ def get_run(ws_id: UUID, run_id: UUID, request: Request) -> api.Run:
 
 
 @router.get("/{run_id}/events", name="events")
-def get_run_events(ws_id: UUID, run_id: UUID, after: Annotated[int, Query(ge=0)] = 0) -> RunEvents:
+def get_run_events(
+    ws_id: UUID, run_id: UUID, request: Request, after: Annotated[int, Query(ge=0)] = 0
+) -> RunEvents:
     """Events after sequence number `after`. Poll every 1 s, backing off to 5 s."""
-    raise not_implemented()
+    with database(request)() as session:
+        _run(session, ws_id, run_id)
+        query = scoped(m.RunEvent, ws_id).where(m.RunEvent.run_id == run_id,
+                                                 m.RunEvent.seq > after)  # fmt: skip
+        rows = session.scalars(query.order_by(m.RunEvent.seq)).all()
+    events = [api.RunEvent(seq=e.seq, type=e.type, node_id=e.node_id, payload=e.payload,
+                           created_at=e.created_at) for e in rows]  # fmt: skip
+    return RunEvents(events=events, last_seq=rows[-1].seq if rows else after)
 
 
 def _move(change) -> EngineRun:
@@ -221,6 +242,27 @@ def _run(session: Session, ws_id: UUID, run_id: UUID) -> m.Run:
     if row is None:
         raise not_found()
     return row
+
+
+def _cursor_run(session: Session, ws_id: UUID, cursor: str) -> m.Run:
+    try:
+        row = get(session, m.Run, ws_id, UUID(cursor))
+    except ValueError:
+        row = None
+    if row is None:
+        raise invalid("query.cursor", "INVALID")
+    return row
+
+
+def _title(run: EngineRun) -> str:
+    """The run's input files, for the list: `orders.csv · payments.json`."""
+    return " · ".join(i.label or i.name for i in run.definition.inputs)
+
+
+def _summary(session: Session, ws_id: UUID, row: m.Run) -> api.RunSummary:
+    run = load_run(session, ws_id, row.id)
+    return api.RunSummary(id=row.id, state=row.state, title=_title(run),
+                          created_at=row.created_at, finished_at=row.finished_at)  # fmt: skip
 
 
 def to_run(session: Session, ws_id: UUID, row: m.Run, request: Request) -> api.Run:
