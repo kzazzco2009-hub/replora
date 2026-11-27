@@ -69,6 +69,7 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 - [x] **S‑34:** the server computes the SHA‑256 at complete; upload URLs are single-purpose (one key, one declared size) and last 10 minutes (T6.7, T6.8).
 - [x] **S‑35 (Phase 6 part):** uploaded bytes are only read in memory by the detector and the ZIP inspector; nothing is executed, extracted to disk, or sent anywhere. **Parser temp-dir quotas and timeouts** come with the worker and the real parsers (T15.2, T17.6).
 - [x] **S‑36:** every download goes through the API's permission check to a 5-minute signed URL with `Content-Disposition: attachment`, `nosniff` and `no-store` (T6.7).
+- [x] **S‑37 (CSV part):** `comparison_report.csv` prefixes `'` to every cell starting with `= + - @`, tab or CR, except plain numbers like `-10` (`decisions.md`, 2026-11-27); `summary.json` holds no spreadsheet cells. T7.8: `tests/unit/test_outputs.py` (`test_formula_cells_are_escaped_but_plain_numbers_are_not`, `test_injected_cells_are_escaped_in_the_report`). The XLSX writer is T14.6.
 - [x] **S‑29 (the rest):** the account purge now deletes the personal workspace's file bytes from storage. Exports live in storage behind a signed 5-minute link.
 
 | ID | Control | Implementation | Verify |

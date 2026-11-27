@@ -259,13 +259,13 @@ Goal: frozen domain models that both developers rely on.
 - [x] P7.1 Adapters: `ZipAdapter` (produces ArchiveManifest), `CsvAdapter` (encoding detection, delimiter sniffing, produces TabularArtifact), `JsonAdapter` (array of objects, produces TabularArtifact).
 - [x] P7.2 Operations: `extract_member`, `map_columns`, `normalize` (trim, number and decimal parsing, key casing), `compare` (fan-in on key, giving matched / value_diff / missing_left / missing_right), `report_csv`, `summary_json`, `bundle_zip`.
 - [x] P7.3 CSV output is protected against formula injection (security.md S‑37).
-- [ ] P7.4 Lineage: every output row records its source file, member, row and operation versions.
-- [ ] P7.5 Data correctness rules:
+- [x] P7.4 Lineage: every output row records its source file, member, row and operation versions.
+- [x] P7.5 Data correctness rules:
   - money and numbers use `Decimal` only (never float), and the comparison tolerance is a parameter (default exact);
   - ambiguous dates (`03/04/2026`) make the run NEEDS_REVIEW with a format choice, never a silent guess;
   - CSV outputs default to **UTF‑8 with BOM** so Arabic opens correctly in Excel, with plain UTF‑8 as an option.
-- [ ] P7.6 **Acceptance test (from the original §9):** O‑101 matched, O‑102 value_diff, O‑103 missing_right, O‑104 missing_left. A failure in a required branch means no success. Schema drift leads to NEEDS_REVIEW.
-- [ ] Tests T7.* pass · Security S‑37 verified · **Gate G7**
+- [x] P7.6 **Acceptance test (from the original §9):** O‑101 matched, O‑102 value_diff, O‑103 missing_right, O‑104 missing_left. A failure in a required branch means no success. Schema drift leads to NEEDS_REVIEW.
+- [x] Tests T7.* pass · Security S‑37 verified · **Gate G7**
 
 ### Phase 8 — Workflow and run API plus background worker (M)
 - [ ] P8.1 Endpoints for templates, drafts (TemplatePlanner), validate, runs (create, approve, cancel, get, list), events and outputs (with preview pagination) per `api_contract.md`.

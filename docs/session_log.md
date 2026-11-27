@@ -10,24 +10,19 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 3 — Execution engine (B3): complete, G3 awaiting Developer A.** Session 16. **G1 and G2 passed** 2026-11-26 (Developer A), on the condition that their stacks merge after the frontend's review. `main` is at **`ef29ba7`** (#69).
+| Current phase | **Phase 7 done: G7 (backend) recorded in Session 18** (pre-approved by the standing go). End-of-phase run at `2a41bd8`: **2391 passed**, no drift, pip-audit clean, frontend build and `pnpm audit` clean, gitleaks clean. **Next: Phase 8.**
 
-**Phase 1:** 7/7 steps, T1.1–T1.6, S‑10, S‑11.
-**Phase 2:** 6/6 steps, T2.1–T2.8, S‑12.
-**Phase 3:** 9/9 steps, T3.1–T3.11, S‑11 (Phase 3 part), S‑13 (Phase 3 part; timeouts, memory and quota at T17.6). End-of-phase run on the top of the stack: 1433 backend + 186 frontend tests, no drift, no leaks.
+**Gates passed:** G0–G4 (G4 pre-approved), **G5, G6 and G7 (backend, pre-approved by Developer A's standing go)**; I1 and I2 are the frontend's to confirm.
 
-**Merged:** #68 P1.5, #69 P1.5b. **Open backend stack (merge in order; after each merge, rebase the next onto `main`, show the range-diff and ping the frontend to re-approve):** #70 P1.6 (rebased at `9447c56`, waiting for re-approval) → #71 P1.7/S‑10 → #72 P2.1 → #73 P2.2+P2.5 → #74 P2.3 → #75 P2.4+P2.6 → #77 P3.1+P3.2+G2 record → #78 P3.3 → #79 P3.4 (`run_codes`) → #80 P3.5 → #81 P3.6 → #82 P3.7 → #83 P3.8 → #84 P3.9 reconcile (`planner_codes`) → `feat/p3.9-merge-template` (merge template, G3 record).
+**Standing go (Developer A, 2026-11-27):** finish Phases 7, 8 and 9 without asking; update this log; push; message the frontend after each phase on #1.
 
-**Frontend PRs:** #76 approved (TanStack Query provider), and their 401 note answered. |
-| Last gate passed | **G2** (2026-11-26, Developer A, `decisions.md`). **G3 is ready and awaiting Developer A.** |
-| Waiting on | **Developer A:** **approve G3** (or not), then Phase 4 can start.
-
-**Frontend:** re-approve #70 so the stack can keep merging; review the Phase 2 and 3 PRs (the shared files are `error-codes.json` → `run_codes` and `planner_codes`, `.env.example`); add the i18n keys `templates.{reconcile,merge}.{title,description}` and `plans.{reconcile,merge}`. |
-| Next step | 0) **Resume:** Phase 5 is done and G5 (backend) is recorded. The standing go covers **Phases 6, 7, 8 and 9** without asking: update this log, push, and message the frontend after each phase. Next: **P6.1**.
-1) **Phase 4** (persistence: SQLAlchemy, Alembic, workspace-scoped repositories; P4.6 persists runs, run_nodes, artifacts and the idempotency ledger).
-2) Merge the stack in order as the frontend approves it (recipe in the notes below and in memory).
-3) Phase 7 registers the real operations under the ids the templates use: `parse_csv`, `parse_json`, `compare`, `report_csv`, `append_rows`, `export_csv`.
-4) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). The API request body size cap belongs to Phase 8 (S‑12 note). |
+**Open PRs (stacked, merge in order; rebase and ping after each merge):** #71 (re-approved at `e828fa5`) → #72–#75 → #77–#85 → #86–#95 (Phase 4 and the contract PR) → #96–#107 (Phase 5) → #108–#112 (Phase 6) → #113–#116 (Phase 7) → the P7.6 PR. #70, #69 and #92 merged. |
+| Last gate passed | **G7 (backend)**, 2026-11-27 (`decisions.md`). |
+| Waiting on | **Frontend:** review the stack (#107–#116 are green again after the Session 18 test fix; #97's Postgres job still has the flaky checkpoint test, see Session 18); I1 and I2 (after their auth PRs #117–#122 merge). Decided on #1 (7213533760): no transfer endpoint, no locale in email links, the backend adds catalogue code names with placeholder texts. |
+| Next step | 1) **Phase 8** (API and worker: wire drafts, runs, workflows and outputs to the engine and DB; the DB job worker; `Idempotency-Key`; `ETag`; the body size cap; `RunEvent.payload` union; P8.8 spike). Known P8 items: the `artifacts` table needs a `name`/source column so `Data.source` survives the DB store; schedule `purge_expired`, `purge_deleted` and `expire_if_stale`; the runs endpoint calls `check_files_per_run`.
+2) When a stacked PR is rebased onto `main`, add its new catalogue code names to `frontend/src/lib/api/error-messages.ts` and `frontend/tests/unit/error-messages-parity.test.ts` (placeholder texts).
+3) Then Phase 9 (frontend-led; the backend supports it), and stop for Developer A before Phase 10.
+4) Watch flakiness: the timing tests were loosened (T5.11 median, ZIP bomb 2 s); the checkpoint and stub-DB causes were fixed in Session 18. |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
 1. `git fetch --all --prune; git switch main; git pull --ff-only` (if a log PR is still open, switch to its branch and pull). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`. Once per clone: `pre-commit install`.
@@ -55,7 +50,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 4 Persistence | 7/7 | 8/8 | 2/2 | ☑ G4 2026-11-27 (pre-approved by Developer A; stack merging) |
 | 5 Auth | 11/11 | 15/15 | 10/10 | ☑ G5 2026-11-27 (backend; pre-approved by Developer A; I1 with the frontend) |
 | 6 Files | 7/7 | 10/10 | 7/7 + S‑29 rest (S‑35 partly at T15.2/T17.6) | ☑ G6 2026-11-27 (backend; pre-approved; I2 with the frontend) |
-| 7 First pipeline | 0/6 | 0/12 | 0/1 | ☐ |
+| 7 First pipeline | 6/6 | 12/12 | 1/1 (S‑37 CSV part; XLSX at T14.6) | ☑ G7 2026-11-27 (backend; pre-approved) |
 | 8 API + worker | 0/9 | 0/10 | 0/6 | ☐ |
 | 9 FE foundation | 3/8 | 0/9 | 0/5 | ☐ |
 | 10 FE core flow | 0/10 | 0/11 | 0/2 | ☐ |
@@ -127,6 +122,19 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 ---
 
+## Session 18 — 2026-11-27 (`D:\Projects\replora`): red CI on the stack, G7
+**Frontend reply on #1 (7213533760):** #71 re-approved; yes to adding catalogue code names with placeholders; no transfer endpoint for `OWNS_SHARED_WORKSPACE` (MVP); no locale in email links (their proxy keeps `?token=`); #95, #109 and S‑37's plain-number rule OK. Recorded in `decisions.md`. They reported two red CI jobs on the stack.
+
+**Red CI, root causes (both test-only, proven before fixing):**
+1. `test_mfa_challenge_accepts_a_recovery_code` (SQLite job, #107 onward, every run): `stub_app()` used the default `database_url`, i.e. the developer's migrated `.data/replora.db`. Since P5.11 the MFA endpoint reads `auth_tokens`, so it passed locally and failed on CI's empty file. **Reproduced** locally with `DATABASE_URL` pointing at an empty file (1 failed). **Fix:** `stub_app(database_url)` plus a module `stub_db` fixture: a fresh SQLite file with the tables. Unit run against an empty default DB: 1677 passed (the one failure was `test_the_default_database_is_sqlite_under_dot_data`, caused by the override itself; 5 passed without it).
+2. `test_a_killed_run_resumes_without_re_executing_done_nodes` (Postgres job, flaky): the test's `bundle()` used `writestr(name, …)`, which stamps the current time (2 s resolution). Two attempts in different slots → different `sha256` → a different ledger key → `unzip` re-ran (the engine was right). **Proven:** two builds 2.1 s apart gave `459de11a…` vs `90830e46…`; with a forced 2.1 s pause between attempts the old fixture fails and the fixed one passes. **Fix:** members get a fixed `ZipInfo` `date_time`.
+- Commit `2e6bf54` on `feat/p5.11-mfa-challenge` (#107): 3 test files, +23/−12. Full suite there: **2176 passed**, no drift. Then `git rebase --update-refs --onto` moved #108–#116 and `feat/p7.6-acceptance`; `git range-diff` showed every commit `=`, and each branch differs from its old head only by those 3 files. Pushed with `--force-with-lease` (no reviews existed on #107–#116). **CI green on #107 and #116**, both backend jobs.
+- **#97 is still red**: its head is below #107, so it lacks fix 2, and the re-run (attempt 2) hit the same flake. The test came in P4.6 (#91); see "Open" below.
+- A stray edit (the `#` removed from `docs/plan.md`'s title) appeared in the working tree; not mine and not committed. It is in `git stash` ("stray edit: docs/plan.md …") for Developer A to drop or keep.
+
+**End-of-Phase-7 run at `2a41bd8`:** backend **2391 passed**, 12 skipped; `export_openapi --check` exit 0; pip-audit no known vulnerabilities; `pnpm --filter frontend build` OK; `pnpm audit --audit-level=high` none; `gitleaks git .` no leaks. **S‑37 (CSV part) ticked in `security.md`; G7 recorded** (`decisions.md`, `plan.md`).
+
+**Open:** whether to push fix 2 down to #91 (it would dismiss the frontend's approvals on #91–#106) or fold it in when the stack is rebased onto `main`.
 ## Session 16 — 2026-11-26 (other machine, `D:\Projects\replora`): finish Phase 1
 **Goal (Developer A):** finish Phase 1 without stopping for permission between steps. Check for frontend replies at every step and post the state.
 
@@ -672,6 +680,19 @@ PR **#115** (stacked on #114).
 - **Schema drift:** a column missing in `normalize` gives a `SCHEMA_DRIFT` warning (with `available`) and the table unchanged, so the review policy stops the run as NEEDS_REVIEW (T7.4).
 - **New `contracts/error-codes.json` → `operation_codes`** (18). A test scans `app/ops` for every `OperationError` and `Issue` code and requires each to be in the enum, and the enum to equal the catalogue section.
 - `uv run pytest -q`: **2382 passed**. No drift.
+PR **#116** (stacked on #115). It also relaxed the ZIP-bomb timing bound to 2 s, the likely cause of an occasional full-suite failure.
+
+**P7.4 and P7.6, lineage and acceptance** (`tests/integration/test_acceptance.py`, golden files in `tests/integration/fixtures/acceptance/`).
+- The pipeline is 10 nodes on the **real registry**: extract the two members, parse each, normalize each, compare, then report, summary and bundle. It validates.
+- **T7.1:** O‑101 matched, O‑102 value_diff (diff 10), O‑103 missing_right, O‑104 missing_left. **`comparison_report.csv`, `summary.json` and `results.zip` equal the committed golden files byte for byte.** They were generated once and their content was inspected (statuses, differences, lineage) before commit. `.gitattributes` marks them `-text`, so CRLF survives.
+- **T7.2:** every report row names its file, member, row and operations, for example `extract_member@1 parse_csv@1 normalize@1 | …`.
+- **T7.3:** without `payments.json`, the run is FAILED with `ZIP_MEMBER_MISSING`, and there are no outputs.
+- **T7.4:** with `amount` renamed `total`, the run is NEEDS_REVIEW (`SCHEMA_DRIFT` at `payments_clean`, with `available`).
+- **Engine bug found and fixed:** `_issue(code, path, node_id, **params)` crashed when an operation error carried its own `path` param (`ZIP_MEMBER_MISSING`). Issue params are now one dict.
+- The bundled samples now hold the T7.1 numbers exactly.
+- `uv run pytest -q`: **2391 passed**.
+**Session 17 ended here** (Developer A's request), during the end-of-Phase-7 check run. Everything above is committed and pushed. **The check run then finished, all green:** the golden CSV blob keeps CRLF; ruff and format clean; **2391 passed**; openapi.json and schema drift exit 0; pip-audit clean; schema.d.ts no drift; frontend typecheck and **186 tests** pass; gitleaks no leaks. G7 can be recorded from this evidence (frontend build and pnpm audit weren't in this run).
+
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

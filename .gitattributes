@@ -10,3 +10,6 @@
 *.pdf binary
 *.docx binary
 *.pptx binary
+
+# Golden outputs are compared byte for byte (CRLF in the CSV, T7.1): never normalized.
+backend/tests/integration/fixtures/acceptance/** -text

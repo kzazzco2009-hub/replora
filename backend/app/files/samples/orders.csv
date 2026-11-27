@@ -1,4 +1,4 @@
-order_id,customer,amount
-O-101,Salma,120.00
-O-102,Omar,75.50
-O-103,Lina,40.00
+order_id,amount
+O-101,100
+O-102,200
+O-103,300
