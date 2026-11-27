@@ -49,8 +49,8 @@
       "JSON_INVALID": "This request couldn't be read. Please try again.",
       "MODEL_ATTRIBUTES_TYPE": "This request couldn't be read. Please try again.",
       "STRING_TYPE": "Enter text here.",
-      "STRING_TOO_SHORT": "Enter at least {min_length} characters.",
-      "STRING_TOO_LONG": "Enter no more than {max_length} characters.",
+      "STRING_TOO_SHORT": "Enter at least {min_length, plural, one {# character} other {# characters}}.",
+      "STRING_TOO_LONG": "Enter no more than {max_length, plural, one {# character} other {# characters}}.",
       "STRING_PATTERN_MISMATCH": "This doesn't match the expected format.",
       "LITERAL_ERROR": "Choose one of the allowed options.",
       "UUID_PARSING": "This isn't a valid ID.",
@@ -61,8 +61,8 @@
       "GREATER_THAN": "Enter a number greater than {gt}.",
       "GREATER_THAN_EQUAL": "Enter {ge} or more.",
       "LESS_THAN_EQUAL": "Enter {le} or less.",
-      "TOO_SHORT": "Add at least {min_length} items.",
-      "TOO_LONG": "Keep this to {max_length} items or fewer.",
+      "TOO_SHORT": "Add at least {min_length, plural, one {# item} other {# items}}.",
+      "TOO_LONG": "Keep this to {max_length, plural, one {# item} other {# items}} or fewer.",
       "INVALID": "This value isn't valid."
     },
     "rejection": {

@@ -49,8 +49,8 @@
       "JSON_INVALID": "تعذّرت قراءة هذا الطلب. من فضلك حاول مرة أخرى.",
       "MODEL_ATTRIBUTES_TYPE": "تعذّرت قراءة هذا الطلب. من فضلك حاول مرة أخرى.",
       "STRING_TYPE": "أدخل نصًا هنا.",
-      "STRING_TOO_SHORT": "أدخل {min_length} حرفًا على الأقل.",
-      "STRING_TOO_LONG": "أدخل {max_length} حرفًا كحد أقصى.",
+      "STRING_TOO_SHORT": "أدخل {min_length, plural, zero {# حرف} one {حرفًا واحدًا} two {حرفين} few {# أحرف} many {# حرفًا} other {# حرف}} على الأقل.",
+      "STRING_TOO_LONG": "أدخل {max_length, plural, zero {# حرف} one {حرفًا واحدًا} two {حرفين} few {# أحرف} many {# حرفًا} other {# حرف}} كحد أقصى.",
       "STRING_PATTERN_MISMATCH": "هذا لا يطابق الصيغة المطلوبة.",
       "LITERAL_ERROR": "اختر أحد الخيارات المتاحة.",
       "UUID_PARSING": "هذا ليس معرّفًا صالحًا.",
@@ -61,8 +61,8 @@
       "GREATER_THAN": "أدخل رقمًا أكبر من {gt}.",
       "GREATER_THAN_EQUAL": "أدخل {ge} أو أكثر.",
       "LESS_THAN_EQUAL": "أدخل {le} أو أقل.",
-      "TOO_SHORT": "أضف {min_length} عناصر على الأقل.",
-      "TOO_LONG": "اجعل هذا {max_length} عناصر كحد أقصى.",
+      "TOO_SHORT": "أضف {min_length, plural, zero {# عنصر} one {عنصرًا واحدًا} two {عنصرين} few {# عناصر} many {# عنصرًا} other {# عنصر}} على الأقل.",
+      "TOO_LONG": "اجعل هذا {max_length, plural, zero {# عنصر} one {عنصرًا واحدًا} two {عنصرين} few {# عناصر} many {# عنصرًا} other {# عنصر}} كحد أقصى.",
       "INVALID": "هذه القيمة غير صالحة."
     },
     "rejection": {

@@ -1,4 +1,7 @@
+import { createTranslator } from "next-intl";
 import { describe, expect, it } from "vitest";
+import ar from "../../messages/ar.json";
+import en from "../../messages/en.json";
 import { mapFieldErrors } from "../../src/lib/api/field-errors";
 import type { Problem } from "../../src/lib/api/problem";
 
@@ -13,6 +16,52 @@ function problem(errors: Problem["errors"], detail?: string): Problem {
     errors,
   };
 }
+
+describe("validation length messages", () => {
+  const arabic = createTranslator({ locale: "ar", messages: ar });
+  const english = createTranslator({ locale: "en", messages: en });
+  const number = new Intl.NumberFormat("ar");
+
+  it.each([
+    [0, `${number.format(0)} حرف`, `${number.format(0)} عنصر`],
+    [1, "حرفًا واحدًا", "عنصرًا واحدًا"],
+    [2, "حرفين", "عنصرين"],
+    [3, `${number.format(3)} أحرف`, `${number.format(3)} عناصر`],
+    [11, `${number.format(11)} حرفًا`, `${number.format(11)} عنصرًا`],
+    [100, `${number.format(100)} حرف`, `${number.format(100)} عنصر`],
+  ])("formats Arabic length %i", (length, characters, items) => {
+    expect(
+      arabic("errors.validation.STRING_TOO_SHORT", { min_length: length }),
+    ).toBe(`أدخل ${characters} على الأقل.`);
+    expect(
+      arabic("errors.validation.STRING_TOO_LONG", { max_length: length }),
+    ).toBe(`أدخل ${characters} كحد أقصى.`);
+    expect(arabic("errors.validation.TOO_SHORT", { min_length: length })).toBe(
+      `أضف ${items} على الأقل.`,
+    );
+    expect(arabic("errors.validation.TOO_LONG", { max_length: length })).toBe(
+      `اجعل هذا ${items} كحد أقصى.`,
+    );
+  });
+
+  it.each([
+    [1, "1 character", "1 item"],
+    [5, "5 characters", "5 items"],
+  ])("formats English length %i", (length, characters, items) => {
+    expect(
+      english("errors.validation.STRING_TOO_SHORT", { min_length: length }),
+    ).toBe(`Enter at least ${characters}.`);
+    expect(
+      english("errors.validation.STRING_TOO_LONG", { max_length: length }),
+    ).toBe(`Enter no more than ${characters}.`);
+    expect(english("errors.validation.TOO_SHORT", { min_length: length })).toBe(
+      `Add at least ${items}.`,
+    );
+    expect(english("errors.validation.TOO_LONG", { max_length: length })).toBe(
+      `Keep this to ${items} or fewer.`,
+    );
+  });
+});
 
 describe("mapFieldErrors", () => {
   it("strips the leading body. prefix to get the field name", () => {
