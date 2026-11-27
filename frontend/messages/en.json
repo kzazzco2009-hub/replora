@@ -1,4 +1,7 @@
 {
+  "runReview": {
+    "requestFailed": "The request failed. Please try again."
+  },
   "theme": {
     "toggle": {
       "groupLabel": "Theme",

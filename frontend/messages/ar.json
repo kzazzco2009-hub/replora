@@ -1,4 +1,7 @@
 {
+  "runReview": {
+    "requestFailed": "تعذّر إكمال الطلب. حاول مرة أخرى."
+  },
   "theme": {
     "toggle": {
       "groupLabel": "المظهر",
