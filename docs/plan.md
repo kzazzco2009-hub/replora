@@ -256,7 +256,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] Tests T6.* pass · Security S‑30…S‑36 verified · **Gate G6**
 
 ### Phase 7 — First real pipeline: ZIP + CSV + JSON reconciliation (M)
-- [ ] P7.1 Adapters: `ZipAdapter` (produces ArchiveManifest), `CsvAdapter` (encoding detection, delimiter sniffing, produces TabularArtifact), `JsonAdapter` (array of objects, produces TabularArtifact).
+- [x] P7.1 Adapters: `ZipAdapter` (produces ArchiveManifest), `CsvAdapter` (encoding detection, delimiter sniffing, produces TabularArtifact), `JsonAdapter` (array of objects, produces TabularArtifact).
 - [ ] P7.2 Operations: `extract_member`, `map_columns`, `normalize` (trim, number and decimal parsing, key casing), `compare` (fan-in on key, giving matched / value_diff / missing_left / missing_right), `report_csv`, `summary_json`, `bundle_zip`.
 - [ ] P7.3 CSV output is protected against formula injection (security.md S‑37).
 - [ ] P7.4 Lineage: every output row records its source file, member, row and operation versions.
