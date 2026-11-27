@@ -535,6 +535,14 @@ PR **#101** (stacked on #100).
 - The permission-matrix fixture gives each simulated user its own client address.
 - **T5.7 and T5.12** pass. Mutation checks: the limit boundary, the per-account count (it survived at first, so a many-addresses test was added), the check itself and the upsert are all caught.
 - `uv run pytest -q`: **2137 passed**. No drift.
+PR **#102** (stacked on #101).
+
+**P5.8, profile, sessions, workspaces and members** (`app/api/v1/workspaces.py`, `app/api/v1/auth.py`, `tests/integration/test_workspaces_api.py`; 13 failed first).
+- `PATCH /auth/me` (display name, locale, theme, and timezone checked against the IANA list, so an unknown zone is 422 `INVALID` at `body.timezone`). `GET /auth/sessions` lists live sessions with `current`. `DELETE /auth/sessions/{id}` revokes your own session (someone else's is 404) and clears the cookies when it is the current one.
+- `GET` and `POST /workspaces` (the creator is owner; `workspace.created` is audited). `DELETE /workspaces/{ws}` is owner-only, with 409 `PERSONAL_WORKSPACE_UNDELETABLE` for the personal workspace; its rows cascade.
+- `GET members`. `PATCH` and `DELETE members/{user}` (audited as `member.role_changed` and `member.removed`): the owner can't be changed or removed, not even by themselves; managers handle only members ranked below them and never grant above their own role; a non-member target is 404.
+- Mutation checks: the owner guard (it survived at first, so a self-demotion test was added), the rank rule and the personal-workspace guard are all caught.
+- `uv run pytest -q`: **2143 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

@@ -154,9 +154,13 @@ def get_me(signed_in: Annotated[Caller, Depends(caller)], request: Request) -> M
 
 
 @router.patch("/me")
-def update_me(body: UpdateMeRequest) -> User:
+def update_me(body: UpdateMeRequest, request: Request) -> User:
     """Update the profile: display name, locale, theme, timezone."""
-    raise not_implemented()
+    with database(request).begin() as session:
+        user = session.get(m.User, request.state.caller.user.id)
+        for field, value in body.model_dump(exclude_none=True).items():
+            setattr(user, field, value)
+    return to_user(user)
 
 
 @router.delete("/me", status_code=202, responses=WRONG_SECRET_RESPONSE)
@@ -244,15 +248,32 @@ def get_export(export_id: UUID) -> ExportStatus:
 
 
 @router.get("/sessions")
-def list_sessions() -> list[Session]:
+def list_sessions(request: Request) -> list[Session]:
     """The current user's active sessions."""
-    raise not_implemented()
+    signed_in, at = request.state.caller, now(request)
+    with database(request)() as session:
+        rows = session.scalars(
+            select(m.Session)
+            .where(m.Session.user_id == signed_in.user.id, m.Session.revoked_at.is_(None),
+                   m.Session.expires_at > at)
+            .order_by(m.Session.created_at)
+        ).all()  # fmt: skip
+    return [Session(id=row.id, user_agent=row.user_agent, created_at=row.created_at,
+                    expires_at=row.expires_at, current=row.id == signed_in.session_id)
+            for row in rows]  # fmt: skip
 
 
 @router.delete("/sessions/{session_id}", status_code=204, responses=NOT_FOUND_RESPONSE)
-def revoke_session(session_id: UUID) -> None:
+def revoke_session(session_id: UUID, request: Request, response: Response) -> None:
     """Revoke a session. Revoking the current one also clears its cookies."""
-    raise not_implemented()
+    signed_in = request.state.caller
+    with database(request).begin() as session:
+        row = session.get(m.Session, session_id)
+        if row is None or row.user_id != signed_in.user.id or row.revoked_at is not None:
+            raise ProblemError(404, "NOT_FOUND", "Not found")
+        sessions.revoke(session, session_id, now(request))
+    if session_id == signed_in.session_id:
+        clear_session_cookies(response)
 
 
 def to_user(row: m.User) -> User:

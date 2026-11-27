@@ -51,7 +51,8 @@ def test_auth_endpoint_is_documented_with_its_success_status(openapi, method, pa
 IMPLEMENTED = {"/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login",
                "/api/v1/auth/logout", "/api/v1/auth/refresh", "/api/v1/auth/verify-email",
                "/api/v1/auth/password/forgot", "/api/v1/auth/password/reset",
-               ("get", "/api/v1/auth/me")}  # fmt: skip
+               ("get", "/api/v1/auth/me"), ("patch", "/api/v1/auth/me"), "/api/v1/auth/sessions",
+               f"/api/v1/auth/sessions/{SESSION_ID}"}  # fmt: skip
 """Phase 5 endpoints that are real now; the rest still answer 501."""
 STUBS = [e for e in AUTH_ENDPOINTS
          if e[1] not in IMPLEMENTED and (e[0], e[1]) not in IMPLEMENTED]  # fmt: skip
