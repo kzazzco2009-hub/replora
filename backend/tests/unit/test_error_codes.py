@@ -77,6 +77,7 @@ def test_validation_codes_are_exactly_what_the_api_emits(error_codes):
         ("TOKEN_INVALID", 400),
         ("CSRF_FAILED", 403),
         ("PERMISSION_DENIED", 403),
+        ("OWNS_SHARED_WORKSPACE", 409),
         ("EMAIL_NOT_VERIFIED", 403),
         ("MFA_ALREADY_ENABLED", 409),
         ("MFA_NOT_ENABLED", 409),

@@ -127,7 +127,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
   - an expired, revoked or reused token is rejected;
   - an invite for email X cannot be accepted by a user signed in as Y;
   - an admin cannot invite someone as owner.
-- [ ] T5.14 Account deletion and export:
+- [x] T5.14 Account deletion and export:
   - the export ZIP contains only the user's own data;
   - after deletion the user cannot log in, their sessions are revoked, files are removed from storage after the grace period, and audit entries remain anonymized.
 - [ ] T5.15 MFA:

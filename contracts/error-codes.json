@@ -40,6 +40,10 @@
       "status": 403,
       "description": "Missing or wrong X-CSRF-Token, or a bad Origin. Fetch GET /auth/csrf again and retry once."
     },
+    "OWNS_SHARED_WORKSPACE": {
+      "status": 409,
+      "description": "The account still owns a workspace shared with others. Delete it, or ask for ownership transfer, before deleting the account (P5.10)."
+    },
     "PERMISSION_DENIED": {
       "status": 403,
       "description": "Signed in and a member of this workspace, but the role doesn't allow this action (security.md S-21 matrix). Not being a member at all gives 404 NOT_FOUND instead."

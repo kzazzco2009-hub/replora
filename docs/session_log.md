@@ -551,6 +551,15 @@ PR **#103** (stacked on #102).
 - **S‑29 "no role above the inviter's" holds by structure:** only owners and admins hold members.manage, and `GrantableRole` stops at admin. A test pins both. A runtime check I wrote first was unreachable (a mutant survived), so it was removed.
 - **T5.13** passes. Mutation checks: the email binding and the status checks are caught.
 - `uv run pytest -q`: **2149 passed**. No drift.
+PR **#104** (stacked on #103).
+
+**P5.10, account deletion and export** (`app/auth/privacy.py`, `tests/integration/test_privacy_api.py`; collection failed first).
+- `DELETE /auth/me {password}`: a wrong password gives 400 `PASSWORD_INCORRECT`. Otherwise it sets `deleted_at`, **revokes every session**, clears the cookies and returns 202; sign-in is refused from then on. **It is refused with 409 `OWNS_SHARED_WORKSPACE` (new problem code) while the user owns a shared workspace** (decision recorded).
+- `purge_deleted(session, now, grace)` removes users whose grace period is over (`DELETION_GRACE_DAYS`, 30), with their workspaces. Audit entries stay, with no actor. The worker schedules it (P8); deleting files from storage comes with Phase 6.
+- `POST /auth/me/export` builds a ZIP (profile, memberships, and the personal workspace's workflows and versions, drafts, runs and file records; never hashes or secrets) under `DATA_DIR/exports/<user>/<id>.zip`. `GET` reports `ready` (someone else's is 404). **`url` stays null until Phase 6 storage gives a signed link: an open item for the frontend.**
+- **T5.14** passes. Mutation checks: the shared-workspace guard, the session revocation and the workspace filter (both masked at first; the tests were strengthened) are all caught.
+- One full run had a single flaky failure, most likely the T5.11 timing check (< 50 ms) under load; the next run was green. Watch it in CI.
+- `uv run pytest -q`: **2156 passed**.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

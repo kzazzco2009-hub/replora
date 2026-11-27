@@ -241,7 +241,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] P5.7 Login throttling and account lockout with backoff (DB-backed rate limit). Every auth event is written to the audit log.
 - [x] P5.8 `GET /auth/me`, `PATCH /auth/me` (including `timezone`), session list and revoke (`/auth/sessions`), workspace deletion (owner only, not the personal workspace), and membership management endpoints.
 - [x] P5.9 Invitations: a hashed, single-use, 7-day invite token. Accepting it works for existing users and for new sign-ups. The admin can revoke it.
-- [ ] P5.10 Account deletion (with a grace period, cascading to the personal workspace and its files) and data export (a ZIP of the user's files, workflows and run history).
+- [x] P5.10 Account deletion (with a grace period, cascading to the personal workspace and its files) and data export (a ZIP of the user's files, workflows and run history).
 - [ ] P5.11 Optional TOTP MFA (per D12) with recovery codes (hashed). It is prompted for owners and admins. Login with MFA uses a short-lived, single-use `replora_mfa_challenge` cookie (api_contract.md §2), so no session is issued until `/auth/mfa/challenge` succeeds.
 - [ ] Tests T5.* pass · Security S‑20…S‑29 verified · **Gate G5**
 
