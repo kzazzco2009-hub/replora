@@ -15,4 +15,7 @@ class Limits(ApiModel):
     max_file_size: int = Field(description="Bytes")
     max_files_per_run: int
     max_nodes: int = Field(description="Most nodes in one workflow")
+    max_depth: int = Field(description="Most nodes on one path through a workflow")
+    max_fan_in: int = Field(description="Most edges into one node")
+    max_fan_out: int = Field(description="Most edges out of one node")
     workspace_quota: int = Field(description="Bytes of storage per workspace")

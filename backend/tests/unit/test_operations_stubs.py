@@ -71,5 +71,8 @@ def test_port_artifact_type_is_one_of_the_11_kinds(schemas):
 def test_limits_are_integers_in_bytes_and_counts(schemas):
     limits = schemas["Limits"]["properties"]
 
-    assert set(limits) == {"max_file_size", "max_files_per_run", "max_nodes", "workspace_quota"}
+    assert set(limits) == {
+        "max_file_size", "max_files_per_run", "max_nodes", "max_depth", "max_fan_in",
+        "max_fan_out", "workspace_quota",
+    }  # fmt: skip
     assert {field["type"] for field in limits.values()} == {"integer"}

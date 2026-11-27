@@ -69,6 +69,13 @@ def check_approval(run: Run) -> None:
         raise PlanHashMismatchError("the run has no approval for its current plan")
 
 
+def approval_expires_at(run: Run, ttl: timedelta) -> datetime | None:
+    """When the run expires if nobody approves it. None unless it is awaiting approval."""
+    if run.state is RunState.AWAITING_APPROVAL:
+        return run.state_since + ttl
+    return None
+
+
 def expire_if_stale(run: Run, now: datetime, ttl: timedelta) -> Run:
     """EXPIRED when the run has awaited approval for longer than `ttl`; otherwise unchanged."""
     if run.state is RunState.AWAITING_APPROVAL and now - run.state_since > ttl:
