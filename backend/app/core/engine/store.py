@@ -1,7 +1,7 @@
 """Artifact stores for the engine (P3.3): in memory here, the database in `app.db.engine_state`."""
 
 import hashlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 from uuid import UUID, uuid7
 
@@ -15,6 +15,8 @@ class Data:
 
     content: bytes
     format: str
+    source: dict = field(default_factory=dict, compare=False)
+    """Where the bytes came from (`file`, ZIP `member`), for row lineage (P7.4)."""
 
 
 class Store(Protocol):

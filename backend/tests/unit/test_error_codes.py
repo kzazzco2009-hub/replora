@@ -21,7 +21,7 @@ def error_codes() -> dict:
 def test_has_the_agreed_sections(error_codes):
     assert set(error_codes) == {
         "problem_codes", "validation_codes", "rejection_codes", "workflow_codes", "run_codes",
-        "planner_codes",
+        "planner_codes", "operation_codes",
     }  # fmt: skip
 
 

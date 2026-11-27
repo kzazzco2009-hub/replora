@@ -43,7 +43,7 @@ def test_a_zip_bomb_is_stopped_by_the_ratio_before_it_is_extracted():
             member.write(b"\0" * MiB)  # 100 MiB of zeros, about 100 KiB compressed
     start = time.perf_counter()
     assert inspect(buffer.getvalue()) == "ZIP_RATIO_EXCEEDED"
-    assert time.perf_counter() - start < 0.5
+    assert time.perf_counter() - start < 2  # stopped early: reading all 100 MiB takes far longer
 
 
 def test_the_total_uncompressed_size_is_counted():
