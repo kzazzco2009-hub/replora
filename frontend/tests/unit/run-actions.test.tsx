@@ -149,9 +149,11 @@ describe.each([
         .getAttribute("href"),
     ).toBe(`/${locale}/new-run`);
     expect(screen.queryByRole("button", { name: labels.cancel })).toBeNull();
-    const results = screen.queryByRole("button", { name: labels.viewResults });
-    expect(results?.hasAttribute("disabled") ?? false).toBe(
-      state === "SUCCEEDED" || state === "PARTIAL",
+    const results = screen.queryByRole("link", { name: labels.viewResults });
+    expect(results?.getAttribute("href") ?? null).toBe(
+      state === "SUCCEEDED" || state === "PARTIAL"
+        ? `/${locale}/runs/${RUN_ID}/results`
+        : null,
     );
   });
 });

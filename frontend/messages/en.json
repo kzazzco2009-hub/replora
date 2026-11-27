@@ -35,6 +35,16 @@
     }
   },
   "results": {
+    "heading": "Run results",
+    "loading": "Loading run results",
+    "files": "Output files",
+    "summary": "Reconciliation summary",
+    "noFiles": "This run produced no output files.",
+    "notReady": "Results are available after the run finishes.",
+    "download": "Download",
+    "downloadFile": "Download {filename}",
+    "preparingDownload": "Preparing download…",
+    "downloadExpired": "The download link expired. Select Download to get a fresh link.",
     "requestFailed": "Results could not be loaded.",
     "statuses": {
       "matched": "Matched",
