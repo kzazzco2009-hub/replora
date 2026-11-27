@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { BottomTabBar } from "./bottom-tab-bar";
 import { NAV_ITEMS } from "./nav-items";
 import { IconRail, Sidebar, type ShellNavItem } from "./side-nav";
+import { UserMenu } from "./user-menu";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const locale = useLocale();
@@ -41,6 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="flex items-center justify-end gap-2 border-b border-line p-2">
           <LocaleSwitch />
           <ThemeToggle />
+          <UserMenu />
         </header>
         <main id="main-content" className="flex-1 p-4 pb-20 sm:pb-4">
           {children}

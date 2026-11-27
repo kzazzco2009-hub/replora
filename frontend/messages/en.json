@@ -80,7 +80,9 @@
   },
   "shell": {
     "primaryNav": "Primary navigation",
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "signOut": "Sign out",
+    "signOutPending": "Signing out…"
   },
   "localeSwitch": {
     "groupLabel": "Language",

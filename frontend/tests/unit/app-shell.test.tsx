@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
@@ -5,7 +6,11 @@ import { AppShell } from "../../src/components/shell/app-shell";
 import { ThemeProvider } from "../../src/components/theme/theme-provider";
 import messages from "../../messages/en.json";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/en" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/en",
+  useRouter: () => ({ replace: vi.fn() }),
+  useParams: () => ({ locale: "en" }),
+}));
 vi.mock("@/i18n/routing", () => ({
   usePathname: () => "/",
   useRouter: () => ({ replace: vi.fn() }),
@@ -23,13 +28,18 @@ window.matchMedia = vi.fn().mockImplementation((query: string) => ({
 }));
 
 function renderShell() {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <ThemeProvider defaultTheme="system">
-        <AppShell>
-          <p>page content</p>
-        </AppShell>
-      </ThemeProvider>
+      <QueryClientProvider client={client}>
+        <ThemeProvider defaultTheme="system">
+          <AppShell>
+            <p>page content</p>
+          </AppShell>
+        </ThemeProvider>
+      </QueryClientProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -55,5 +65,10 @@ describe("AppShell", () => {
         .getByRole("link", { name: "Skip to main content" })
         .getAttribute("href"),
     ).toBe("#main-content");
+  });
+
+  it("shows the user menu once useMe resolves", async () => {
+    renderShell();
+    expect(await screen.findByText("سلمى")).toBeTruthy();
   });
 });
