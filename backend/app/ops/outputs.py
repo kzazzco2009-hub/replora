@@ -57,11 +57,16 @@ def summary_json(report: dict[str, Any], params: dict[str, Any]) -> bytes:
 
 
 def bundle_zip(files: dict[str, bytes]) -> bytes:
+    """The same bytes on every machine: a fixed time and OS byte, and members stored as they are.
+
+    Deflate output depends on the zlib build (Python on Windows ships zlib-ng), so compressing
+    would make the bundle differ between a developer's machine and the server.
+    """
     buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_STORED) as archive:
         for name, data in files.items():
             info = zipfile.ZipInfo(name, date_time=FIXED_TIME)
-            info.compress_type = zipfile.ZIP_DEFLATED
+            info.create_system = 3
             archive.writestr(info, data)
     return buffer.getvalue()
 

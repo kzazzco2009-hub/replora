@@ -91,3 +91,11 @@ def test_map_columns_renames_and_refuses_a_missing_or_clashing_column():
     with pytest.raises(OperationError) as caught:
         map_columns(table, {"mapping": {"Order No": "Total"}})
     assert caught.value.code == "COLUMN_CLASH"
+
+
+def test_the_bundle_does_not_depend_on_the_os_or_the_zlib_build():
+    """Windows and Linux differ in `create_system`, and zlib builds differ in deflate output."""
+    archive = zipfile.ZipFile(io.BytesIO(bundle_zip({"a.csv": b"x" * 100})))
+
+    [info] = archive.infolist()
+    assert (info.create_system, info.compress_type) == (3, zipfile.ZIP_STORED)
