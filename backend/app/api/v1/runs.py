@@ -23,6 +23,7 @@ from app.api.problem import (
 from app.api.session import database, now
 from app.api.v1 import run_models as api
 from app.api.v1.drafts import checked
+from app.api.v1.outputs import summary
 from app.api.v1.run_models import (
     ApproveRequest,
     ResolveRequest,
@@ -187,7 +188,8 @@ def list_runs(
         if state is not None:
             query = query.where(m.Run.state == state.value)
         rows = page_query(session, query, m.Run, limit + 1, after)
-        items = [_summary(session, ws_id, row) for row in rows[:limit]]
+        storage = request.app.state.storage
+        items = [_summary(session, ws_id, row, storage) for row in rows[:limit]]
     return RunSummaryPage(items=items, next_cursor=str(rows[limit - 1].id)
                           if len(rows) > limit else None)  # fmt: skip
 
@@ -259,10 +261,11 @@ def _title(run: EngineRun) -> str:
     return " · ".join(i.label or i.name for i in run.definition.inputs)
 
 
-def _summary(session: Session, ws_id: UUID, row: m.Run) -> api.RunSummary:
+def _summary(session: Session, ws_id: UUID, row: m.Run, storage) -> api.RunSummary:
     run = load_run(session, ws_id, row.id)
     return api.RunSummary(id=row.id, state=row.state, title=_title(run),
-                          created_at=row.created_at, finished_at=row.finished_at)  # fmt: skip
+                          created_at=row.created_at, finished_at=row.finished_at,
+                          summary=summary(session, ws_id, row.id, storage))  # fmt: skip
 
 
 def to_run(session: Session, ws_id: UUID, row: m.Run, request: Request) -> api.Run:
@@ -275,6 +278,7 @@ def to_run(session: Session, ws_id: UUID, row: m.Run, request: Request) -> api.R
         nodes=[api.RunNode(node_id=n.node_id, operation_id=operations[n.node_id], state=n.state,
                            attempt=n.attempt, started_at=n.started_at, finished_at=n.finished_at,
                            error_code=n.error_code, warnings=n.warnings) for n in nodes],
+        summary=summary(session, ws_id, row.id, request.app.state.storage),
         approved_by=row.approved_by, approved_at=row.approved_at,
         approval_expires_at=approval_expires_at(run, _ttl(request)),
         created_at=row.created_at, finished_at=row.finished_at,
