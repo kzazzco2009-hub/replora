@@ -13,7 +13,6 @@ from app.api.problem import (
     NOT_FOUND_RESPONSE,
     WRONG_SECRET_RESPONSE,
     ProblemError,
-    not_implemented,
 )
 from app.api.session import (
     REFRESH_COOKIE,
@@ -47,9 +46,12 @@ from app.api.v1.auth_models import (
 from app.api.v1.workspace_models import Workspace
 from app.auth import accounts, audit, limits, one_time, privacy, sessions, totp
 from app.auth.mail import compose
+from app.auth.one_time import MFA_CHALLENGE_TTL
 from app.auth.passwords import hash_password, verify_password
 from app.auth.tokens import digest
 from app.db import models as m
+
+MFA_COOKIE = "replora_mfa_challenge"
 
 router = APIRouter(prefix="/auth", tags=["auth"], responses=ERROR_RESPONSES)
 
@@ -100,15 +102,20 @@ def login(body: LoginRequest, request: Request, response: Response) -> User | Mf
                 limits.hit(session, limits.LOGIN, subject, now(request))
             known = accounts.find_user(session, body.email)
             audit.record(session, "auth.login_failed", known.id if known else None, ip_hash=ip)
-        if user is not None:
-            agent = request.headers.get("user-agent")
-            row, refresh_token = sessions.start(session, user.id, now(request), user_agent=agent,
-                                                ip_hash=ip)  # fmt: skip
-            audit.record(session, "auth.login", user.id, ip_hash=ip)
+        if user is not None and user.mfa_enabled_at is not None:
+            token = one_time.issue(session, user, "mfa", now(request), MFA_CHALLENGE_TTL)
+        elif user is not None:
+            row, refresh_token = _start_session(session, request, user, ip)
     if limited is not None:
         raise limited
     if user is None:
         raise ProblemError(401, "INVALID_CREDENTIALS", "Invalid credentials")
+    if user.mfa_enabled_at is not None:
+        # S-28: no session yet. The challenge cookie is random, hashed, bound, 5 minutes, once.
+        response.set_cookie(MFA_COOKIE, token, max_age=int(MFA_CHALLENGE_TTL.total_seconds()),
+                            path="/", httponly=True, samesite="lax",
+                            secure=request.app.state.settings.app_env == "production")  # fmt: skip
+        return MfaRequired(mfa_required=True)
     set_session_cookies(request, response, row, refresh_token)
     issue_csrf(request, response)
     return to_user(user)
@@ -248,9 +255,31 @@ def confirm_mfa(body: MfaCodeRequest, request: Request) -> None:
 
 
 @router.post("/mfa/challenge", responses=WRONG_SECRET_RESPONSE)
-def mfa_challenge(body: MfaChallengeRequest) -> User:
+def mfa_challenge(body: MfaChallengeRequest, request: Request, response: Response) -> User:
     """Finish an MFA login with a TOTP code or a recovery code (uses the challenge cookie)."""
-    raise not_implemented()
+    ip, at = client_ip(request), now(request)
+    with database(request).begin() as session:
+        challenge = one_time.find(session, "mfa", request.cookies.get(MFA_COOKIE, ""), at)
+        failure = ProblemError(401, "MFA_CHALLENGE_INVALID", "Sign in again")
+        if challenge is not None:
+            user = session.get(m.User, challenge.user_id)
+            subjects = [ip, digest(accounts.normal_email(user.email))]
+            failure = limits.over(session, limits.LOGIN, subjects, at)
+        if challenge is not None and failure is None:
+            if _second_factor(session, request, user, body):
+                challenge.used_at = at
+                row, refresh_token = _start_session(session, request, user, ip)
+            else:
+                for subject in subjects:
+                    limits.hit(session, limits.LOGIN, subject, at)
+                audit.record(session, "auth.login_failed", user.id, ip_hash=ip)
+                failure = ProblemError(400, "MFA_CODE_INVALID", "Wrong code")
+    if failure is not None:
+        raise failure
+    response.delete_cookie(MFA_COOKIE, path="/", httponly=True, samesite="lax")
+    set_session_cookies(request, response, row, refresh_token)
+    issue_csrf(request, response)
+    return to_user(user)
 
 
 @router.delete("/mfa", status_code=204, responses=WRONG_SECRET_RESPONSE)
@@ -339,10 +368,37 @@ def client_ip(request: Request) -> str:
     return limits.ip_hash(host, request.app.state.jwt_key)
 
 
-def _use_code(request: Request, user: m.User, code: str) -> None:
-    """Accept a current TOTP code once, or answer 400 `MFA_CODE_INVALID`."""
+def _code_ok(request: Request, user: m.User, code: str) -> bool:
+    """Whether a current TOTP code is right; its step is then used up."""
     secret = totp.decrypt(user.mfa_secret_enc, request.app.state.mfa_key)
     step = totp.verify(secret, code, now(request), user.mfa_last_step)
-    if step is None:
+    if step is not None:
+        user.mfa_last_step = step
+    return step is not None
+
+
+def _use_code(request: Request, user: m.User, code: str) -> None:
+    """Accept a current TOTP code once, or answer 400 `MFA_CODE_INVALID`."""
+    if not _code_ok(request, user, code):
         raise ProblemError(400, "MFA_CODE_INVALID", "Wrong code")
-    user.mfa_last_step = step
+
+
+def _second_factor(session, request: Request, user: m.User, body: MfaChallengeRequest) -> bool:
+    """A TOTP code, or a recovery code that hasn't been used (then it is)."""
+    if body.code is not None:
+        return _code_ok(request, user, body.code)
+    row = session.scalars(select(m.MfaRecoveryCode).where(
+        m.MfaRecoveryCode.user_id == user.id,
+        m.MfaRecoveryCode.code_hash == digest(body.recovery_code),
+        m.MfaRecoveryCode.used_at.is_(None),
+    )).first()  # fmt: skip
+    if row is not None:
+        row.used_at = now(request)
+    return row is not None
+
+
+def _start_session(session, request: Request, user: m.User, ip: str):
+    agent = request.headers.get("user-agent")
+    started = sessions.start(session, user.id, now(request), user_agent=agent, ip_hash=ip)
+    audit.record(session, "auth.login", user.id, ip_hash=ip)
+    return started

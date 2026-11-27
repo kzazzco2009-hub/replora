@@ -23,7 +23,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Waiting on | **Developer A:** **approve G3** (or not), then Phase 4 can start.
 
 **Frontend:** re-approve #70 so the stack can keep merging; review the Phase 2 and 3 PRs (the shared files are `error-codes.json` → `run_codes` and `planner_codes`, `.env.example`); add the i18n keys `templates.{reconcile,merge}.{title,description}` and `plans.{reconcile,merge}`. |
-| Next step | 0) **Resume:** Phase 4 is done and G4 is recorded (#94). Next: the contract PR for the frontend requests, then **Phase 5** (P5.1 onward). G5 stops for Developer A, and it is also I1 with the frontend.
+| Next step | 0) **Resume:** Phase 5 is done and G5 (backend) is recorded. The standing go covers **Phases 6, 7, 8 and 9** without asking: update this log, push, and message the frontend after each phase. Next: **P6.1**.
 1) **Phase 4** (persistence: SQLAlchemy, Alembic, workspace-scoped repositories; P4.6 persists runs, run_nodes, artifacts and the idempotency ledger).
 2) Merge the stack in order as the frontend approves it (recipe in the notes below and in memory).
 3) Phase 7 registers the real operations under the ids the templates use: `parse_csv`, `parse_json`, `compare`, `report_csv`, `append_rows`, `export_csv`.
@@ -53,7 +53,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 2 Validator | 6/6 | 8/8 | 1/1 | ☑ G2 2026-11-26 (Developer A; stack merging) |
 | 3 Engine | 9/9 | 11/11 | 1/1 (S‑13 timeouts at T17.6) | ☑ G3 2026-11-26 (Developer A; stack merging) |
 | 4 Persistence | 7/7 | 8/8 | 2/2 | ☑ G4 2026-11-27 (pre-approved by Developer A; stack merging) |
-| 5 Auth | 0/11 | 0/15 | 0/10 | ☐ |
+| 5 Auth | 11/11 | 15/15 | 10/10 | ☑ G5 2026-11-27 (backend; pre-approved by Developer A; I1 with the frontend) |
 | 6 Files | 0/7 | 0/10 | 0/8 | ☐ |
 | 7 First pipeline | 0/6 | 0/12 | 0/1 | ☐ |
 | 8 API + worker | 0/9 | 0/10 | 0/6 | ☐ |
@@ -570,6 +570,26 @@ PR **#105** (stacked on #104).
 - Mutation checks: replay, the window and the RFC truncation are all caught.
 - The login challenge is the next PR.
 - `uv run pytest -q`: **2170 passed**. No drift.
+PR **#106** (stacked on #105).
+
+**P5.11 part 2, the MFA login challenge** (7 failed first). **P5.11 is done.**
+- With MFA on, login answers `{mfa_required: true}` and sets **only** `replora_mfa_challenge`: HttpOnly, SameSite=Lax, Secure in production, 5 minutes. Its token is random and stored hashed in `auth_tokens` (kind `mfa`), bound to the user. **No session cookies are issued.**
+- `POST /auth/mfa/challenge` takes a TOTP code (no replay) or a recovery code (single use). Success uses the challenge up, starts the session, clears the challenge cookie and rotates CSRF. A missing, expired or used challenge gives 401 `MFA_CHALLENGE_INVALID`. A wrong code gives 400 `MFA_CODE_INVALID`, counts toward the **login throttle** (5 per 15 minutes per account and per IP, then 429), and does not use the challenge up.
+- `one_time.find` looks a token up without using it.
+- **Every §2 auth endpoint is real now**, so the empty 501 stub test is gone.
+- Mutation checks: single-use recovery codes, using the challenge up, the throttle and the MFA branch are all caught.
+- `uv run pytest -q`: **2176 passed**. No drift.
+**End-of-Phase-5 run** (`feat/p5.11-mfa-challenge`):
+| Command | Result |
+|---|---|
+| `uv run ruff check .` · `ruff format --check .` | clean · 144 files formatted |
+| `uv run pytest -q` | **2176 passed** (12 skipped on purpose: the shared matrix callers aren't signed out) |
+| `export_openapi --check` · `export_schemas --check` | exit 0 · exit 0 |
+| `uv run pip-audit` · `pnpm audit --audit-level=high` | clean · clean |
+| frontend `gen:api` drift · lint · typecheck · test · build | none · clean · clean · **186 passed** · built (on this stack's base) |
+| `gitleaks git .` | no leaks found |
+
+**Gate G5 (backend) passed** (pre-approved, recorded in `decisions.md`). I1 is the frontend's part. **Next: Phase 6 (files).**
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
