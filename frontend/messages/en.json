@@ -86,7 +86,11 @@
     "uploading": "Uploading… {percent}%",
     "ready": "Ready — detected as {type}",
     "rejected": "Rejected",
-    "failed": "Upload failed"
+    "failed": "Upload failed",
+    "heading": "Upload your files",
+    "dropHint": "Drag and drop files here, or",
+    "browse": "Choose files",
+    "limitsHint": "Up to {maxFiles} files, {maxSize} each"
   },
   "home": {
     "title": "Replora"

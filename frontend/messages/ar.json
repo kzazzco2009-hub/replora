@@ -86,7 +86,11 @@
     "uploading": "جارٍ الرفع… {percent}%",
     "ready": "جاهز — تم اكتشافه كـ {type}",
     "rejected": "مرفوض",
-    "failed": "فشل الرفع"
+    "failed": "فشل الرفع",
+    "heading": "رفع ملفاتك",
+    "dropHint": "اسحب الملفات وأسقطها هنا، أو",
+    "browse": "اختر ملفات",
+    "limitsHint": "حتى {maxFiles} ملفات، بحد أقصى {maxSize} لكل ملف"
   },
   "home": {
     "title": "Replora"
