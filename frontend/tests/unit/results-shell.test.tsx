@@ -11,7 +11,10 @@ import { RUN_ID, run } from "../msw/handlers/runs";
 import { setScenario } from "../msw/scenarios";
 import { server } from "../msw/server";
 
-vi.mock("next/navigation", () => ({ useParams: () => ({ runId: RUN_ID }) }));
+vi.mock("next/navigation", () => ({
+  useParams: () => ({ runId: RUN_ID }),
+  useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock("@/lib/api/use-me", () => ({
   useMe: () => ({ data: { memberships: [{ id: "ws-1" }] } }),
 }));
@@ -76,7 +79,9 @@ describe.each([
       name: new RegExp(artifact.name),
     });
     expect(
-      screen.getByText(messages.results.statuses.matched).querySelector("svg"),
+      screen
+        .getByText(messages.results.statuses.matched, { selector: "dt > span" })
+        .querySelector("svg"),
     ).toBeTruthy();
     expect(request).not.toHaveBeenCalled();
     fireEvent.click(button);
@@ -116,6 +121,23 @@ describe.each([
     show();
     expect(await screen.findByText(messages.results.noFiles)).toBeTruthy();
   });
+
+  it.each(["unknown", "501", "invalid"])(
+    "keeps the download with preview case %s",
+    async (scenario) => {
+      setScenario("outputs_preview", scenario);
+      show();
+      const labels = messages.results;
+      expect(
+        await screen.findByText(
+          scenario === "unknown" ? labels.statuses.unknown : labels.unavailable,
+        ),
+      ).toBeTruthy();
+      expect(
+        screen.getByRole("button", { name: new RegExp(artifact.name) }),
+      ).toBeTruthy();
+    },
+  );
 
   it("shows a generic error for an unsafe download URL", async () => {
     server.use(

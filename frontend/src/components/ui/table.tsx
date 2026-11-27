@@ -2,7 +2,7 @@ import { useId, type ReactNode } from "react";
 
 export interface TableColumn<K extends string = string> {
   key: K;
-  header: string;
+  header: ReactNode;
   align?: "start" | "end";
   /**
    * Numeric cells keep the table's own direction (so `text-end` resolves the
@@ -28,6 +28,7 @@ export interface TableProps<K extends string = string> {
   /** Shown instead of rows while loading; the table gets aria-busy. */
   loading?: ReactNode;
   dir?: "ltr" | "rtl";
+  sticky?: boolean;
 }
 
 const ALIGN_CLASS: Record<"start" | "end", string> = {
@@ -56,6 +57,7 @@ export function Table<K extends string = string>({
   emptyState,
   loading,
   dir,
+  sticky = false,
 }: TableProps<K>) {
   const captionId = useId();
 
@@ -65,7 +67,7 @@ export function Table<K extends string = string>({
       aria-labelledby={captionId}
       tabIndex={0}
       dir={dir}
-      className="overflow-x-auto rounded-control border border-line"
+      className={`overflow-x-auto rounded-control border border-line ${sticky ? "max-h-96" : ""}`}
     >
       <table
         aria-busy={loading ? true : undefined}
@@ -79,11 +81,11 @@ export function Table<K extends string = string>({
         </caption>
         <thead>
           <tr>
-            {columns.map((column) => (
+            {columns.map((column, index) => (
               <th
                 key={column.key}
                 scope="col"
-                className={`border-b border-line px-3 py-2 font-medium text-ink-muted ${ALIGN_CLASS[columnAlign(column)]}`}
+                className={`border-b border-line px-3 py-2 font-medium text-ink-muted ${ALIGN_CLASS[columnAlign(column)]} ${sticky ? `sticky top-0 bg-surface whitespace-nowrap ${index === 0 ? "start-0 z-20" : "z-10"}` : ""}`}
               >
                 {column.header}
               </th>
@@ -106,8 +108,8 @@ export function Table<K extends string = string>({
           ) : (
             rows.map((row) => (
               <tr key={row.id}>
-                {columns.map((column) => {
-                  const className = `border-b border-line px-3 py-2 ${ALIGN_CLASS[columnAlign(column)]}`;
+                {columns.map((column, index) => {
+                  const className = `border-b border-line px-3 py-2 ${ALIGN_CLASS[columnAlign(column)]} ${sticky && index === 0 ? "sticky start-0 z-10 bg-surface" : ""}`;
                   const content = row.cells[column.key];
                   return column.rowHeader ? (
                     <th key={column.key} scope="row" className={className}>
