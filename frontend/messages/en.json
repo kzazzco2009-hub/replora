@@ -64,6 +64,20 @@
       "TOO_SHORT": "Add at least {min_length} items.",
       "TOO_LONG": "Keep this to {max_length} items or fewer.",
       "INVALID": "This value isn't valid."
+    },
+    "rejection": {
+      "FILE_EMPTY": "This file has no content. Check the export and upload it again.",
+      "FILE_SIZE_MISMATCH": "This file changed while it was uploading. Upload it again.",
+      "FILE_TYPE_UNSUPPORTED": "This file's content isn't a supported type, whatever its name says. Upload a CSV or ZIP file.",
+      "FILE_CORRUPT": "This file is damaged and can't be read. Re-export it and upload the new copy.",
+      "ZIP_ENCRYPTED": "This ZIP is password-protected. Remove the password and upload it again.",
+      "ZIP_TOO_MANY_MEMBERS": "This ZIP has more files inside it than allowed. Split it into smaller ZIPs.",
+      "ZIP_TOO_LARGE": "This ZIP is larger than allowed once unpacked. Split it into smaller ZIPs.",
+      "ZIP_RATIO_EXCEEDED": "This ZIP unpacks to far more than its compressed size, so it was refused as unsafe. Upload the original files instead.",
+      "ZIP_NESTED": "This ZIP contains another ZIP inside it. Upload the inner files directly, not nested.",
+      "ZIP_UNSAFE_PATH": "A file inside this ZIP has an unsafe path. Re-create the ZIP without folders outside it.",
+      "ZIP_SYMLINK": "This ZIP contains a shortcut (symbolic link) instead of a real file. Replace it with the actual file and upload again.",
+      "ZIP_MEMBER_UNSUPPORTED": "A file inside this ZIP isn't a supported type. Remove it and upload the ZIP again."
     }
   },
   "upload": {
