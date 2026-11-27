@@ -11,6 +11,7 @@ from uuid import UUID, uuid7
 
 from app.db import models as m
 from app.files.detect import detect, safe_display_name
+from app.files.zip_safety import inspect
 
 MAX_FILE_SIZE = 50 * 1024 * 1024
 INPUT_RETENTION = timedelta(days=30)
@@ -33,9 +34,12 @@ def complete(row: m.File, storage) -> None:
         verdict = "FILE_SIZE_MISMATCH"
     else:
         verdict = detect(data)
+    members = inspect(data) if verdict == "zip" else None
+    if isinstance(members, str):
+        verdict = members
     if verdict.isupper():
         row.status, row.rejection_code = "rejected", verdict
         storage.delete(row.storage_key)
         return
-    row.status, row.detected_type = "ready", verdict
+    row.status, row.detected_type, row.members = "ready", verdict, members
     row.sha256 = hashlib.sha256(data).hexdigest()

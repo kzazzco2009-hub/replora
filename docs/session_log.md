@@ -609,6 +609,14 @@ PR **#108** (stacked on #107).
 - **Migration 0004:** `files.rejection_code` and `files.members`. Autogenerate wrote the bare `Text()` again, fixed as in 0001.
 - **T6.1, T6.2, T6.3 and T6.8** pass. Mutation checks: the size check and the delete of rejected bytes (masked at first) are caught.
 - `uv run pytest -q`: **2245 passed**.
+PR **#109** (stacked on #108).
+
+**P6.4, ZIP safety** (`app/files/zip_safety.py`, `tests/unit/test_zip_safety.py`; collection failed first).
+- Member by member, counting **real** bytes while streaming (headers are never trusted). It stops at a ratio over 100:1 per member (`ZIP_RATIO_EXCEEDED`) or over 200 MiB in total (`ZIP_TOO_LARGE`).
+- Before reading: unsafe paths (`..`, absolute, drive letters, backslashes) → `ZIP_UNSAFE_PATH`; symlinks → `ZIP_SYMLINK`; the encryption flag → `ZIP_ENCRYPTED`; more than 25 files → `ZIP_TOO_MANY_MEMBERS`. Each member is detected from its content: a nested ZIP → `ZIP_NESTED`; not CSV or JSON → `ZIP_MEMBER_UNSUPPORTED`. A damaged archive → `FILE_CORRUPT`.
+- `complete` stores the `members` of a ready ZIP.
+- **T6.4:** a 100 MiB zero bomb is rejected in under 0.5 s. **T6.5** and **T6.6** pass. Mutation checks: the ratio, `..` and nesting checks are caught.
+- `uv run pytest -q`: **2263 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
