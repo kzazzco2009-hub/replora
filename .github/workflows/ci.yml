@@ -70,6 +70,38 @@ jobs:
         run: uv run python -m app.export_schemas --check
       - run: uv run pip-audit
 
+  backend-postgres:
+    name: Backend on Postgres 17
+    needs: detect
+    if: needs.detect.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: replora
+          POSTGRES_PASSWORD: replora
+          POSTGRES_DB: replora_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U replora -d replora_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # A throwaway CI database, not a secret.
+      TEST_DATABASE_URL: postgresql://replora:replora@localhost:5432/replora_test
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv sync --locked
+      - run: uv run pytest
+
   frontend:
     name: Frontend (lint, typecheck, test, audit)
     needs: detect

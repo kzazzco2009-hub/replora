@@ -31,6 +31,7 @@
         "required_status_checks": [
           { "context": "Secret scan (gitleaks)" },
           { "context": "Backend (lint, test, audit)" },
+            { "context": "Backend on Postgres 17" },
           { "context": "Frontend (lint, typecheck, test, audit)" }
         ]
       }

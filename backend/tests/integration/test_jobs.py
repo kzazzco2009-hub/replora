@@ -14,8 +14,8 @@ LEASE = timedelta(minutes=5)
 
 
 @pytest.fixture
-def sessions(tmp_path):
-    engine = make_engine(f"sqlite:///{(tmp_path / 'j.db').as_posix()}")
+def sessions(db_url):
+    engine = make_engine(db_url)
     Base.metadata.create_all(engine)
     return make_sessions(engine)
 

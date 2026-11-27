@@ -37,9 +37,9 @@ def bundle() -> bytes:
 
 
 @pytest.fixture
-def world(tmp_path):
-    """A database file, a blob folder, a workspace with a saved pipeline and a queued run."""
-    url = f"sqlite:///{(tmp_path / 'c.db').as_posix()}"
+def world(db_url, tmp_path):
+    """A database, a blob folder, a workspace with a saved pipeline and a queued run."""
+    url = db_url
     Base.metadata.create_all(make_engine(url))
     sessions = make_sessions(make_engine(url))
     with sessions.begin() as session:

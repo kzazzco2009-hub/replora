@@ -228,8 +228,8 @@ Goal: frozen domain models that both developers rely on.
 - [x] P4.4 Alembic setup (`render_as_batch=True` for SQLite). The initial migration. `upgrade` and `downgrade` are tested.
 - [x] P4.5 Repositories: every query function takes a `workspace_id` and filters by it. No unscoped query is possible.
 - [x] P4.6 Persist engine state: runs, run_nodes and artifacts are saved after each node (checkpointing for serverless).
-- [ ] P4.7 CI job: run the full backend suite against **Postgres 17** (service container) in addition to SQLite.
-- [ ] Tests T4.* pass · Security S‑14, S‑15 verified · **Gate G4**
+- [x] P4.7 CI job: run the full backend suite against **Postgres 17** (service container) in addition to SQLite.
+- [x] Tests T4.* pass · Security S‑14, S‑15 verified · **Gate G4**
 
 ### Phase 5 — Authentication and authorization (M)
 - [ ] P5.1 Register and login with argon2id hashing (`pwdlib`). Password policy follows NIST 800‑63B (length ≥ 12, breached-password check offline list, no composition rules).
