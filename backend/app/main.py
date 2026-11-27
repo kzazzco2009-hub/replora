@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
 from app.api import problem, v1
+from app.auth.access import check_table
 from app.auth.mail import ConsoleMailer
 from app.auth.tokens import new_secret
 from app.config import Settings
@@ -41,6 +42,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.mailer = ConsoleMailer()
     app.include_router(v1.router)
     problem.install(app)
+    paths = app.openapi()["paths"]
+    check_table((method.upper(), path) for path, ops in paths.items() for method in ops)
     app.add_middleware(RequestIdMiddleware)
     configure_logging()
     return app

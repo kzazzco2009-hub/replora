@@ -7,6 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
+from app.auth.access import authorize
 from app.config import Settings
 from app.db.engine import make_engine
 from app.main import create_app
@@ -47,9 +48,17 @@ def with_csrf(client: TestClient) -> TestClient:
     return client
 
 
+def stub_app():
+    """The app for contract-stub tests: access control is off here, because
+    `tests/integration/test_permissions.py` covers it for every route."""
+    app = create_app(Settings(_env_file=None))
+    app.dependency_overrides[authorize] = lambda: None
+    return app
+
+
 @pytest.fixture(scope="module")
 def client() -> TestClient:
-    return with_csrf(TestClient(create_app(Settings(_env_file=None))))
+    return with_csrf(TestClient(stub_app()))
 
 
 @pytest.fixture(scope="module")

@@ -80,18 +80,22 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 | S‑28 | MFA (TOTP) | RFC 6238 TOTP. The secret is encrypted at rest (an app-level key from the environment). Recovery codes are hashed and single-use. Codes are throttled. Owners and admins are prompted to enroll. The login challenge is an HttpOnly, Secure, SameSite=Lax `replora_mfa_challenge` cookie: random, stored hashed, bound to the user, valid 5 minutes and single use. No session cookies are issued before the challenge succeeds. | T5.15 |
 | S‑29 | Privacy rights and invitations | Data export holds only the user's own data. Deletion revokes sessions, purges files after a grace period and anonymizes the audit actor. Invite tokens are hashed, single-use and bound to an email, expire after 7 days, and cannot grant a role above the inviter's. | T5.13, T5.14 |
 
-**Permission matrix (initial)**
+**Permission matrix** (in code: `backend/app/auth/permissions.py`; which route needs what: `backend/app/auth/access.py` `TABLE`)
 
 | Permission | owner | admin | member | viewer |
 |---|:-:|:-:|:-:|:-:|
-| workspace.manage / delete | ✔ | — | — | — |
-| members.manage | ✔ | ✔ | — | — |
-| files.upload / delete | ✔ | ✔ | ✔ | — |
-| files.read / download | ✔ | ✔ | ✔ | ✔ |
+| workspace.read (members list) | ✔ | ✔ | ✔ | ✔ |
+| workspace.delete | ✔ | — | — | — |
+| members.manage (members, invitations) | ✔ | ✔ | — | — |
+| files.upload / files.delete | ✔ | ✔ | ✔ | — |
+| files.read (list, get, download, samples) | ✔ | ✔ | ✔ | ✔ |
 | drafts.create / workflows.save | ✔ | ✔ | ✔ | — |
-| runs.approve / cancel | ✔ | ✔ | ✔ (own runs) | — |
-| runs.read / outputs.download | ✔ | ✔ | ✔ | ✔ |
+| drafts.read / workflows.read | ✔ | ✔ | ✔ | ✔ |
+| runs.create / runs.approve / runs.cancel | ✔ | ✔ | ✔ (approve and cancel: own runs) | — |
+| runs.read (runs, events, outputs) | ✔ | ✔ | ✔ | ✔ |
 | audit.read | ✔ | ✔ | — | — |
+
+Not a member gives 404 `NOT_FOUND`. A member without the permission gives 403 `PERMISSION_DENIED`. No session gives 401 `UNAUTHENTICATED`.
 
 ## Phase 6–7 — File intake and processing
 | ID | Control | Implementation | Verify |
