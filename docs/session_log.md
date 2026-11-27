@@ -46,7 +46,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
 | 1 Contracts | 7/7 | 6/6 | 2/2 (S‑11 re-checked at G3) | ☑ G1 2026-11-26 (Developer A; stack merging) |
-| 2 Validator | 0/6 | 0/8 | 0/1 | ☐ |
+| 2 Validator | 1/6 | 1/8 | 0/1 | ☐ |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
 | 5 Auth | 0/11 | 0/15 | 0/10 | ☐ |
@@ -188,6 +188,17 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 | `gitleaks git .` | no leaks found |
 
 **Gate G1: approved by Developer A** (the gate approver for backend gates), in this session's instructions: finish Phase 1 and then continue into Phase 2 without stopping for permission. **Condition:** the stack #68 → #69 → #70 → the P1.7 PR merges with the frontend's review (contract changes in #69 and #70). Phase 2 work is stacked on top until then. Recorded in `decisions.md`.
+
+**Phase 2 starts (G1 approved).**
+
+**P2.1: `app/core/registry.py`** (branch `feat/p2.1-operation-registry`, stacked on #71):
+- `OperationRegistry(contracts)`: `register`, `get(id, version)`, `versions(id)` and `list()` (sorted by id then version, for `GET /operations`). Two versions of one operation live side by side.
+- `RegistryError(code, **params)`. `OP_DUPLICATE` (a repeated `(id, version)`) and `OP_PARAMS_SCHEMA_INVALID` are startup errors for developers. `OP_UNKNOWN` and `OP_VERSION_INVALID` (with `params.known`) reach users through the validator.
+- A params schema must be in the §5 subset: a `type: object` whose properties are `string` (an `enum` only here), `integer`, `boolean` or an array of strings. No `oneOf`, `anyOf`, `allOf`, `not`, `$ref`, `$defs` or `if/then/else` anywhere. Pure Python, no new dependency.
+- **New `contracts/error-codes.json` → `workflow_codes`** (the validator's `Issue` codes), mirrored by `app/core/issue_codes.py` `IssueCode`, with a parity test. It starts with `OP_UNKNOWN` and `OP_VERSION_INVALID`; each Phase 2 step adds its own. The frontend's #67 parity test reads the other sections by name, so it is unaffected.
+- **TDD:** `test_registry.py` was red first (no module), then **16 passed**. The parity tests were red (2 failed) until the section was added. **The tests bite:** without the duplicate guard 1 fails; accepting any array `items` fails 1.
+- Checks: ruff clean (65 files), **1120 passed**, no drift.
+- **P2.1 and T2.1 ticked.**
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.

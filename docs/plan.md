@@ -201,7 +201,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] Tests T1.* pass · Security S‑10, S‑11 verified · **Gate G1 (contracts v1 frozen. Changes after this need a Change Request in `api_contract.md` §9)**
 
 ### Phase 2 — Operation registry and DAG validator (M)
-- [ ] P2.1 `OperationRegistry`: register and look up by `(id, version)`. Duplicates are rejected. `list()` is used for the API.
+- [x] P2.1 `OperationRegistry`: register and look up by `(id, version)`. Duplicates are rejected. `list()` is used for the API.
 - [ ] P2.2 Validator, structural checks: unique node IDs, edges reference existing nodes and ports, **no cycles** (Kahn topological sort), no orphan required inputs.
 - [ ] P2.3 Validator, type checks: port artifact types match exactly (**no implicit conversion**), and parameters validate against the operation's params schema.
 - [ ] P2.4 Validator, limit checks: ≤ 30 nodes, depth ≤ 10, fan-in and fan-out ≤ 10, plus file count and size limits from the resource policy.

@@ -204,5 +204,13 @@
     "ZIP_MEMBER_UNSUPPORTED": {
       "description": "A file inside the ZIP is not a supported type."
     }
+  },
+  "workflow_codes": {
+    "OP_UNKNOWN": {
+      "description": "A node uses an operation that doesn't exist (params.operation)."
+    },
+    "OP_VERSION_INVALID": {
+      "description": "A node pins a version of the operation that doesn't exist (params.operation, params.version, params.known)."
+    }
   }
 }

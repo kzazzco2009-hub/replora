@@ -8,6 +8,7 @@ import pytest
 from app.api.problem import FALLBACK_VALIDATION_CODE, VALIDATION_CODES
 from app.api.v1.file_models import RejectionCode
 from app.config import REPO_ROOT
+from app.core.issue_codes import IssueCode
 
 
 @pytest.fixture(scope="module")
@@ -16,7 +17,14 @@ def error_codes() -> dict:
 
 
 def test_has_the_agreed_sections(error_codes):
-    assert set(error_codes) == {"problem_codes", "validation_codes", "rejection_codes"}
+    assert set(error_codes) == {
+        "problem_codes", "validation_codes", "rejection_codes", "workflow_codes",
+    }  # fmt: skip
+
+
+def test_workflow_codes_are_exactly_the_validator_issue_codes(error_codes):
+    assert set(error_codes["workflow_codes"]) == set(IssueCode)
+    assert all(entry["description"] for entry in error_codes["workflow_codes"].values())
 
 
 def test_rejection_codes_are_exactly_the_file_rejection_codes(error_codes):
