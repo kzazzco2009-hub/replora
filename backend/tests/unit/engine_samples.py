@@ -48,5 +48,6 @@ class Spy:
 
 
 def queued(defn):
-    run = transition(transition(new_run(defn, NOW), RunAction.VALIDATE), RunAction.REQUEST_APPROVAL)
+    run = transition(new_run(defn, NOW), RunAction.VALIDATE, NOW)
+    run = transition(run, RunAction.REQUEST_APPROVAL, NOW)
     return approve(run, run.plan_hash, uuid4(), NOW)
