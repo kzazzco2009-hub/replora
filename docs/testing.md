@@ -65,13 +65,13 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 ## Phase 2 — Registry and validator
 **Unit**
 - [x] T2.1 Registry: register and get; duplicate `(id, version)` is rejected; an unknown op gives `OP_UNKNOWN`.
-- [ ] T2.2 Cycle detection: self-loop, 2-cycle and long cycle each give `DAG_CYCLE` with the nodes involved.
+- [x] T2.2 Cycle detection: self-loop, 2-cycle and long cycle each give `DAG_CYCLE` with the nodes involved.
 - [ ] T2.3 A port type mismatch gives `PORT_TYPE_MISMATCH`. No implicit conversion happens (TabularArtifact → TextDocumentArtifact is rejected).
-- [ ] T2.4 A missing required input gives `PORT_UNBOUND`. An edge to an unknown port gives `PORT_UNKNOWN`.
+- [x] T2.4 A missing required input gives `PORT_UNBOUND`. An edge to an unknown port gives `PORT_UNKNOWN`.
 - [ ] T2.5 Limits: 30 nodes is OK and 31 fails; depth 10 is OK and 11 fails; fan-in and fan-out 10 are OK and 11 fails (boundary tests on both sides).
 - [ ] T2.6 Invalid params against the schema give `PARAM_INVALID` with the field path.
-- [ ] T2.7 An unpinned or unknown operation version gives `OP_VERSION_INVALID`.
-- [ ] T2.8 Property test: a randomly generated DAG that has no cycle validates without error. Adding a back-edge always fails.
+- [x] T2.7 An unpinned or unknown operation version gives `OP_VERSION_INVALID`.
+- [x] T2.8 Property test: a randomly generated DAG that has no cycle validates without error. Adding a back-edge always fails.
 
 **Edge cases:** disconnected subgraphs; duplicate edges; edges with the same source and target ports; the validator never raises (it always returns a report).
 
