@@ -10,6 +10,7 @@ import {
 } from "../../src/lib/api/error-messages";
 import { VALIDATION_CODES } from "../../src/lib/api/field-errors";
 import type { Problem } from "../../src/lib/api/problem";
+import { REJECTION_CODES } from "../../src/lib/api/rejection-messages";
 
 function problem(code: string): Problem {
   return {
@@ -34,23 +35,9 @@ describe("error-messages vs contracts/error-codes.json", () => {
     );
   });
 
-  it("rejection_codes are allow-listed (field-level, not mapped in this PR)", () => {
-    const allowListed = [
-      "FILE_EMPTY",
-      "FILE_SIZE_MISMATCH",
-      "FILE_TYPE_UNSUPPORTED",
-      "FILE_CORRUPT",
-      "ZIP_ENCRYPTED",
-      "ZIP_TOO_MANY_MEMBERS",
-      "ZIP_TOO_LARGE",
-      "ZIP_RATIO_EXCEEDED",
-      "ZIP_NESTED",
-      "ZIP_UNSAFE_PATH",
-      "ZIP_SYMLINK",
-      "ZIP_MEMBER_UNSUPPORTED",
-    ];
-    expect(Object.keys(errorCodes.rejection_codes).sort()).toEqual(
-      allowListed.sort(),
+  it("maps exactly the contract's rejection_codes, no more and no fewer", () => {
+    expect([...REJECTION_CODES].sort()).toEqual(
+      Object.keys(errorCodes.rejection_codes).sort(),
     );
   });
 });
@@ -75,6 +62,14 @@ describe("error message keys exist in both locales", () => {
 
   it.each(VALIDATION_CODES)("ar.json has errors.validation.%s", (code) => {
     expect(ar.errors.validation).toHaveProperty(code);
+  });
+
+  it.each(REJECTION_CODES)("en.json has errors.rejection.%s", (code) => {
+    expect(en.errors.rejection).toHaveProperty(code);
+  });
+
+  it.each(REJECTION_CODES)("ar.json has errors.rejection.%s", (code) => {
+    expect(ar.errors.rejection).toHaveProperty(code);
   });
 });
 
