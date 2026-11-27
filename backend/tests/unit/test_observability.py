@@ -41,7 +41,7 @@ REQUESTS = [
     ("get", "/api/v1/health", 200),
     ("get", "/api/v1/nope", 404),
     ("post", "/api/v1/auth/login", 422),
-    ("get", "/api/v1/auth/sessions", 501),
+    ("get", "/api/v1/templates", 501),
     ("get", "/test/boom", 500),
 ]
 

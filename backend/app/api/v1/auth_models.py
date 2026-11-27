@@ -3,6 +3,7 @@
 from datetime import datetime
 from typing import Annotated, Literal, Self
 from uuid import UUID
+from zoneinfo import available_timezones
 
 from pydantic import AfterValidator, EmailStr, Field, model_validator
 from pydantic_core import PydanticCustomError
@@ -20,6 +21,13 @@ def _not_breached(password: str) -> str:
     if is_breached(password):
         raise PydanticCustomError("password_breached", "This password is known from breaches")
     return password
+
+
+def _known_timezone(name: str) -> str:
+    """P5.8: an IANA zone this server knows; anything else is `INVALID` at `body.timezone`."""
+    if name not in available_timezones():
+        raise PydanticCustomError("timezone_unknown", "Unknown timezone")
+    return name
 
 
 Password = Annotated[str, Field(min_length=12, max_length=256), AfterValidator(_not_breached)]
@@ -74,7 +82,9 @@ class UpdateMeRequest(ApiModel):
     display_name: Annotated[str, Field(min_length=1, max_length=100)] | None = None
     locale: Locale | None = None
     theme: Theme | None = None
-    timezone: str | None = Field(default=None, description="IANA name, e.g. Africa/Cairo")
+    timezone: Annotated[str, AfterValidator(_known_timezone)] | None = Field(
+        default=None, description="IANA name, e.g. Africa/Cairo"
+    )
 
 
 class TokenRequest(ApiModel):

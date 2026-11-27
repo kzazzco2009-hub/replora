@@ -34,7 +34,14 @@ def test_endpoint_is_documented_with_its_success_status(openapi, method, path, s
     assert str(status) in responses(openapi, method, path)
 
 
-@pytest.mark.parametrize(("method", "path", "status", "body"), ENDPOINTS)
+REAL = {("get", "/api/v1/workspaces"), ("post", "/api/v1/workspaces"), ("delete", WS),
+        ("get", f"{WS}/members"), ("patch", f"{WS}/members/{{user_id}}"),
+        ("delete", f"{WS}/members/{{user_id}}")}  # fmt: skip
+"""Implemented in P5.8; their behaviour is tested in tests/integration/test_workspaces_api.py."""
+STUBS = [e for e in ENDPOINTS if (e[0], e[1]) not in REAL]
+
+
+@pytest.mark.parametrize(("method", "path", "status", "body"), STUBS)
 def test_stub_answers_501_problem_json(client, method, path, status, body):
     response = client.request(method, path.format(**IDS), json=body)
 
