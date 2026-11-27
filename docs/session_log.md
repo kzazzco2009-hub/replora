@@ -50,7 +50,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
 | 1 Contracts | 7/7 | 6/6 | 2/2 (S‑11 re-checked at G3) | ☑ G1 2026-11-26 (Developer A; stack merging) |
 | 2 Validator | 6/6 | 8/8 | 1/1 | ☑ G2 2026-11-26 (Developer A; stack merging) |
-| 3 Engine | 9/9 | 11/11 | 1/1 (S‑13 timeouts at T17.6) | ☐ G3 awaiting Developer A |
+| 3 Engine | 9/9 | 11/11 | 1/1 (S‑13 timeouts at T17.6) | ☑ G3 2026-11-26 (Developer A; stack merging) |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
 | 5 Auth | 0/11 | 0/15 | 0/10 | ☐ |
 | 6 Files | 0/7 | 0/10 | 0/8 | ☐ |
@@ -384,6 +384,16 @@ PR **#84** (stacked on #83).
 | `gitleaks git .` | no leaks found |
 
 **Gate G3: Phase 3 is complete and waiting for Developer A's approval.** The instruction was to approve G2 and start Phase 3, not to go past it, so Phase 4 doesn't start until G3 is approved. **S‑13 note for the gate:** retries and cancellation are verified now. Node and run timeouts, the memory guard and the temp-dir quota need the worker that can stop a node (P8.3), so they are verified at T17.6, as `security.md` lists.
+
+PR **#85** (stacked on #84).
+
+**G3 approved** by Developer A (2026-11-26, `decisions.md`). They also said to do **Phases 4 and 5**: G4 is pre-approved once Phase 4 is verified, and **G5 stops for approval** (it is also I1). The final state and every open item were sent to the frontend on #1 (7203533845).
+
+**P4.1, engine and sessions** (`app/db/engine.py`, `tests/unit/test_db_engine.py`; collection failed first).
+- `uv add sqlalchemy alembic "psycopg[binary]"` locked sqlalchemy 2.1.9, alembic 1.20.1 and psycopg 3.3.9.
+- `Settings.database_url` defaults to `sqlite:///<repo>/.data/replora.db` (`.data/` is git-ignored).
+- `make_engine`: SQLite runs `PRAGMA journal_mode=WAL` and `foreign_keys=ON` on every connection. Postgres gets the psycopg 3 driver (a plain `postgres://` URL from Supabase is normalized) and `NullPool`. `make_sessions` uses `expire_on_commit=False`.
+- `uv run pytest -q`: **1440 passed**. ruff is clean, pip-audit clean, no drift, no leaks.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
