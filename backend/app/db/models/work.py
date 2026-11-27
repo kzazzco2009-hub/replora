@@ -118,6 +118,8 @@ class Run(IdMixin, CreatedMixin, Base):
     idempotency_key: Mapped[str | None] = mapped_column(String(128))
     approve_key: Mapped[str | None] = mapped_column(String(36))
     """The `Idempotency-Key` of the approval, so a retried approve answers the same (P8.4)."""
+    resolve_key: Mapped[str | None] = mapped_column(String(36))
+    """The `Idempotency-Key` of the last review answer (`resolve`)."""
     file_ids: Mapped[list[Json]] = mapped_column(JsonDocument, default=list)
     """The files for the definition's inputs, in order (copied from the draft)."""
     definition: Mapped[Json | None] = mapped_column(JsonDocument)

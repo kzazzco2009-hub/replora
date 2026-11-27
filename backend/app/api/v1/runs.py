@@ -1,7 +1,7 @@
 """§7 runs lifecycle (docs/api_contract.md): create, approve, cancel, read and poll (P8.1, P8.4).
 
 Approving or cancelling hands the run to the worker with a `run_step` job (P8.2). A run from a
-saved workflow (Phase 13) and `resolve` still answer 501.
+saved workflow (Phase 13) still answers 501.
 """
 
 from typing import Annotated
@@ -44,7 +44,9 @@ from app.core.engine.run import (
     transition,
 )
 from app.core.engine.run import Run as EngineRun
-from app.core.run_state import InvalidTransitionError, RunAction
+from app.core.review import AnswerError, answer
+from app.core.run_state import InvalidTransitionError, RunAction, next_state
+from app.core.validation import Issue
 from app.db import models as m
 from app.db.engine_state import apply, load_run
 from app.db.jobs import enqueue
@@ -146,14 +148,43 @@ def approve_run(
 
 @router.post("/{run_id}/resolve", name="resolve")
 def resolve_run(
-    ws_id: UUID, run_id: UUID, body: ResolveRequest, idempotency_key: IdempotencyKey
-) -> api.Run:
+    ws_id: UUID, run_id: UUID, body: ResolveRequest, idempotency_key: IdempotencyKey,
+    request: Request,
+) -> api.Run:  # fmt: skip
     """Answer the review questions: a new `plan_hash`, waiting again in `AWAITING_APPROVAL`.
 
     Only from `NEEDS_REVIEW`; otherwise 409 `INVALID_STATE_TRANSITION`.
     409 `PLAN_HASH_MISMATCH` if the plan changed since it was reviewed.
+    Every question (an issue with `params.options`) needs one of its options. The run's recorded
+    nodes are dropped, so the approved run computes everything again with the answers.
     """
-    raise not_implemented()
+    at, key = now(request), str(idempotency_key)
+    with database(request).begin() as session:
+        row = _run(session, ws_id, run_id)
+        if row.resolve_key == key:
+            return to_run(session, ws_id, row, request)
+        run = load_run(session, ws_id, run_id)
+        if run.state is RunState.NEEDS_REVIEW and body.plan_hash != row.plan_hash:
+            raise ProblemError(409, "PLAN_HASH_MISMATCH", "The plan changed; review it")
+        _move(lambda: next_state(run.state, RunAction.RESOLVE))
+        issues = [Issue.model_validate(issue) for issue in row.issues]
+        choices = [(c.code, c.path, c.value) for c in body.choices]
+        try:
+            definition = answer(run.definition, issues, choices)
+        except AnswerError as error:
+            path = "body.choices" if error.index is None else f"body.choices.{error.index}"
+            raise invalid(path, error.code) from error
+        run = transition(run.model_copy(update={"definition": definition, "approval": None}),
+                         RunAction.RESOLVE, at)  # fmt: skip
+        for node in session.scalars(scoped(m.RunNode, ws_id).where(m.RunNode.run_id == run_id)):
+            session.delete(node)
+        row.definition, row.plan_hash = definition.model_dump(mode="json"), run.plan_hash
+        row.approved_by = row.approved_at = row.approve_key = None
+        row.issues, row.resolve_key = [], key
+        apply(row, run)
+        emit(session, row.id, "state_changed", at, state=row.state)
+        session.flush()
+        return to_run(session, ws_id, row, request)
 
 
 @router.post("/{run_id}/cancel", status_code=202, name="cancel")

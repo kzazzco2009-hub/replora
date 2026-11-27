@@ -4699,7 +4699,7 @@
           "runs"
         ],
         "summary": "Resolve",
-        "description": "Answer the review questions: a new `plan_hash`, waiting again in `AWAITING_APPROVAL`.\n\nOnly from `NEEDS_REVIEW`; otherwise 409 `INVALID_STATE_TRANSITION`.\n409 `PLAN_HASH_MISMATCH` if the plan changed since it was reviewed.",
+        "description": "Answer the review questions: a new `plan_hash`, waiting again in `AWAITING_APPROVAL`.\n\nOnly from `NEEDS_REVIEW`; otherwise 409 `INVALID_STATE_TRANSITION`.\n409 `PLAN_HASH_MISMATCH` if the plan changed since it was reviewed.\nEvery question (an issue with `params.options`) needs one of its options. The run's recorded\nnodes are dropped, so the approved run computes everything again with the answers.",
         "operationId": "runs_resolve",
         "parameters": [
           {

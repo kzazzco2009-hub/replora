@@ -1,5 +1,5 @@
 """P0.5: the §7 runs lifecycle is documented in OpenAPI. The behaviour is in
-`tests/integration/test_runs_api.py` (P8.1); `resolve` and runs from a workflow are still 501."""
+`tests/integration/test_runs_api.py` (P8.1); runs from a workflow are still 501."""
 
 import pytest
 
@@ -42,13 +42,6 @@ def test_endpoint_is_documented(openapi, method, path, status, body, operation_i
     assert documented["operationId"] == operation_id
     for error in ("401", "403", "404", "409", "422", "429", "501"):
         assert documented["responses"][error]["content"] == PROBLEM
-
-
-def test_resolve_is_still_a_501_stub(client):
-    response = client.post(f"{RUN}/resolve".format(**IDS), json=RESOLVE, headers=IDEMPOTENT)
-
-    assert response.status_code == 501
-    assert response.json()["code"] == "NOT_IMPLEMENTED"
 
 
 def test_lifecycle_paths_are_all_documented(openapi):
