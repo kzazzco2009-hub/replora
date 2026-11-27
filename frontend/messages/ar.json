@@ -86,5 +86,16 @@
     "groupLabel": "اللغة",
     "ar": "AR",
     "en": "EN"
+  },
+  "auth": {
+    "signIn": {
+      "heading": "تسجيل الدخول",
+      "emailLabel": "البريد الإلكتروني",
+      "passwordLabel": "كلمة المرور",
+      "submit": "تسجيل الدخول",
+      "submitPending": "جارٍ تسجيل الدخول…",
+      "createAccount": "إنشاء حساب",
+      "forgotPassword": "نسيت كلمة المرور؟"
+    }
   }
 }
