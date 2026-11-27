@@ -246,7 +246,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] Tests T5.* pass · Security S‑20…S‑29 verified · **Gate G5**
 
 ### Phase 6 — File intake and storage (M)
-- [ ] P6.1 `Storage` interface: `create_upload_url`, `put` (local only), `open`, `delete`, `signed_download_url`. Implement `LocalStorage` (`./.data/storage`, keys never derived from user filenames).
+- [x] P6.1 `Storage` interface: `create_upload_url`, `put` (local only), `open`, `delete`, `signed_download_url`. Implement `LocalStorage` (`./.data/storage`, keys never derived from user filenames).
 - [ ] P6.2 Upload flow: `upload-intent` returns a file_id and an upload URL, the client PUTs the file, then calls `complete`, which triggers validation. This flow is identical in production with Supabase signed upload URLs.
 - [ ] P6.3 Validation on `complete`: size ≤ 50 MiB, sha256, **magic-byte detection** (not the extension), an allowed type list, and the filename is sanitized for display only.
 - [ ] P6.4 ZIP safety: ≤ 25 members, ≤ 200 MiB uncompressed, ratio ≤ 100:1, no nested ZIP, no absolute or `..` paths, no symlinks, and streaming extraction with counters.
