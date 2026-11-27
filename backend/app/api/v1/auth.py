@@ -1,10 +1,11 @@
 """§2 auth endpoints (docs/api_contract.md). Contract stubs: each one answers 501 until Phase 5."""
 
+import secrets
 from typing import Annotated
 from uuid import UUID, uuid7
 
 from fastapi import APIRouter, Depends, Request, Response
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from app.api.csrf import issue_csrf
 from app.api.problem import (
@@ -44,7 +45,7 @@ from app.api.v1.auth_models import (
     User,
 )
 from app.api.v1.workspace_models import Workspace
-from app.auth import accounts, audit, limits, one_time, privacy, sessions
+from app.auth import accounts, audit, limits, one_time, privacy, sessions, totp
 from app.auth.mail import compose
 from app.auth.passwords import hash_password, verify_password
 from app.auth.tokens import digest
@@ -219,15 +220,31 @@ def reset_password(body: ResetPasswordRequest, request: Request) -> None:
 
 
 @router.post("/mfa/enroll")
-def enroll_mfa() -> MfaEnrollment:
+def enroll_mfa(request: Request) -> MfaEnrollment:
     """Start TOTP enrollment. MFA is not active until confirmed."""
-    raise not_implemented()
+    secret = totp.new_secret()
+    codes = [secrets.token_hex(5) for _ in range(10)]
+    with database(request).begin() as session:
+        user = session.get(m.User, request.state.caller.user.id)
+        if user.mfa_enabled_at is not None:
+            raise ProblemError(409, "MFA_ALREADY_ENABLED", "MFA is already on")
+        user.mfa_secret_enc = totp.encrypt(secret, request.app.state.mfa_key)
+        session.execute(delete(m.MfaRecoveryCode).where(m.MfaRecoveryCode.user_id == user.id))
+        session.add_all(
+            m.MfaRecoveryCode(user_id=user.id, code_hash=digest(code)) for code in codes
+        )
+    return MfaEnrollment(otpauth_uri=totp.uri(secret, user.email), recovery_codes=codes)
 
 
 @router.post("/mfa/enroll/confirm", status_code=204, responses=WRONG_SECRET_RESPONSE)
-def confirm_mfa(body: MfaCodeRequest) -> None:
+def confirm_mfa(body: MfaCodeRequest, request: Request) -> None:
     """Activate MFA with a code from the authenticator app."""
-    raise not_implemented()
+    with database(request).begin() as session:
+        user = session.get(m.User, request.state.caller.user.id)
+        if user.mfa_secret_enc is None:
+            raise ProblemError(409, "MFA_NOT_ENABLED", "Start enrollment first")
+        _use_code(request, user, body.code)
+        user.mfa_enabled_at = now(request)
 
 
 @router.post("/mfa/challenge", responses=WRONG_SECRET_RESPONSE)
@@ -237,9 +254,17 @@ def mfa_challenge(body: MfaChallengeRequest) -> User:
 
 
 @router.delete("/mfa", status_code=204, responses=WRONG_SECRET_RESPONSE)
-def disable_mfa(body: MfaDisableRequest) -> None:
+def disable_mfa(body: MfaDisableRequest, request: Request) -> None:
     """Turn MFA off (needs the password and a current code)."""
-    raise not_implemented()
+    with database(request).begin() as session:
+        user = session.get(m.User, request.state.caller.user.id)
+        if user.mfa_enabled_at is None:
+            raise ProblemError(409, "MFA_NOT_ENABLED", "MFA is off")
+        if not verify_password(body.password, user.password_hash)[0]:
+            raise ProblemError(400, "PASSWORD_INCORRECT", "Wrong password")
+        _use_code(request, user, body.code)
+        user.mfa_secret_enc = user.mfa_enabled_at = user.mfa_last_step = None
+        session.execute(delete(m.MfaRecoveryCode).where(m.MfaRecoveryCode.user_id == user.id))
 
 
 @router.post("/me/export", status_code=202)
@@ -295,7 +320,7 @@ def revoke_session(session_id: UUID, request: Request, response: Response) -> No
 
 def to_user(row: m.User) -> User:
     return User(id=row.id, email=row.email, display_name=row.display_name, locale=row.locale,
-                theme=row.theme, timezone=row.timezone, mfa_enabled=row.mfa_secret_enc is not None,
+                theme=row.theme, timezone=row.timezone, mfa_enabled=row.mfa_enabled_at is not None,
                 email_verified=row.email_verified_at is not None,
                 created_at=row.created_at)  # fmt: skip
 
@@ -312,3 +337,12 @@ def client_ip(request: Request) -> str:
     """The caller's IP as an HMAC: it can be counted and compared, never read back."""
     host = request.client.host if request.client else "unknown"
     return limits.ip_hash(host, request.app.state.jwt_key)
+
+
+def _use_code(request: Request, user: m.User, code: str) -> None:
+    """Accept a current TOTP code once, or answer 400 `MFA_CODE_INVALID`."""
+    secret = totp.decrypt(user.mfa_secret_enc, request.app.state.mfa_key)
+    step = totp.verify(secret, code, now(request), user.mfa_last_step)
+    if step is None:
+        raise ProblemError(400, "MFA_CODE_INVALID", "Wrong code")
+    user.mfa_last_step = step

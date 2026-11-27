@@ -38,6 +38,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.jwt_key = (
         settings.jwt_secret.get_secret_value() if settings.jwt_secret else new_secret()
     )
+    app.state.mfa_key = (
+        settings.mfa_key.get_secret_value() if settings.mfa_key else "replora-development-mfa-key"
+    )
     app.state.clock = lambda: datetime.now(UTC)
     app.state.mailer = ConsoleMailer()
     app.include_router(v1.router)

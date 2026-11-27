@@ -117,7 +117,11 @@ def test_a_reused_refresh_token_signs_everyone_out(client):
 
 @pytest.mark.parametrize(("env", "secure"), [("development", False), ("production", True)])
 def test_session_cookies_are_httponly_lax_on_root_and_secure_in_production(db_url, env, secure):
-    extra = {"openrouter_api_key": "k", "jwt_secret": "j" * 43} if env == "production" else {}
+    extra = (
+        {"openrouter_api_key": "k", "jwt_secret": "j" * 43, "mfa_key": "m" * 43}
+        if env == "production"
+        else {}
+    )
     client = app_client(db_url, app_env=env, **extra)
     client.post("/api/v1/auth/register", json=SALMA)
     cookies = set_cookies(login(client))

@@ -53,14 +53,22 @@ def test_production_refuses_to_start_without_its_secrets():
 def test_production_refuses_to_start_with_debug_on():
     with pytest.raises(ValidationError, match="debug"):
         make_settings(
-            app_env="production", openrouter_api_key=FAKE_KEY, jwt_secret=FAKE_JWT, debug="true"
+            app_env="production",
+            openrouter_api_key=FAKE_KEY,
+            jwt_secret=FAKE_JWT,
+            mfa_key=FAKE_JWT,
+            debug="true",
         )
 
 
 def test_refusal_never_echoes_a_secret():
     with pytest.raises(ValidationError) as excinfo:
         make_settings(
-            app_env="production", openrouter_api_key=FAKE_KEY, jwt_secret=FAKE_JWT, debug="true"
+            app_env="production",
+            openrouter_api_key=FAKE_KEY,
+            jwt_secret=FAKE_JWT,
+            mfa_key=FAKE_JWT,
+            debug="true",
         )
 
     assert "input_value" not in str(excinfo.value)
@@ -77,7 +85,12 @@ def test_development_needs_no_secrets_and_may_debug():
 def test_api_docs_are_disabled_in_production():
     client = TestClient(
         create_app(
-            make_settings(app_env="production", openrouter_api_key=FAKE_KEY, jwt_secret=FAKE_JWT)
+            make_settings(
+                app_env="production",
+                openrouter_api_key=FAKE_KEY,
+                jwt_secret=FAKE_JWT,
+                mfa_key=FAKE_JWT,
+            )
         )
     )
 

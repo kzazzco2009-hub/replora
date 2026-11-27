@@ -560,6 +560,16 @@ PR **#104** (stacked on #103).
 - **T5.14** passes. Mutation checks: the shared-workspace guard, the session revocation and the workspace filter (both masked at first; the tests were strengthened) are all caught.
 - One full run had a single flaky failure, most likely the T5.11 timing check (< 50 ms) under load; the next run was green. Watch it in CI.
 - `uv run pytest -q`: **2156 passed**.
+PR **#105** (stacked on #104).
+
+**P5.11 part 1, MFA enrollment** (`app/auth/totp.py`, migration `0003`, `tests/unit/test_totp.py`, `tests/integration/test_mfa_api.py`; collection failed first).
+- **TOTP is RFC 6238** (SHA‑1, 6 digits, 30 s), written directly with `hmac` and checked against **the 4 RFC appendix B vectors**. It accepts one step either side, and **never a step already used** (`users.mfa_last_step`), so a code can't be replayed.
+- The secret is **encrypted at rest with Fernet** (`uv add cryptography`, 50.0.2) under `MFA_KEY`, a production secret (`.env.example`). Development uses a fixed key, so devices keep working across restarts.
+- `POST /auth/mfa/enroll` returns the `otpauth://` URI and 10 recovery codes, stored as SHA‑256; MFA stays off until confirmed. `.../confirm` activates it. `DELETE /auth/mfa` needs the password and a current code. The codes are 400 `MFA_CODE_INVALID`, 409 `MFA_ALREADY_ENABLED` and 409 `MFA_NOT_ENABLED`, and `User.mfa_enabled` follows `mfa_enabled_at`.
+- **Migration 0003** (`mfa_enabled_at`, `mfa_last_step`) carries the `uq_users_email` guard around the SQLite rebuild, as recorded after 0002.
+- Mutation checks: replay, the window and the RFC truncation are all caught.
+- The login challenge is the next PR.
+- `uv run pytest -q`: **2170 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
