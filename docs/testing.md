@@ -177,13 +177,13 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 **Functional**
 - [ ] T8.1 Each endpoint in `api_contract.md` has a happy path, a validation error (422 problem+json with a `code`), auth (401) and authz (403/404) test.
 - [ ] T8.2 **Contract tests:** responses match `contracts/fixtures/*`, and schemathesis fuzzing finds no 5xx errors and no schema violations.
-- [ ] T8.3 An `Idempotency-Key` repeat returns the same run (not a second one). A different body with the same key gives 409.
+- [x] T8.3 An `Idempotency-Key` repeat returns the same run (not a second one). A different body with the same key gives 409.
 - [ ] T8.4 ETag: the second GET with `If-None-Match` returns 304. The `Cache-Control` headers are correct per resource type.
 - [ ] T8.5 Pagination: cursor stability with concurrent inserts, no duplicates or gaps, and `limit` is bounded (max 100).
-- [ ] T8.6 Worker: the node-by-node chain finishes a 6-node run, and every node is a separate job. A worker crash mid-node retries safely.
-- [ ] T8.7 Events polling `?after=seq` returns only new events, in order.
+- [x] T8.6 Worker: the node-by-node chain finishes a 6-node run, and every node is a separate job. A worker crash mid-node retries safely.
+- [x] T8.7 Events polling `?after=seq` returns only new events, in order.
 - [ ] T8.8 Error responses never contain stack traces, SQL or file paths (scanned across all error tests).
-- [ ] T8.9 PATCH a draft without `If-Match` gives 428. A stale ETag gives 412. Two concurrent edits mean exactly one succeeds.
+- [x] T8.9 PATCH a draft without `If-Match` gives 428. A stale ETag gives 412. Two concurrent edits mean exactly one succeeds.
 - [ ] T8.10 **Feasibility spike (P8.8) evidence:**
   - bundle size is under 250 MB;
   - cold start p95 is measured;

@@ -939,6 +939,9 @@ export interface paths {
         /**
          * Preview
          * @description A page of an output table, optionally filtered by reconciliation status or text.
+         *
+         *     `row` is the row's place in the file (0 is the first row after the header). Cells are text,
+         *     exactly as in the file (formula cells keep their S-37 `'`).
          */
         get: operations["outputs_preview"];
         put?: never;
@@ -978,7 +981,10 @@ export interface paths {
         };
         /**
          * Lineage
-         * @description The source rows and operations behind one output row.
+         * @description The source rows and operations behind one output row (P7.4).
+         *
+         *     A reconciliation report row has a source on each side it was found on. An output without
+         *     row lineage (one not made from a comparison report), or a row past its end, is a 404.
          */
         get: operations["outputs_lineage"];
         put?: never;
@@ -1812,7 +1818,7 @@ export interface components {
              * Status
              * @description Null outside a reconciliation
              */
-            status: ("matched" | "value_diff" | "missing_left" | "missing_right") | null;
+            status: ("matched" | "value_diff" | "missing_left" | "missing_right" | "duplicate_key") | null;
             /** Cells */
             cells: (string | number | boolean | null)[];
         };
@@ -6646,7 +6652,7 @@ export interface operations {
             query?: {
                 offset?: number;
                 limit?: number;
-                status?: ("matched" | "value_diff" | "missing_left" | "missing_right") | null;
+                status?: ("matched" | "value_diff" | "missing_left" | "missing_right" | "duplicate_key") | null;
                 /** @description Text search in cells */
                 q?: string | null;
             };

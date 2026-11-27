@@ -5306,7 +5306,7 @@
           "outputs"
         ],
         "summary": "Preview",
-        "description": "A page of an output table, optionally filtered by reconciliation status or text.",
+        "description": "A page of an output table, optionally filtered by reconciliation status or text.\n\n`row` is the row's place in the file (0 is the first row after the header). Cells are text,\nexactly as in the file (formula cells keep their S-37 `'`).",
         "operationId": "outputs_preview",
         "parameters": [
           {
@@ -5373,7 +5373,8 @@
                     "matched",
                     "value_diff",
                     "missing_left",
-                    "missing_right"
+                    "missing_right",
+                    "duplicate_key"
                   ],
                   "type": "string"
                 },
@@ -5618,7 +5619,7 @@
           "outputs"
         ],
         "summary": "Lineage",
-        "description": "The source rows and operations behind one output row.",
+        "description": "The source rows and operations behind one output row (P7.4).\n\nA reconciliation report row has a source on each side it was found on. An output without\nrow lineage (one not made from a comparison report), or a row past its end, is a 404.",
         "operationId": "outputs_lineage",
         "parameters": [
           {
@@ -8181,7 +8182,8 @@
                   "matched",
                   "value_diff",
                   "missing_left",
-                  "missing_right"
+                  "missing_right",
+                  "duplicate_key"
                 ]
               },
               {

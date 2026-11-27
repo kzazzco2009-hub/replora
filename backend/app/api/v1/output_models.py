@@ -10,7 +10,8 @@ from app.api.models import ApiModel
 from app.core.artifact_type import ArtifactType
 from app.core.operations import OperationRef
 
-ReconcileStatus = Literal["matched", "value_diff", "missing_left", "missing_right"]
+ReconcileStatus = Literal["matched", "value_diff", "missing_left", "missing_right", "duplicate_key"]
+"""`duplicate_key`: a key repeated on one side; each of its rows is listed, never dropped (P7.2)."""
 MAX_SAFE_INTEGER = 2**53 - 1
 SafeInt = Annotated[int, Field(ge=-MAX_SAFE_INTEGER, le=MAX_SAFE_INTEGER)]
 Cell = str | SafeInt | bool | None

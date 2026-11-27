@@ -268,10 +268,10 @@ Goal: frozen domain models that both developers rely on.
 - [x] Tests T7.* pass · Security S‑37 verified · **Gate G7**
 
 ### Phase 8 — Workflow and run API plus background worker (M)
-- [ ] P8.1 Endpoints for templates, drafts (TemplatePlanner), validate, runs (create, approve, cancel, get, list), events and outputs (with preview pagination) per `api_contract.md`.
-- [ ] P8.2 DB-backed job queue (`jobs` table, `SELECT … FOR UPDATE SKIP LOCKED` on Postgres, simple locking on SQLite). The local worker runs as `uv run python -m app.worker`.
-- [ ] P8.3 Node-by-node runner: each job executes **one node**, persists the result, and enqueues the next. This proves the serverless chaining model locally.
-- [ ] P8.4 An `Idempotency-Key` header on `POST /runs` and `POST /runs/{id}/approve`.
+- [x] P8.1 Endpoints for templates, drafts (TemplatePlanner), validate, runs (create, approve, cancel, get, list), events and outputs (with preview pagination) per `api_contract.md`. *(#124–#128, #131, #132. Runs from a workflow are Phase 13. `resolve` is still 501: it isn't listed here, but `DATE_AMBIGUOUS` runs need it, so it is done before G8)*
+- [x] P8.2 DB-backed job queue (`jobs` table, `SELECT … FOR UPDATE SKIP LOCKED` on Postgres, simple locking on SQLite). The local worker runs as `uv run python -m app.worker`. *(#129, #130)*
+- [x] P8.3 Node-by-node runner: each job executes **one node**, persists the result, and enqueues the next. This proves the serverless chaining model locally.
+- [x] P8.4 An `Idempotency-Key` header on `POST /runs` and `POST /runs/{id}/approve`.
 - [ ] P8.5 HTTP caching: `ETag` with `If-None-Match` (304) on GET resources. `Cache-Control: private, no-cache` for user data. `public, max-age=3600` for `/operations`.
 - [ ] P8.6 Errors use RFC 9457 `application/problem+json` with a stable `code`.
 - [ ] P8.7 **Freeze OpenAPI v1.** Commit it to `contracts/openapi.json`. CI fails on any undeclared drift.
@@ -282,7 +282,7 @@ Goal: frozen domain models that both developers rely on.
   - the transaction-pooler connection;
   - a 50 MiB signed upload.
   Record the results. **Decide D9.** Tear down or keep it as staging.
-- [ ] P8.9 `If-Match` (ETag) required on PATCH of drafts and workflows. A stale version gets 412 `PRECONDITION_FAILED`.
+- [x] P8.9 `If-Match` (ETag) required on PATCH of drafts and workflows. A stale version gets 412 `PRECONDITION_FAILED`.
 - [ ] Tests T8.* pass · Security S‑16, S‑17, S‑50…S‑53 verified · **Gate G8 (backend MVP complete + production path proven)**
 
 ### Phase 9 — Frontend foundation (M) *(runs in parallel with Phases 4–8, see frontend_plan.md)*
