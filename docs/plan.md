@@ -289,8 +289,8 @@ Goal: frozen domain models that both developers rely on.
 - [x] P9.1 Design tokens from `design.md` as CSS variables. Tailwind v4 `@theme`. Light and dark palettes.
 - [x] P9.2 Theme: system default, a manual toggle that persists, and no flash on load (`next-themes`). *(#29; ticked in the frontend plan)*
 - [x] P9.3 i18n: `next-intl` with `/ar` and `/en` routes. `dir="rtl"` for Arabic. **Logical CSS properties only** (`ms-`, `pe-`, `start`, `end`). The Arabic and Latin fonts load via `next/font`. *(#30 routing and `lang`/`dir`, #37 Readex Pro and messages, #38 logical-CSS lint rule; marked done by the frontend in #39)*
-- [ ] P9.4 App shell, responsive at three sizes: sidebar (≥ 1024 px), collapsible rail (640–1023 px), bottom navigation (< 640 px).
-- [ ] P9.5 Core UI kit: Button, Input, Select, Dialog, Sheet, Toast, Tabs, Table, Badge, EmptyState, ErrorState, **Skeleton** (one variant per layout).
+- [x] P9.4 App shell, responsive at three sizes: sidebar (≥ 1024 px), collapsible rail (640–1023 px), bottom navigation (< 640 px). *(#46, #47; ticked in the frontend plan by #61)*
+- [x] P9.5 Core UI kit: Button, Input, Select, Dialog, Sheet, Toast, Tabs, Table, Badge, EmptyState, ErrorState, **Skeleton** (one variant per layout). *(#48, #49, #54, #62–#66; ticked in the frontend plan by #133)*
 - [ ] P9.6 API client generated from `contracts/openapi.json`. TanStack Query (staleTime and ETag aware). MSW mocks from `contracts/fixtures`.
 - [ ] P9.7 Auth screens: sign in, sign up, verify email, forgot and reset password. Protected routes in the Next.js request proxy (`proxy.ts` in Next 16; verify the current name at P0.1).
 - [ ] P9.8 Route `loading.tsx` with layout-matched skeletons for every data page. Suspense boundaries.
