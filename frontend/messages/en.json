@@ -110,6 +110,16 @@
       }
     }
   },
+  "describe": {
+    "chooseTemplate": "Choose a template",
+    "selectFile": "Select a file",
+    "back": "Back",
+    "createDraft": "Create draft",
+    "creatingDraft": "Creating draft…",
+    "draftCreatedHeading": "Draft created",
+    "draftId": "Draft ID",
+    "review": "Review"
+  },
   "home": {
     "title": "Replora"
   },
