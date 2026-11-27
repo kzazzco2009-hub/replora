@@ -51,8 +51,9 @@ def world(tmp_path_factory):
     Base.metadata.create_all(make_engine(url))
     app = create_app(Settings(_env_file=None, database_url=url))
     clients = {"anonymous": with_csrf(TestClient(app))}
-    for name in CALLERS[:-1]:
-        client = with_csrf(TestClient(app))
+    for k, name in enumerate(CALLERS[:-1]):
+        # Each caller has its own address, as real users do, so the register limit isn't hit.
+        client = with_csrf(TestClient(app, client=(f"10.0.0.{k + 1}", 50000)))
         body = {"email": f"{name}@example.com", "password": PASSWORD, "display_name": name,
                 "locale": "en"}  # fmt: skip
         client.post("/api/v1/auth/register", json=body)

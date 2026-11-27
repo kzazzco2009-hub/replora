@@ -526,6 +526,15 @@ PR **#100** (stacked on #99).
 - Mutation checks: membership, role, signed-in and the startup check are all caught (1–64 tests each).
 - **Cross-track:** `PERMISSION_DENIED` is a new `problem_codes` entry. The frontend's parity test on `main` requires `PROBLEM_CODES` to equal the catalogue, so the frontend must add it with AR/EN messages when this lands. This goes in the end-of-phase message.
 - `uv run pytest -q`: **2121 passed**.
+PR **#101** (stacked on #100).
+
+**P5.7, throttling and the audit log** (`app/auth/limits.py`, `app/auth/audit.py`, `tests/integration/test_throttle_audit.py`; 7 failed first).
+- **Fixed windows in `rate_limits`, counted with an atomic upsert** (the dialect's `ON CONFLICT DO UPDATE`). Login failures: 5 per 15 minutes per account **and** per IP. Register and forgot-password: 3 per hour per IP. Over the limit gives 429 `RATE_LIMITED` with `Retry-After` (`ProblemError` can carry headers now). While locked, even the right password is refused, and the lock releases when the window ends. Successful logins don't count.
+- IPs are kept only as an HMAC (`client_ip`), and so are the sessions' `ip_hash` values.
+- **Audit:** `auth.register`, `auth.login`, `auth.login_failed` (no actor for an unknown email), `auth.logout` and `auth.password_reset`. No raw email is stored. Role changes are audited with P5.8.
+- The permission-matrix fixture gives each simulated user its own client address.
+- **T5.7 and T5.12** pass. Mutation checks: the limit boundary, the per-account count (it survived at first, so a many-addresses test was added), the check itself and the upsert are all caught.
+- `uv run pytest -q`: **2137 passed**. No drift.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

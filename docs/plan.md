@@ -238,7 +238,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] P5.4 Email verification and password reset (single-use, hashed, 30‑min tokens). The email goes to the console sink locally.
 - [x] P5.5 Workspaces and roles: `owner`, `admin`, `member`, `viewer`. The permission matrix is defined in code (security.md S‑21). Each user gets a personal workspace on signup.
 - [x] P5.6 A `require(permission)` FastAPI dependency. Resources from another workspace return **404** (no existence leak).
-- [ ] P5.7 Login throttling and account lockout with backoff (DB-backed rate limit). Every auth event is written to the audit log.
+- [x] P5.7 Login throttling and account lockout with backoff (DB-backed rate limit). Every auth event is written to the audit log.
 - [ ] P5.8 `GET /auth/me`, `PATCH /auth/me` (including `timezone`), session list and revoke (`/auth/sessions`), workspace deletion (owner only, not the personal workspace), and membership management endpoints.
 - [ ] P5.9 Invitations: a hashed, single-use, 7-day invite token. Accepting it works for existing users and for new sign-ups. The admin can revoke it.
 - [ ] P5.10 Account deletion (with a grace period, cascading to the personal workspace and its files) and data export (a ZIP of the user's files, workflows and run history).
