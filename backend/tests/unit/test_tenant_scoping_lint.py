@@ -16,6 +16,8 @@ from app.db.repos import CHILD, TENANT
 APP = Path(__file__).resolve().parents[2] / "app"
 TENANT_NAMES = {model.__name__ for model in (*TENANT, *CHILD)}
 QUERY_BUILDERS = {"select", "update", "delete"}
+SYSTEM_JOBS = {"purge_expired"}
+"""Jobs that work across every workspace on purpose (P6.6 retention). Each is listed by name."""
 
 
 def _functions(tree: ast.AST):
@@ -46,7 +48,7 @@ def unscoped_queries(source: str) -> list[str]:
     for function, call in _functions(ast.parse(source)):
         name, target = _name(call), _first_arg(call)
         builds = name in QUERY_BUILDERS or (name == "get" and isinstance(call.func, ast.Attribute))
-        if builds and target in TENANT_NAMES and function != "scoped":
+        if builds and target in TENANT_NAMES and function not in {"scoped", *SYSTEM_JOBS}:
             found.append(f"{name}({target}) in {function}")
     return found
 

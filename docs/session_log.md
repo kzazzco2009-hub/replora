@@ -54,7 +54,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 3 Engine | 9/9 | 11/11 | 1/1 (S‑13 timeouts at T17.6) | ☑ G3 2026-11-26 (Developer A; stack merging) |
 | 4 Persistence | 7/7 | 8/8 | 2/2 | ☑ G4 2026-11-27 (pre-approved by Developer A; stack merging) |
 | 5 Auth | 11/11 | 15/15 | 10/10 | ☑ G5 2026-11-27 (backend; pre-approved by Developer A; I1 with the frontend) |
-| 6 Files | 0/7 | 0/10 | 0/8 | ☐ |
+| 6 Files | 7/7 | 10/10 | 7/7 + S‑29 rest (S‑35 partly at T15.2/T17.6) | ☑ G6 2026-11-27 (backend; pre-approved; I2 with the frontend) |
 | 7 First pipeline | 0/6 | 0/12 | 0/1 | ☐ |
 | 8 API + worker | 0/9 | 0/10 | 0/6 | ☐ |
 | 9 FE foundation | 3/8 | 0/9 | 0/5 | ☐ |
@@ -627,6 +627,17 @@ PR **#110** (stacked on #109).
 - **The flaky test:** T5.11's timing check is now the median of 5 requests per kind, each from its own address. That was the single intermittent failure seen in two full runs.
 - Mutation checks: deleting the bytes, the ready-only download and the cursor are caught.
 - `uv run pytest -q`: **2267 passed**. No drift.
+PR **#111** (stacked on #110).
+
+**P6.6 and P6.7, retention and quotas**, plus the rest of S‑29.
+- `purge_expired` deletes files past `expires_at` (30 days, D11) from storage **and** the database (T6.9). It is the one function the S‑14 lint allows to cross workspaces (`SYSTEM_JOBS`, named on purpose). The worker schedules it (P8).
+- **Quota:** stored and pending bytes per workspace, plus the new file, must stay within `WORKSPACE_QUOTA_BYTES` (2 GiB); otherwise upload intent gives 413 `QUOTA_EXCEEDED`. Rejected files don't count. `check_files_per_run` gives 413 above 10 files; the runs endpoint calls it in P8 (T6.10).
+- **S‑29:** `purge_deleted` also deletes the personal workspace's file bytes. **Exports now live in storage, and `GET /auth/me/export/{id}` returns a 5-minute signed `url`**, which closes that open item.
+- Mutation checks: the quota, deleting the bytes on expiry and on account purge, and excluding rejected files (masked at first, then tested) are all caught.
+
+**End-of-Phase-6 run** (`feat/p6.6-retention-quotas`): ruff and format clean; **2271 passed**; no drift in `openapi.json` or the schemas; pip-audit clean; frontend `gen:api` no drift, typecheck, lint, **186 tests** and build OK; `pnpm audit` clean; gitleaks no leaks.
+
+**Gate G6 (backend) passed** (pre-approved, recorded in `decisions.md`). I2 is the frontend's part. **Next: Phase 7.**
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)

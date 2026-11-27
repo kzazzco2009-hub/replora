@@ -9,6 +9,10 @@ import hashlib
 from datetime import datetime, timedelta
 from uuid import UUID, uuid7
 
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+
+from app.api.problem import ProblemError
 from app.db import models as m
 from app.files.detect import detect, safe_display_name
 from app.files.zip_safety import inspect
@@ -43,3 +47,29 @@ def complete(row: m.File, storage) -> None:
         return
     row.status, row.detected_type, row.members = "ready", verdict, members
     row.sha256 = hashlib.sha256(data).hexdigest()
+
+
+MAX_FILES_PER_RUN = 10
+
+
+def check_files_per_run(count: int) -> None:
+    """P6.7: a run reads at most 10 files (the runs endpoint calls this, P8.1)."""
+    if count > MAX_FILES_PER_RUN:
+        raise ProblemError(413, "QUOTA_EXCEEDED", "At most 10 files per run")
+
+
+def check_quota(session: Session, workspace_id: UUID, size: int, quota: int) -> None:
+    """P6.7: the workspace's stored and pending bytes, plus this file, stay within the quota."""
+    used = session.scalar(select(func.coalesce(func.sum(m.File.size), 0)).where(
+        m.File.workspace_id == workspace_id, m.File.status != "rejected"))  # fmt: skip
+    if used + size > quota:
+        raise ProblemError(413, "QUOTA_EXCEEDED", "The workspace storage is full")
+
+
+def purge_expired(session: Session, storage, now: datetime) -> int:
+    """P6.6: delete files past `expires_at`, from storage and the database. The count."""
+    rows = session.scalars(select(m.File).where(m.File.expires_at <= now)).all()
+    for row in rows:
+        storage.delete(row.storage_key)
+        session.delete(row)
+    return len(rows)

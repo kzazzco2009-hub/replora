@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     """P4.1: SQLite under `.data/` locally; the Supabase pooler URL in production (Phase 18)."""
     data_dir: Path = REPO_ROOT / ".data"
     """Local data (exports until Phase 6 storage). Git-ignored."""
+    workspace_quota_bytes: Annotated[int, Field(ge=1)] = 2 * 1024**3
+    """P6.7: stored bytes per workspace (default 2 GiB). Over it, upload intents are 413."""
     deletion_grace_days: Annotated[int, Field(ge=0)] = 30
     """P5.10: an account is purged this long after the user deletes it."""
     approval_ttl_hours: Annotated[int, Field(ge=1)] = 24

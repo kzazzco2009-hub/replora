@@ -45,7 +45,9 @@ def create_upload_intent(ws_id: UUID, body: UploadIntentRequest, request: Reques
     if body.size > service.MAX_FILE_SIZE:
         raise ProblemError(413, "FILE_TOO_LARGE", "The file is larger than 50 MiB")
     at, user = now(request), request.state.caller.user
+    quota = request.app.state.settings.workspace_quota_bytes
     with database(request).begin() as session:
+        service.check_quota(session, ws_id, body.size, quota)
         row = service.new_file(ws_id, user.id, body.display_name, body.size, at)
         session.add(row)
     target = request.app.state.storage.create_upload_url(row.storage_key, row.size, at)

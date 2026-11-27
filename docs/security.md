@@ -59,7 +59,17 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 - [x] **S‑26:** database rate limits with an atomic upsert (login 5/15 min per account and per IP, register and forgot 3/hour per IP); generic answers; equal cost for known and unknown emails; an audit log of auth events (T5.7, T5.11, T5.12).
 - [x] **S‑27:** single-use, hashed, 30-minute verify and reset tokens; every session revoked on reset; no security questions (T5.8).
 - [x] **S‑28:** RFC 6238 TOTP (RFC vectors), no step reused, the secret encrypted with Fernet under `MFA_KEY`, single-use hashed recovery codes, codes throttled with the login limit, and a 5-minute hashed single-use HttpOnly challenge cookie with no session before it succeeds (T5.15). The "prompt owners and admins to enroll" part is UI (frontend).
-- [x] **S‑29:** the export holds only the user's own data; deletion revokes sessions, and after the grace period the purge removes the user and personal workspace and the audit actor becomes NULL; invitations are hashed, single-use, bound to an email, 7 days, with no role above the inviter's (T5.13, T5.14). **Purging files from storage is verified with Phase 6.**
+- [x] **S‑29:** the export holds only the user's own data; deletion revokes sessions, and after the grace period the purge removes the user and personal workspace and the audit actor becomes NULL; invitations are hashed, single-use, bound to an email, 7 days, with no role above the inviter's (T5.13, T5.14). Purging files from storage: done in Phase 6 (below).
+
+**Phase 6 status** (the evidence is in `session_log.md`, Session 17):
+- [x] **S‑30:** magic bytes plus a structural check (JSON parse, text rules); the extension and client MIME are ignored; the allow-list is CSV, JSON and ZIP today (T6.1).
+- [x] **S‑31:** 50 MiB checked at intent (declared), on the PUT (no more than declared) and at complete (actual equals declared) (T6.2, T6.8). The bucket limit is T18.4.
+- [x] **S‑32:** streaming counters per member (ratio 100:1, total 200 MiB), 25 members, no nesting, no `..`/absolute/drive paths, no symlinks, encryption refused (T6.4–T6.6).
+- [x] **S‑33:** storage keys are `workspace_id/file_id`, and the root can't be escaped; display names are sanitized for display only (T6.3).
+- [x] **S‑34:** the server computes the SHA‑256 at complete; upload URLs are single-purpose (one key, one declared size) and last 10 minutes (T6.7, T6.8).
+- [x] **S‑35 (Phase 6 part):** uploaded bytes are only read in memory by the detector and the ZIP inspector; nothing is executed, extracted to disk, or sent anywhere. **Parser temp-dir quotas and timeouts** come with the worker and the real parsers (T15.2, T17.6).
+- [x] **S‑36:** every download goes through the API's permission check to a 5-minute signed URL with `Content-Disposition: attachment`, `nosniff` and `no-store` (T6.7).
+- [x] **S‑29 (the rest):** the account purge now deletes the personal workspace's file bytes from storage. Exports live in storage behind a signed 5-minute link.
 
 | ID | Control | Implementation | Verify |
 |---|---|---|---|
