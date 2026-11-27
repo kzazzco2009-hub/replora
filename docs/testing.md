@@ -161,9 +161,9 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [ ] T7.4 Schema drift (column `amount` renamed `total`) gives NEEDS_REVIEW.
 
 **Unit / edge cases (adapters)**
-- [ ] T7.5 CSV: UTF‑8 with BOM, UTF‑16, Windows‑1256 (Arabic), `;` and tab delimiters, quoted newlines, ragged rows (reported), an empty file, header only, and duplicate headers.
+- [x] T7.5 CSV: UTF‑8 with BOM, UTF‑16, Windows‑1256 (Arabic), `;` and tab delimiters, quoted newlines, ragged rows (reported), an empty file, header only, and duplicate headers.
 - [ ] T7.6 Numbers: `1,234.50`, `1.234,50`, Arabic-Indic digits `١٢٣`, negatives `(100)`, empty and NaN values.
-- [ ] T7.7 JSON: not an array, nested objects (flatten rule), mixed key sets, very deep nesting (limit), a duplicate key.
+- [x] T7.7 JSON: not an array, nested objects (flatten rule), mixed key sets, very deep nesting (limit), a duplicate key.
 - [ ] T7.8 **CSV formula injection:** cells starting with `= + - @ \t \r` are escaped in the outputs.
 - [ ] T7.9 Duplicate keys on one side are reported, never silently dropped.
 - [ ] T7.10 Decimal comparison:

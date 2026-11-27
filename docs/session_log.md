@@ -638,6 +638,16 @@ PR **#111** (stacked on #110).
 **End-of-Phase-6 run** (`feat/p6.6-retention-quotas`): ruff and format clean; **2271 passed**; no drift in `openapi.json` or the schemas; pip-audit clean; frontend `gen:api` no drift, typecheck, lint, **186 tests** and build OK; `pnpm audit` clean; gitleaks no leaks.
 
 **Gate G6 (backend) passed** (pre-approved, recorded in `decisions.md`). I2 is the frontend's part. **Next: Phase 7.**
+PR **#112** (stacked on #111). Phase 6 summary sent to the frontend (#1, 7210626804).
+
+## Phase 7 — the first real pipeline
+
+**P7.1, the adapters** (`app/ops/table.py`, `csv_adapter.py`, `json_adapter.py`, `zip_adapter.py`; both test files failed first).
+- **`Table`:** columns, rows of text (read as numbers or dates only by `normalize`), and per-row lineage (`file`, `member`, `row`). It travels on the engine's ports as canonical JSON.
+- **CSV:** a BOM decides (UTF‑8 or UTF‑16), else UTF‑8, else Windows‑1256. The delimiter is sniffed among `,` `;` and tab. Quoted newlines are kept and headers are trimmed. **Ragged rows are padded or cut and reported** (`CSV_ROW_RAGGED` with the rows). Empty → `CSV_EMPTY`, duplicate headers → `CSV_DUPLICATE_HEADER`; header-only is an empty table.
+- **JSON:** an array of objects. Nested objects become dotted columns, lists stay JSON text, and number text is kept exactly. **Mixed key sets become the union and are reported** (`JSON_KEYS_MIXED`). Not an array, empty, duplicate key and depth over 10 each fail with a code.
+- **ZIP:** `extract_member(path)` adds `member` to the lineage; a missing member gives `ZIP_MEMBER_MISSING` with the paths found.
+- **T7.5 and T7.7** pass. `uv run pytest -q`: **2297 passed**.
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
