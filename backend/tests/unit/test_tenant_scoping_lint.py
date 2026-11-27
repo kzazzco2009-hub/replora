@@ -16,8 +16,9 @@ from app.db.repos import CHILD, TENANT
 APP = Path(__file__).resolve().parents[2] / "app"
 TENANT_NAMES = {model.__name__ for model in (*TENANT, *CHILD)}
 QUERY_BUILDERS = {"select", "update", "delete"}
-SYSTEM_JOBS = {"purge_expired"}
-"""Jobs that work across every workspace on purpose (P6.6 retention). Each is listed by name."""
+SYSTEM_JOBS = {"purge_expired", "expire_stale_runs"}
+"""Jobs that work across every workspace on purpose (P6.6 retention, P8.2 approval expiry).
+Each is listed by name."""
 
 
 def _functions(tree: ast.AST):
