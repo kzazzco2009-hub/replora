@@ -49,6 +49,18 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 - [x] **S‑14:** `app/db/repos.py` `scoped(model, workspace_id)` is the only builder of queries on tenant tables (files, workflows, drafts, runs, artifacts) and their children (workflow_versions, run_nodes, run_events, joined to their parent's workspace). `get` and `page` use it. `tests/unit/test_tenant_scoping_lint.py` parses `app/` and fails on any `select`, `update`, `delete` or `session.get` of a tenant model outside `scoped`. T4.3: for every tenant and child table, workspace A never sees B's rows, and `get` of B's id from A is `None` (404). The lint matches model names, so dynamic queries (`select(model)`) are covered by the repository tests; mutation-checked.
 - [x] **S‑15:** queries use SQLAlchemy bound parameters only. The same lint fails on `text()` given an f-string, `%` or `.format()` (an AST check instead of semgrep, like S‑10; decision 2026-11-26). Payloads (`' OR 1=1--`, `'; DROP TABLE workflows; --`, `%' OR '%`) are stored and matched as plain data. Whitelisted sort and filter fields are API work, tested with schemathesis at T8.2.
 
+**Phase 5 status** (the evidence is in `session_log.md`, Session 17):
+- [x] **S‑20:** argon2id (pwdlib), rehashed at login when the parameters change; NFKC first (T5.1).
+- [x] **S‑21:** one matrix in code (`app/auth/permissions.py`), every route declared in `app/auth/access.py` `TABLE`, and a startup check that refuses an undeclared route. T5.9: 64 routes × 6 callers.
+- [x] **S‑22:** a non-member gets 404 on every workspace route, and a malformed id is 404 too (T5.10). Inside a workspace, rows from another workspace resolve to None in the repositories (T4.3).
+- [x] **S‑23 (roles):** the owner can't be reassigned or removed; managers act only on lower ranks; the grantable roles stop at admin. Request models forbid extra fields (P1.7). T8.1 completes it with the Phase 8 bodies.
+- [x] **S‑24:** HS256-pinned 15-minute JWTs; refresh tokens stored as SHA‑256 and rotated, **with reuse revoking the session**; HttpOnly, SameSite=Lax, Path=/, Secure in production (T5.3, T5.4, T5.6).
+- [x] **S‑25:** double-submit `X-CSRF-Token` on every unsafe route, plus an Origin allow-list (T5.5 over all of them).
+- [x] **S‑26:** database rate limits with an atomic upsert (login 5/15 min per account and per IP, register and forgot 3/hour per IP); generic answers; equal cost for known and unknown emails; an audit log of auth events (T5.7, T5.11, T5.12).
+- [x] **S‑27:** single-use, hashed, 30-minute verify and reset tokens; every session revoked on reset; no security questions (T5.8).
+- [x] **S‑28:** RFC 6238 TOTP (RFC vectors), no step reused, the secret encrypted with Fernet under `MFA_KEY`, single-use hashed recovery codes, codes throttled with the login limit, and a 5-minute hashed single-use HttpOnly challenge cookie with no session before it succeeds (T5.15). The "prompt owners and admins to enroll" part is UI (frontend).
+- [x] **S‑29:** the export holds only the user's own data; deletion revokes sessions, and after the grace period the purge removes the user and personal workspace and the audit actor becomes NULL; invitations are hashed, single-use, bound to an email, 7 days, with no role above the inviter's (T5.13, T5.14). **Purging files from storage is verified with Phase 6.**
+
 | ID | Control | Implementation | Verify |
 |---|---|---|---|
 | S‑10 | **No arbitrary code execution** | Only registered operations run. There is no `eval`, `exec` or `pickle`, and no dynamic imports from user or AI data. An AST scan of `app/` bans those calls and imports (`backend/tests/unit/test_no_code_execution.py`; decision 2026-11-26). | AST scan in CI (pytest) |

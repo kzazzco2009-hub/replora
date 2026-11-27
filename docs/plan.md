@@ -243,7 +243,7 @@ Goal: frozen domain models that both developers rely on.
 - [x] P5.9 Invitations: a hashed, single-use, 7-day invite token. Accepting it works for existing users and for new sign-ups. The admin can revoke it.
 - [x] P5.10 Account deletion (with a grace period, cascading to the personal workspace and its files) and data export (a ZIP of the user's files, workflows and run history).
 - [x] P5.11 Optional TOTP MFA (per D12) with recovery codes (hashed). It is prompted for owners and admins. Login with MFA uses a short-lived, single-use `replora_mfa_challenge` cookie (api_contract.md §2), so no session is issued until `/auth/mfa/challenge` succeeds.
-- [ ] Tests T5.* pass · Security S‑20…S‑29 verified · **Gate G5**
+- [x] Tests T5.* pass · Security S‑20…S‑29 verified · **Gate G5**
 
 ### Phase 6 — File intake and storage (M)
 - [ ] P6.1 `Storage` interface: `create_upload_url`, `put` (local only), `open`, `delete`, `signed_download_url`. Implement `LocalStorage` (`./.data/storage`, keys never derived from user filenames).
