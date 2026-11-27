@@ -10,24 +10,19 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 3 — Execution engine (B3): complete, G3 awaiting Developer A.** Session 16. **G1 and G2 passed** 2026-11-26 (Developer A), on the condition that their stacks merge after the frontend's review. `main` is at **`ef29ba7`** (#69).
+| Current phase | **Phase 7 (first real pipeline): all 6 steps and T7.1–T7.12 are done; G7 is NOT recorded yet.** Session 17 ended on Developer A's request before the end-of-Phase-7 check run finished. The last complete full run on `feat/p7.6-acceptance` (`f9e1d38`): **2391 passed**, ruff clean, no `openapi.json` drift, gitleaks clean.
 
-**Phase 1:** 7/7 steps, T1.1–T1.6, S‑10, S‑11.
-**Phase 2:** 6/6 steps, T2.1–T2.8, S‑12.
-**Phase 3:** 9/9 steps, T3.1–T3.11, S‑11 (Phase 3 part), S‑13 (Phase 3 part; timeouts, memory and quota at T17.6). End-of-phase run on the top of the stack: 1433 backend + 186 frontend tests, no drift, no leaks.
+**Gates passed:** G0–G4 (G4 pre-approved), **G5 and G6 (backend, pre-approved by Developer A's standing go)**; I1 and I2 are the frontend's to confirm.
 
-**Merged:** #68 P1.5, #69 P1.5b. **Open backend stack (merge in order; after each merge, rebase the next onto `main`, show the range-diff and ping the frontend to re-approve):** #70 P1.6 (rebased at `9447c56`, waiting for re-approval) → #71 P1.7/S‑10 → #72 P2.1 → #73 P2.2+P2.5 → #74 P2.3 → #75 P2.4+P2.6 → #77 P3.1+P3.2+G2 record → #78 P3.3 → #79 P3.4 (`run_codes`) → #80 P3.5 → #81 P3.6 → #82 P3.7 → #83 P3.8 → #84 P3.9 reconcile (`planner_codes`) → `feat/p3.9-merge-template` (merge template, G3 record).
+**Standing go (Developer A, 2026-11-27):** finish Phases 7, 8 and 9 without asking; update this log; push; message the frontend after each phase on #1.
 
-**Frontend PRs:** #76 approved (TanStack Query provider), and their 401 note answered. |
-| Last gate passed | **G2** (2026-11-26, Developer A, `decisions.md`). **G3 is ready and awaiting Developer A.** |
-| Waiting on | **Developer A:** **approve G3** (or not), then Phase 4 can start.
-
-**Frontend:** re-approve #70 so the stack can keep merging; review the Phase 2 and 3 PRs (the shared files are `error-codes.json` → `run_codes` and `planner_codes`, `.env.example`); add the i18n keys `templates.{reconcile,merge}.{title,description}` and `plans.{reconcile,merge}`. |
-| Next step | 0) **Resume:** Phase 5 is done and G5 (backend) is recorded. The standing go covers **Phases 6, 7, 8 and 9** without asking: update this log, push, and message the frontend after each phase. Next: **P6.1**.
-1) **Phase 4** (persistence: SQLAlchemy, Alembic, workspace-scoped repositories; P4.6 persists runs, run_nodes, artifacts and the idempotency ledger).
-2) Merge the stack in order as the frontend approves it (recipe in the notes below and in memory).
-3) Phase 7 registers the real operations under the ids the templates use: `parse_csv`, `parse_json`, `compare`, `report_csv`, `append_rows`, `export_csv`.
-4) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). The API request body size cap belongs to Phase 8 (S‑12 note). |
+**Open PRs (stacked, merge in order; rebase and ping after each merge):** #71 (rebased `e828fa5`, needs re-approval) → #72–#75 → #77–#85 → #86–#95 (Phase 4 and the contract PR) → #96–#107 (Phase 5) → #108–#112 (Phase 6) → #113–#116 (Phase 7) → `feat/p7.6-acceptance` (pushed, **PR not opened yet**). #70 and #69 merged. |
+| Last gate passed | **G6 (backend)**, 2026-11-27 (`decisions.md`). |
+| Waiting on | **Frontend:** re-approve #71 and review the stack; the catalogue code names on rebase (`PERMISSION_DENIED`, `OWNS_SHARED_WORKSPACE`, `PASSWORD_BREACHED`, plus the `workflow_codes`, `run_codes`, `planner_codes` and `operation_codes` texts); `OWNS_SHARED_WORKSPACE` vs a transfer endpoint; the locale in email links; I1 and I2. |
+| Next step | 1) **Open the PR for `feat/p7.6-acceptance`** (base `feat/p7.4-ops-registry`), run the end-of-Phase-7 checks (backend full suite, drift, pip-audit; frontend gen:api/typecheck/test/build; gitleaks), record S‑37 as verified (T7.8) and **G7** (pre-approved), and send the Phase 7 summary on #1.
+2) **Phase 8** (API and worker: wire drafts, runs, workflows and outputs to the engine and DB; the DB job worker; `Idempotency-Key`; `ETag`; the body size cap; `RunEvent.payload` union; P8.8 spike). Known P8 items: the `artifacts` table needs a `name`/source column so `Data.source` survives the DB store; schedule `purge_expired`, `purge_deleted` and `expire_if_stale`; the runs endpoint calls `check_files_per_run`.
+3) Then Phase 9 (frontend-led; the backend supports it), and stop for Developer A before Phase 10.
+4) Watch flakiness: an occasional single full-suite failure was seen; the timing tests were loosened (T5.11 median, ZIP bomb 2 s). |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
 1. `git fetch --all --prune; git switch main; git pull --ff-only` (if a log PR is still open, switch to its branch and pull). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`. Once per clone: `pre-commit install`.
@@ -55,7 +50,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 4 Persistence | 7/7 | 8/8 | 2/2 | ☑ G4 2026-11-27 (pre-approved by Developer A; stack merging) |
 | 5 Auth | 11/11 | 15/15 | 10/10 | ☑ G5 2026-11-27 (backend; pre-approved by Developer A; I1 with the frontend) |
 | 6 Files | 7/7 | 10/10 | 7/7 + S‑29 rest (S‑35 partly at T15.2/T17.6) | ☑ G6 2026-11-27 (backend; pre-approved; I2 with the frontend) |
-| 7 First pipeline | 0/6 | 0/12 | 0/1 | ☐ |
+| 7 First pipeline | 6/6 | 12/12 | S‑37 by T7.8 (to record) | ☐ G7 (end-of-phase run pending) |
 | 8 API + worker | 0/9 | 0/10 | 0/6 | ☐ |
 | 9 FE foundation | 3/8 | 0/9 | 0/5 | ☐ |
 | 10 FE core flow | 0/10 | 0/11 | 0/2 | ☐ |
@@ -683,6 +678,8 @@ PR **#116** (stacked on #115). It also relaxed the ZIP-bomb timing bound to 2 s,
 - **Engine bug found and fixed:** `_issue(code, path, node_id, **params)` crashed when an operation error carried its own `path` param (`ZIP_MEMBER_MISSING`). Issue params are now one dict.
 - The bundled samples now hold the T7.1 numbers exactly.
 - `uv run pytest -q`: **2391 passed**.
+**Session 17 ended here** (Developer A's request), during the end-of-Phase-7 check run. Everything above is committed and pushed.
+
 **Earlier pause:****Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
