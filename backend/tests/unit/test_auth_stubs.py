@@ -53,7 +53,9 @@ IMPLEMENTED = {"/api/v1/auth/csrf", "/api/v1/auth/register", "/api/v1/auth/login
                "/api/v1/auth/password/forgot", "/api/v1/auth/password/reset",
                ("get", "/api/v1/auth/me"), ("patch", "/api/v1/auth/me"), "/api/v1/auth/sessions",
                f"/api/v1/auth/sessions/{SESSION_ID}", ("delete", "/api/v1/auth/me"),
-               "/api/v1/auth/me/export", f"/api/v1/auth/me/export/{SESSION_ID}"}  # fmt: skip
+               "/api/v1/auth/me/export", f"/api/v1/auth/me/export/{SESSION_ID}",
+               "/api/v1/auth/mfa/enroll", "/api/v1/auth/mfa/enroll/confirm",
+               "/api/v1/auth/mfa"}  # fmt: skip
 """Phase 5 endpoints that are real now; the rest still answer 501."""
 STUBS = [e for e in AUTH_ENDPOINTS
          if e[1] not in IMPLEMENTED and (e[0], e[1]) not in IMPLEMENTED]  # fmt: skip

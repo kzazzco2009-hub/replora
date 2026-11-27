@@ -9,7 +9,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-PRODUCTION_SECRETS = ("openrouter_api_key", "jwt_secret")
+PRODUCTION_SECRETS = ("openrouter_api_key", "jwt_secret", "mfa_key")
 """S-02: production refuses to start without these. Each phase adds the secrets it needs."""
 
 
@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     """P5.4: where emailed links point (the frontend)."""
     allowed_origins: list[str] = ["http://localhost:3000"]
     """P5.3: an unsafe request that sends `Origin` must come from one of these (S-25)."""
+    mfa_key: SecretStr | None = None
+    """P5.11: encrypts TOTP secrets at rest (S-28). Outside production a fixed development key is
+    used, so enrolled devices keep working across restarts."""
     jwt_secret: SecretStr | None = None
     """P5.2: signs access tokens (HS256, 256+ bits). Outside production a random key is made at
     startup, so a restart ends access tokens (15 minutes), not sessions."""

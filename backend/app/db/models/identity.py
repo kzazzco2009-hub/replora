@@ -24,6 +24,10 @@ class User(IdMixin, CreatedMixin, Base):
     theme: Mapped[str] = mapped_column(String(8), default="system")
     timezone: Mapped[str] = mapped_column(String(64), default="UTC")
     mfa_secret_enc: Mapped[bytes | None] = mapped_column(LargeBinary)
+    mfa_enabled_at: Mapped[datetime | None]
+    """P5.11: set when enrollment is confirmed. Before that the secret is pending."""
+    mfa_last_step: Mapped[int | None]
+    """The last TOTP step used, so no code works twice."""
     deleted_at: Mapped[datetime | None]
 
 
