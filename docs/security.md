@@ -41,6 +41,7 @@ Reference frameworks: **OWASP Top 10:2025**, OWASP ASVS 5 (Level 2 target), OWAS
 **Phase 1 status** (the evidence is in `session_log.md`, Session 16):
 - [x] **S‑10:** `test_no_code_execution.py` parses every file in `app/` and fails on `eval`, `exec`, `compile`, `__import__`, `breakpoint`, the `pickle`/`dill`/`marshal`/`shelve`/`importlib`/`runpy`/`code` modules (only `importlib.metadata` is allowed, for the version), and `import_module`/`load_module`/`exec_module`. 14 probe cases show each form is caught. Ruff's `S` rules also flag `eval`, `exec` and `pickle`. Every workflow model is closed (`extra="forbid"`, T1.2), so no field like `code` gets in.
 - [x] **S‑11 (Phase 1 part):** `plan_hash` is the canonical SHA‑256 (T1.3, T1.4). `approve` and `resolve` both need the `plan_hash` the user saw, and `resolve` leads to a new hash that must be approved again (P1.5 table). `Run` has `approved_by` and `approved_at`. **Storing and checking them is T3.1 (Phase 3)**, so S‑11 is re-verified at G3.
+- [x] **S‑11 (Phase 3 part, T3.1):** the engine's `approve` rejects a wrong `plan_hash` and stores the approver and time (`app/core/engine/run.py`). `START` re-checks the approval against the run's current definition, so a plan changed after approval can't run. Mutation-checked: removing any of the three guards fails a test. Persisting the approval is Phase 4.
 
 | ID | Control | Implementation | Verify |
 |---|---|---|---|

@@ -18,11 +18,11 @@ Append a new entry per session (newest at the top). For each step record: what w
 **Merged:** #68 P1.5 (`1eb5085`). **Open backend stack (merge in order; after each merge, rebase the next onto `main`, show the range-diff and ping the frontend to re-approve):** #69 P1.5b (contract; rebased, head `06c1568`, waiting for re-approval) → #70 P1.6 (contract) → #71 P1.7/S‑10/G1 → #72 P2.1 → #73 P2.2+P2.5 → #74 P2.3 → `feat/p2.4-validator-limits` (P2.4, P2.6, G2 record).
 
 **Frontend PRs:** #63 re-approved at `e5e5b27`; #66 has a change request (RTL numeric alignment), a fix is coming. |
-| Last gate passed | **G1** (2026-11-26, Developer A, `decisions.md`). **G2 is ready and awaiting Developer A.** |
-| Waiting on | **Developer A:** **approve G2** (or not), then Phase 3 can start. Also, on this machine, `pre-commit install` and `git config --global user.email "143901646+khaledhagar@users.noreply.github.com"` (both blocked for Claude).
+| Last gate passed | **G2** (2026-11-26, Developer A, `decisions.md`). Phase 3 started: P3.1 and P3.2 in `app/core/engine/run.py`. |
+| Waiting on | **Developer A:** nothing. `pre-commit install` is done, and this clone's `.git/config` sets the noreply email.
 
 **Frontend:** review the stack, #69 and #70 first (they change `schema.d.ts`); the `workflow_codes` translations; push the #66 fix. |
-| Next step | 1) After the G2 go: **Phase 3** (engine, in-memory with fake adapters; P3.1 enforces the P1.5 table, T3.1 finishes S‑11).
+| Next step | 1) **Phase 3** continues with P3.3 (in-memory executor). P3.1 and P3.2 are done (T3.1, which finishes S‑11).
 2) Merge the stack in order as the frontend approves it. When the base of a stacked PR merges, retarget the child to `main` and `git rebase --onto origin/main <old base tip>`, check `git range-diff`, regenerate `openapi.json`/`schema.d.ts`/`contracts/schemas` if needed.
 3) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). The API request body size cap belongs to Phase 8 (S‑12 note). |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
@@ -47,7 +47,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 |---|---|---|---|---|
 | 0 Foundation | 11/11 | 7/7 | 5/5 | ☑ G0 2026-11-26 |
 | 1 Contracts | 7/7 | 6/6 | 2/2 (S‑11 re-checked at G3) | ☑ G1 2026-11-26 (Developer A; stack merging) |
-| 2 Validator | 6/6 | 8/8 | 1/1 | ☐ G2 awaiting Developer A |
+| 2 Validator | 6/6 | 8/8 | 1/1 | ☑ G2 2026-11-26 (Developer A; stack merging) |
 | 3 Engine | 0/9 | 0/11 | 0/1 | ☐ |
 | 4 Persistence | 0/7 | 0/8 | 0/2 | ☐ |
 | 5 Auth | 0/11 | 0/15 | 0/10 | ☐ |
@@ -254,6 +254,17 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 **Merges after the frontend's review (#1, 7201202275):** they approved #68–#71 at their heads and asked for in-order merges with a ping after each rebase (a push dismisses approvals). **#68 merged** (`1eb5085`). **#69** was rebased with `git rebase --onto origin/main f552b36` (range-diff `a3bf12e = 06c1568`) and retargeted to `main`. On the rebased branch: 795 passed, no drift, and the frontend typecheck plus 367 tests pass with their merged PRs. Pinged on #69 (7201289845). **#66** re-approved at `f80642e` (the RTL fix is right).
 
 **Gate G2: Phase 2 is complete and waiting for Developer A's approval.** Developer A's instruction was to finish Phase 2, not to go past it. So Phase 3 doesn't start until G2 is approved.
+
+**G2 approved** by Developer A (2026-11-26, `decisions.md`). **#69 merged** (`ef29ba7`). **#70** rebased (`b1d1ae2 = 9447c56`; 856 passed, no drift), retargeted to `main`, pinged (7202790463). **#76** (frontend, TanStack Query provider and `useMe`) reviewed and approved.
+
+**Phase 3 starts: P3.1 and P3.2** (`app/core/engine/run.py`, `tests/unit/test_engine_run.py`, TDD: collection failed first). `transition` enforces the P1.5 table (all 16 allowed pairs move the run, and all 128 illegal pairs raise `InvalidTransitionError` with `{from, action}`). `approve` needs the run's exact `plan_hash` and records who approved and when. `START` re-checks the approval against the current definition (T3.1, S‑11 Phase 3 part). Mutation checks: dropping each of the three guards fails 1–2 tests.
+
+| Command | Result |
+|---|---|
+| `uv run pytest -q` | **1353 passed** |
+| `ruff check` · `ruff format --check` | clean · clean |
+| `export_openapi --check` · `export_schemas --check` | exit 0 · exit 0 |
+| `gitleaks git .` | no leaks found |
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.
