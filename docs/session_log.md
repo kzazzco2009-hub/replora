@@ -10,19 +10,19 @@ Append a new entry per session (newest at the top). For each step record: what w
 ## Current status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 7 (first real pipeline): all 6 steps and T7.1–T7.12 are done; G7 is NOT recorded yet.** Session 17 ended on Developer A's request before the end-of-Phase-7 check run finished. The last complete full run on `feat/p7.6-acceptance` (`f9e1d38`): **2391 passed**, ruff clean, no `openapi.json` drift, gitleaks clean.
+| Current phase | **Phase 7 done: G7 (backend) recorded in Session 18** (pre-approved by the standing go). End-of-phase run at `2a41bd8`: **2391 passed**, no drift, pip-audit clean, frontend build and `pnpm audit` clean, gitleaks clean. **Next: Phase 8.**
 
-**Gates passed:** G0–G4 (G4 pre-approved), **G5 and G6 (backend, pre-approved by Developer A's standing go)**; I1 and I2 are the frontend's to confirm.
+**Gates passed:** G0–G4 (G4 pre-approved), **G5, G6 and G7 (backend, pre-approved by Developer A's standing go)**; I1 and I2 are the frontend's to confirm.
 
 **Standing go (Developer A, 2026-11-27):** finish Phases 7, 8 and 9 without asking; update this log; push; message the frontend after each phase on #1.
 
-**Open PRs (stacked, merge in order; rebase and ping after each merge):** #71 (rebased `e828fa5`, needs re-approval) → #72–#75 → #77–#85 → #86–#95 (Phase 4 and the contract PR) → #96–#107 (Phase 5) → #108–#112 (Phase 6) → #113–#116 (Phase 7) → `feat/p7.6-acceptance` (pushed, **PR not opened yet**). #70 and #69 merged. |
-| Last gate passed | **G6 (backend)**, 2026-11-27 (`decisions.md`). |
-| Waiting on | **Frontend:** re-approve #71 and review the stack; the catalogue code names on rebase (`PERMISSION_DENIED`, `OWNS_SHARED_WORKSPACE`, `PASSWORD_BREACHED`, plus the `workflow_codes`, `run_codes`, `planner_codes` and `operation_codes` texts); `OWNS_SHARED_WORKSPACE` vs a transfer endpoint; the locale in email links; I1 and I2. |
-| Next step | 1) **Open the PR for `feat/p7.6-acceptance`** (base `feat/p7.4-ops-registry`), run the end-of-Phase-7 checks (backend full suite, drift, pip-audit; frontend gen:api/typecheck/test/build; gitleaks), record S‑37 as verified (T7.8) and **G7** (pre-approved), and send the Phase 7 summary on #1.
-2) **Phase 8** (API and worker: wire drafts, runs, workflows and outputs to the engine and DB; the DB job worker; `Idempotency-Key`; `ETag`; the body size cap; `RunEvent.payload` union; P8.8 spike). Known P8 items: the `artifacts` table needs a `name`/source column so `Data.source` survives the DB store; schedule `purge_expired`, `purge_deleted` and `expire_if_stale`; the runs endpoint calls `check_files_per_run`.
+**Open PRs (stacked, merge in order; rebase and ping after each merge):** #71 (re-approved at `e828fa5`) → #72–#75 → #77–#85 → #86–#95 (Phase 4 and the contract PR) → #96–#107 (Phase 5) → #108–#112 (Phase 6) → #113–#116 (Phase 7) → the P7.6 PR. #70, #69 and #92 merged. |
+| Last gate passed | **G7 (backend)**, 2026-11-27 (`decisions.md`). |
+| Waiting on | **Frontend:** review the stack (#107–#116 are green again after the Session 18 test fix; #97's Postgres job still has the flaky checkpoint test, see Session 18); I1 and I2 (after their auth PRs #117–#122 merge). Decided on #1 (7213533760): no transfer endpoint, no locale in email links, the backend adds catalogue code names with placeholder texts. |
+| Next step | 1) **Phase 8** (API and worker: wire drafts, runs, workflows and outputs to the engine and DB; the DB job worker; `Idempotency-Key`; `ETag`; the body size cap; `RunEvent.payload` union; P8.8 spike). Known P8 items: the `artifacts` table needs a `name`/source column so `Data.source` survives the DB store; schedule `purge_expired`, `purge_deleted` and `expire_if_stale`; the runs endpoint calls `check_files_per_run`.
+2) When a stacked PR is rebased onto `main`, add its new catalogue code names to `frontend/src/lib/api/error-messages.ts` and `frontend/tests/unit/error-messages-parity.test.ts` (placeholder texts).
 3) Then Phase 9 (frontend-led; the backend supports it), and stop for Developer A before Phase 10.
-4) Watch flakiness: an occasional single full-suite failure was seen; the timing tests were loosened (T5.11 median, ZIP bomb 2 s). |
+4) Watch flakiness: the timing tests were loosened (T5.11 median, ZIP bomb 2 s); the checkpoint and stub-DB causes were fixed in Session 18. |
 | Resume (next session) | **On any machine**, in PowerShell from the clone (`D:\Projects\replora`).
 1. `git fetch --all --prune; git switch main; git pull --ff-only` (if a log PR is still open, switch to its branch and pull). Then read "Current status".
 2. Install from the lockfiles: `pnpm install --frozen-lockfile; cd backend; uv sync --locked; cd ..`. Once per clone: `pre-commit install`.
@@ -50,7 +50,7 @@ Append a new entry per session (newest at the top). For each step record: what w
 | 4 Persistence | 7/7 | 8/8 | 2/2 | ☑ G4 2026-11-27 (pre-approved by Developer A; stack merging) |
 | 5 Auth | 11/11 | 15/15 | 10/10 | ☑ G5 2026-11-27 (backend; pre-approved by Developer A; I1 with the frontend) |
 | 6 Files | 7/7 | 10/10 | 7/7 + S‑29 rest (S‑35 partly at T15.2/T17.6) | ☑ G6 2026-11-27 (backend; pre-approved; I2 with the frontend) |
-| 7 First pipeline | 6/6 | 12/12 | S‑37 by T7.8 (to record) | ☐ G7 (end-of-phase run pending) |
+| 7 First pipeline | 6/6 | 12/12 | 1/1 (S‑37 CSV part; XLSX at T14.6) | ☑ G7 2026-11-27 (backend; pre-approved) |
 | 8 API + worker | 0/9 | 0/10 | 0/6 | ☐ |
 | 9 FE foundation | 3/8 | 0/9 | 0/5 | ☐ |
 | 10 FE core flow | 0/10 | 0/11 | 0/2 | ☐ |
@@ -122,6 +122,19 @@ The lockfiles (`uv.lock`, `pnpm-lock.yaml`) are the source of truth once they ex
 
 ---
 
+## Session 18 — 2026-11-27 (`D:\Projects\replora`): red CI on the stack, G7
+**Frontend reply on #1 (7213533760):** #71 re-approved; yes to adding catalogue code names with placeholders; no transfer endpoint for `OWNS_SHARED_WORKSPACE` (MVP); no locale in email links (their proxy keeps `?token=`); #95, #109 and S‑37's plain-number rule OK. Recorded in `decisions.md`. They reported two red CI jobs on the stack.
+
+**Red CI, root causes (both test-only, proven before fixing):**
+1. `test_mfa_challenge_accepts_a_recovery_code` (SQLite job, #107 onward, every run): `stub_app()` used the default `database_url`, i.e. the developer's migrated `.data/replora.db`. Since P5.11 the MFA endpoint reads `auth_tokens`, so it passed locally and failed on CI's empty file. **Reproduced** locally with `DATABASE_URL` pointing at an empty file (1 failed). **Fix:** `stub_app(database_url)` plus a module `stub_db` fixture: a fresh SQLite file with the tables. Unit run against an empty default DB: 1677 passed (the one failure was `test_the_default_database_is_sqlite_under_dot_data`, caused by the override itself; 5 passed without it).
+2. `test_a_killed_run_resumes_without_re_executing_done_nodes` (Postgres job, flaky): the test's `bundle()` used `writestr(name, …)`, which stamps the current time (2 s resolution). Two attempts in different slots → different `sha256` → a different ledger key → `unzip` re-ran (the engine was right). **Proven:** two builds 2.1 s apart gave `459de11a…` vs `90830e46…`; with a forced 2.1 s pause between attempts the old fixture fails and the fixed one passes. **Fix:** members get a fixed `ZipInfo` `date_time`.
+- Commit `2e6bf54` on `feat/p5.11-mfa-challenge` (#107): 3 test files, +23/−12. Full suite there: **2176 passed**, no drift. Then `git rebase --update-refs --onto` moved #108–#116 and `feat/p7.6-acceptance`; `git range-diff` showed every commit `=`, and each branch differs from its old head only by those 3 files. Pushed with `--force-with-lease` (no reviews existed on #107–#116). **CI green on #107 and #116**, both backend jobs.
+- **#97 is still red**: its head is below #107, so it lacks fix 2, and the re-run (attempt 2) hit the same flake. The test came in P4.6 (#91); see "Open" below.
+- A stray edit (the `#` removed from `docs/plan.md`'s title) appeared in the working tree; not mine and not committed. It is in `git stash` ("stray edit: docs/plan.md …") for Developer A to drop or keep.
+
+**End-of-Phase-7 run at `2a41bd8`:** backend **2391 passed**, 12 skipped; `export_openapi --check` exit 0; pip-audit no known vulnerabilities; `pnpm --filter frontend build` OK; `pnpm audit --audit-level=high` none; `gitleaks git .` no leaks. **S‑37 (CSV part) ticked in `security.md`; G7 recorded** (`decisions.md`, `plan.md`).
+
+**Open:** whether to push fix 2 down to #91 (it would dismiss the frontend's approvals on #91–#106) or fold it in when the stack is rebased onto `main`.
 ## Session 16 — 2026-11-26 (other machine, `D:\Projects\replora`): finish Phase 1
 **Goal (Developer A):** finish Phase 1 without stopping for permission between steps. Check for frontend replies at every step and post the state.
 

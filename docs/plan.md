@@ -265,7 +265,7 @@ Goal: frozen domain models that both developers rely on.
   - ambiguous dates (`03/04/2026`) make the run NEEDS_REVIEW with a format choice, never a silent guess;
   - CSV outputs default to **UTF‑8 with BOM** so Arabic opens correctly in Excel, with plain UTF‑8 as an option.
 - [x] P7.6 **Acceptance test (from the original §9):** O‑101 matched, O‑102 value_diff, O‑103 missing_right, O‑104 missing_left. A failure in a required branch means no success. Schema drift leads to NEEDS_REVIEW.
-- [ ] Tests T7.* pass · Security S‑37 verified · **Gate G7**
+- [x] Tests T7.* pass · Security S‑37 verified · **Gate G7**
 
 ### Phase 8 — Workflow and run API plus background worker (M)
 - [ ] P8.1 Endpoints for templates, drafts (TemplatePlanner), validate, runs (create, approve, cancel, get, list), events and outputs (with preview pagination) per `api_contract.md`.
