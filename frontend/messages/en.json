@@ -42,6 +42,28 @@
       "BASE_VERSION_STALE": "A newer version of this workflow exists. Reload it, then map again from the latest version.",
       "INTERNAL_ERROR": "Something went wrong on our side. If this keeps happening, contact support with the reference below.",
       "NOT_IMPLEMENTED": "This feature isn't available yet."
+    },
+    "validation": {
+      "MISSING": "This field is required.",
+      "EXTRA_FORBIDDEN": "This field isn't recognized.",
+      "JSON_INVALID": "This request couldn't be read. Please try again.",
+      "MODEL_ATTRIBUTES_TYPE": "This request couldn't be read. Please try again.",
+      "STRING_TYPE": "Enter text here.",
+      "STRING_TOO_SHORT": "Enter at least {min_length} characters.",
+      "STRING_TOO_LONG": "Enter no more than {max_length} characters.",
+      "STRING_PATTERN_MISMATCH": "This doesn't match the expected format.",
+      "LITERAL_ERROR": "Choose one of the allowed options.",
+      "UUID_PARSING": "This isn't a valid ID.",
+      "INVALID_EMAIL": "Enter a valid email address.",
+      "MFA_CODE_OR_RECOVERY_REQUIRED": "Enter a code or a recovery code, not both.",
+      "INT_PARSING": "Enter a whole number.",
+      "INT_FROM_FLOAT": "Enter a whole number, not a fraction.",
+      "GREATER_THAN": "Enter a number greater than {gt}.",
+      "GREATER_THAN_EQUAL": "Enter {ge} or more.",
+      "LESS_THAN_EQUAL": "Enter {le} or less.",
+      "TOO_SHORT": "Add at least {min_length} items.",
+      "TOO_LONG": "Keep this to {max_length} items or fewer.",
+      "INVALID": "This value isn't valid."
     }
   },
   "home": {

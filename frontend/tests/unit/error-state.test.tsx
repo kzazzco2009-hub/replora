@@ -1,7 +1,20 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AlertTriangle } from "lucide-react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ErrorState } from "../../src/components/ui/error-state";
+
+function mockClipboard() {
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, "clipboard", {
+    value: { writeText },
+    configurable: true,
+  });
+  return writeText;
+}
+
+afterEach(() => {
+  Reflect.deleteProperty(navigator, "clipboard");
+});
 
 describe.each(["ltr", "rtl"] as const)("ErrorState (dir=%s)", (dir) => {
   it("renders the title, description and action with role=alert", () => {
@@ -83,5 +96,65 @@ describe.each(["ltr", "rtl"] as const)("ErrorState (dir=%s)", (dir) => {
     );
 
     expect(screen.queryByText(/super secret stack trace/)).toBeNull();
+  });
+
+  it("copies the correlation id and swaps to the copied label, announced in a status region", async () => {
+    mockClipboard();
+    render(
+      <div dir={dir}>
+        <ErrorState
+          title="Error"
+          correlationId="01J000000000000000000000"
+          correlationIdLabel="Reference"
+          copyLabel="Copy"
+          copiedLabel="Copied"
+        />
+      </div>,
+    );
+
+    const button = await screen.findByRole("button", { name: "Copy" });
+    expect(button.className).toMatch(/min-h-11/);
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Copied" })).toBeTruthy();
+    });
+    expect(screen.getByRole("status").textContent).toBe("Copied");
+  });
+
+  it("renders no copy button without a copyLabel, even with a correlation id", async () => {
+    mockClipboard();
+    render(
+      <div dir={dir}>
+        <ErrorState
+          title="Error"
+          correlationId="01J000000000000000000000"
+          correlationIdLabel="Reference"
+        />
+      </div>,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button")).toBeNull();
+    });
+  });
+
+  it("renders no copy button when navigator.clipboard is unavailable", async () => {
+    render(
+      <div dir={dir}>
+        <ErrorState
+          title="Error"
+          correlationId="01J000000000000000000000"
+          correlationIdLabel="Reference"
+          copyLabel="Copy"
+          copiedLabel="Copied"
+        />
+      </div>,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button")).toBeNull();
+    });
+    expect(screen.getByText("01J000000000000000000000")).toBeTruthy();
   });
 });

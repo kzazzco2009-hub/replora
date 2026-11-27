@@ -42,6 +42,28 @@
       "BASE_VERSION_STALE": "توجد نسخة أحدث من مسار العمل هذا. أعد تحميله، ثم أعد الربط من آخر نسخة.",
       "INTERNAL_ERROR": "حدث خطأ من جانبنا. إذا تكرر ذلك، تواصل مع الدعم وأرسل الرقم المرجعي أدناه.",
       "NOT_IMPLEMENTED": "هذه الميزة غير متاحة بعد."
+    },
+    "validation": {
+      "MISSING": "هذا الحقل مطلوب.",
+      "EXTRA_FORBIDDEN": "هذا الحقل غير معروف.",
+      "JSON_INVALID": "تعذّرت قراءة هذا الطلب. من فضلك حاول مرة أخرى.",
+      "MODEL_ATTRIBUTES_TYPE": "تعذّرت قراءة هذا الطلب. من فضلك حاول مرة أخرى.",
+      "STRING_TYPE": "أدخل نصًا هنا.",
+      "STRING_TOO_SHORT": "أدخل {min_length} حرفًا على الأقل.",
+      "STRING_TOO_LONG": "أدخل {max_length} حرفًا كحد أقصى.",
+      "STRING_PATTERN_MISMATCH": "هذا لا يطابق الصيغة المطلوبة.",
+      "LITERAL_ERROR": "اختر أحد الخيارات المتاحة.",
+      "UUID_PARSING": "هذا ليس معرّفًا صالحًا.",
+      "INVALID_EMAIL": "أدخل بريدًا إلكترونيًا صالحًا.",
+      "MFA_CODE_OR_RECOVERY_REQUIRED": "أدخل الرمز أو رمز الاسترداد، لا كلاهما.",
+      "INT_PARSING": "أدخل رقمًا صحيحًا.",
+      "INT_FROM_FLOAT": "أدخل رقمًا صحيحًا، لا رقمًا عشريًا.",
+      "GREATER_THAN": "أدخل رقمًا أكبر من {gt}.",
+      "GREATER_THAN_EQUAL": "أدخل {ge} أو أكثر.",
+      "LESS_THAN_EQUAL": "أدخل {le} أو أقل.",
+      "TOO_SHORT": "أضف {min_length} عناصر على الأقل.",
+      "TOO_LONG": "اجعل هذا {max_length} عناصر كحد أقصى.",
+      "INVALID": "هذه القيمة غير صالحة."
     }
   },
   "home": {
