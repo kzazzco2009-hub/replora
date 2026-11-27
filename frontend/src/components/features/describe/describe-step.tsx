@@ -9,6 +9,8 @@ import { Select } from "@/components/ui/select";
 import { createDraft, useTemplates } from "@/lib/api/drafts";
 import { mapProblem } from "@/lib/api/error-messages";
 import { mapFieldErrors } from "@/lib/api/field-errors";
+import { createRun, runErrorMessages } from "@/lib/api/runs";
+import { useRouter } from "@/i18n/routing";
 import { isApiError } from "@/lib/api/problem";
 import { FormAlert } from "@/components/features/auth/form-alert";
 
@@ -70,9 +72,7 @@ export function DescribeStep({ wsId, files, onBack }: DescribeStepProps) {
           {t("describe.draftId")}{" "}
           <bdi className="select-all font-mono">{draft.id}</bdi>
         </p>
-        <Button disabled className="self-start">
-          {t("describe.review")}
-        </Button>
+        <ReviewDraft wsId={wsId} draftId={draft.id} />
       </div>
     );
   }
@@ -222,5 +222,42 @@ export function DescribeStep({ wsId, files, onBack }: DescribeStepProps) {
         </Button>
       </div>
     </div>
+  );
+}
+
+function ReviewDraft({ wsId, draftId }: { wsId: string; draftId: string }) {
+  const t = useTranslations();
+  const router = useRouter();
+  const review = useMutation({
+    mutationFn: ({ draftId, key }: { draftId: string; key: string }) =>
+      createRun(draftId, { wsId, idempotencyKey: key }),
+    onSuccess: (run) =>
+      router.push(`/runs/${encodeURIComponent(run.id)}/review`),
+  });
+
+  return (
+    <>
+      {review.isError && (
+        <ul role="alert">
+          {runErrorMessages(review.error).map((message, index) => (
+            <li key={index}>
+              {t(
+                message.messageKey,
+                "params" in message
+                  ? (message.params as Record<string, string | number>)
+                  : undefined,
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      <Button
+        disabled={review.isPending || review.isSuccess}
+        className="self-start"
+        onClick={() => review.mutate({ draftId, key: crypto.randomUUID() })}
+      >
+        {review.isPending ? t("runReview.openingReview") : t("describe.review")}
+      </Button>
+    </>
   );
 }

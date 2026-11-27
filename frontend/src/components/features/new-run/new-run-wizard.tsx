@@ -17,8 +17,7 @@ export interface NewRunWizardProps {
  * Owns the upload queue so it survives moving from Upload to Describe: one
  * page, one component tree, no route or context needed for two steps whose
  * state (a handful of already-`ready` server `File` records) already lives
- * in memory here. A later step (Review, Run) that needs this to survive a
- * reload or a real route can promote it to a draft id in the URL instead.
+ * in memory here. Review opens a separate route keyed by the created run ID.
  */
 export function NewRunWizard({ wsId }: NewRunWizardProps) {
   const t = useTranslations("newRunWizard");

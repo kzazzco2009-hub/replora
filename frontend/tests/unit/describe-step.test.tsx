@@ -4,8 +4,12 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DescribeStep } from "../../src/components/features/describe/describe-step";
 import messages from "../../messages/en.json";
+import { RUN_ID } from "../msw/handlers/runs";
 import { setScenario } from "../msw/scenarios";
 import { installSelectJsdomPolyfills } from "./select-jsdom-polyfills";
+
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("@/i18n/routing", () => ({ useRouter: () => ({ push }) }));
 
 const FILES = [
   { id: "file-orders", displayName: "orders.csv" },
@@ -15,6 +19,7 @@ const FILES = [
 let restorePolyfills: () => void;
 
 beforeEach(() => {
+  push.mockClear();
   document.cookie = "replora_csrf=test-token";
   restorePolyfills = installSelectJsdomPolyfills();
 });
@@ -104,13 +109,14 @@ describe("DescribeStep behavior", () => {
     ).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "Create draft" }));
 
-    await waitFor(() => {
-      expect(screen.getByText("Draft created")).toBeTruthy();
-      expect(
-        screen.getByRole("button", { name: "Review" }).hasAttribute("disabled"),
-      ).toBe(true);
-    });
+    const review = await screen.findByRole("button", { name: "Review" });
+    expect(screen.getByText("Draft created")).toBeTruthy();
     expect(screen.getByText("Match orders with payments")).toBeTruthy();
+    expect(push).not.toHaveBeenCalled();
+    fireEvent.click(review);
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledExactlyOnceWith(`/runs/${RUN_ID}/review`),
+    );
   });
 
   it("doesn't offer the same file for two inputs", async () => {
