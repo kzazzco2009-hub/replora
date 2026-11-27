@@ -1,5 +1,5 @@
-"""P0.5: the §7 run outputs are documented. List and download are real (P8.1,
-`tests/integration/test_outputs_api.py`); preview and lineage are still 501."""
+"""P0.5: the §7 run outputs are documented. The behaviour is in
+`tests/integration/test_outputs_api.py` (P8.1)."""
 
 import pytest
 
@@ -30,14 +30,6 @@ def test_endpoint_is_documented(openapi, path, operation_id):
     assert "200" in documented["responses"]
     for error in ("401", "403", "404", "422", "429", "501"):
         assert documented["responses"][error]["content"] == PROBLEM
-
-
-@pytest.mark.parametrize(("path", "operation_id"), [ENDPOINTS[1], ENDPOINTS[3]])
-def test_preview_and_lineage_are_still_501_stubs(client, path, operation_id):
-    response = client.get(path.format(**IDS))
-
-    assert response.status_code == 501
-    assert response.json()["code"] == "NOT_IMPLEMENTED"
 
 
 def test_output_paths_are_all_documented(openapi):
@@ -84,7 +76,8 @@ def test_preview_row_carries_its_number_and_status(schemas):
     assert set(row["required"]) == {"row", "status", "cells"}
     assert row["properties"]["row"]["minimum"] == 0
     statuses = [option.get("enum") for option in row["properties"]["status"]["anyOf"]]
-    assert statuses == [["matched", "value_diff", "missing_left", "missing_right"], None]
+    assert statuses == [["matched", "value_diff", "missing_left", "missing_right", "duplicate_key"],
+                        None]  # fmt: skip
 
 
 def test_integer_cells_stay_in_the_javascript_safe_range(schemas):
