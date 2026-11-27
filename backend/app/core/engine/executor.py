@@ -19,14 +19,14 @@ import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Protocol
 from uuid import UUID
 
 from pydantic import JsonValue
 
 from app.core.artifacts import ArtifactLineage, ArtifactRef
-from app.core.engine.run import Run, transition
-from app.core.engine.store import ArtifactStore, Data
+from app.core.engine.run import Run, check_approval, transition
+from app.core.engine.store import Data, Store
 from app.core.registry import OperationRegistry
 from app.core.run_issue_codes import RunIssueCode
 from app.core.run_state import RunAction, RunState
@@ -76,7 +76,14 @@ Handler = Callable[[Mapping[str, Data], Mapping[str, JsonValue]], Result]
 """An operation's implementation: input data by port name and the params, to a `Result`."""
 
 Handlers = Mapping[tuple[str, int], Handler]
-Ledger = dict[NodeKey, Done]
+
+
+class Ledger(Protocol):
+    """The nodes already done, by idempotency key: a dict in memory, `run_nodes` in the DB."""
+
+    def __contains__(self, key: object) -> bool: ...
+    def __getitem__(self, key: NodeKey) -> Done: ...
+    def __setitem__(self, key: NodeKey, done: Done) -> None: ...
 
 
 @dataclass(frozen=True)
@@ -115,22 +122,33 @@ def execute(
     run: Run,
     registry: OperationRegistry,
     handlers: Handlers,
-    store: ArtifactStore,
+    store: Store,
     inputs: Mapping[str, ArtifactRef],
     ledger: Ledger | None = None,
     sleep: Callable[[float], None] = time.sleep,
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     cancelled: Callable[[], bool] = lambda: False,
+    checkpoint: Callable[[Run], None] = lambda run: None,
 ) -> Execution:
     """Run an approved, queued run to its end state. `inputs` are the workflow's files by name.
 
-    Pass the same `ledger` to a later attempt of the same run to skip the nodes already done.
+    Pass the same `ledger` to a later attempt of the same run to skip the nodes already done. A
+    run that is already RUNNING (its worker died) resumes instead of starting again.
     `cancelled` is asked before every node; once it says yes, no other node starts.
+    `checkpoint` gets the run when it starts and ends (P4.6). Nodes and artifacts are saved by
+    the ledger and the store as each node finishes.
     """
     if run.state is RunState.CANCEL_REQUESTED:
-        return Execution(transition(run, RunAction.CONFIRM_CANCEL, clock()), {}, {})
-    runner = _Runner(transition(run, RunAction.START, clock()), registry, handlers, store,
-                     {} if ledger is None else ledger, sleep, clock, cancelled)  # fmt: skip
+        cancelled_run = transition(run, RunAction.CONFIRM_CANCEL, clock())
+        checkpoint(cancelled_run)
+        return Execution(cancelled_run, {}, {})
+    if run.state is RunState.RUNNING:
+        check_approval(run)
+    else:
+        run = transition(run, RunAction.START, clock())
+    checkpoint(run)
+    runner = _Runner(run, registry, handlers, store, {} if ledger is None else ledger, sleep,
+                     clock, cancelled, checkpoint)  # fmt: skip
     return runner.run(inputs)
 
 
@@ -139,11 +157,12 @@ class _Runner:
     run_: Run
     registry: OperationRegistry
     handlers: Handlers
-    store: ArtifactStore
+    store: Store
     ledger: Ledger
     sleep: Callable[[float], None]
     clock: Callable[[], datetime]
     cancelled: Callable[[], bool]
+    checkpoint: Callable[[Run], None]
     produced: dict[Slot, ArtifactRef] = field(default_factory=dict)
     issues: list[Issue] = field(default_factory=list)
 
@@ -226,6 +245,7 @@ class _Runner:
                    for o in self.run_.definition.outputs
                    if (o.source.node_id, o.source.port) in self.produced}  # fmt: skip
         end = transition(self.run_, action, self.clock())
+        self.checkpoint(end)
         return Execution(end, self.produced, outputs, self.issues)
 
 

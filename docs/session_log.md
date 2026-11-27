@@ -23,7 +23,8 @@ Append a new entry per session (newest at the top). For each step record: what w
 | Waiting on | **Developer A:** **approve G3** (or not), then Phase 4 can start.
 
 **Frontend:** re-approve #70 so the stack can keep merging; review the Phase 2 and 3 PRs (the shared files are `error-codes.json` → `run_codes` and `planner_codes`, `.env.example`); add the i18n keys `templates.{reconcile,merge}.{title,description}` and `plans.{reconcile,merge}`. |
-| Next step | 1) After the G3 go: **Phase 4** (persistence: SQLAlchemy, Alembic, workspace-scoped repositories; P4.6 persists runs, run_nodes, artifacts and the idempotency ledger).
+| Next step | 0) **Resume:** Phase 4 is at P4.6 (done, top of the stack). Next: T4.8 job claim, P4.7 Postgres CI, then G4 and Phase 5.
+1) **Phase 4** (persistence: SQLAlchemy, Alembic, workspace-scoped repositories; P4.6 persists runs, run_nodes, artifacts and the idempotency ledger).
 2) Merge the stack in order as the frontend approves it (recipe in the notes below and in memory).
 3) Phase 7 registers the real operations under the ids the templates use: `parse_csv`, `parse_json`, `compare`, `report_csv`, `append_rows`, `export_csv`.
 4) `RunEvent.payload` becomes a discriminated union on `type` before G8 (#1, 7186123958). The API request body size cap belongs to Phase 8 (S‑12 note). |
@@ -436,6 +437,17 @@ PR **#89** (stacked on #88).
 - **T4.3:** for all 8 tenant and child tables, workspace A and B each see only their own rows, and a cross-workspace `get` gives None. SQL payloads are stored and matched as plain data.
 - Mutation checks: dropping the tenant filter, the child filter, the cursor direction, the order, or the scoping in `get` fails 1–14 tests.
 - `uv run pytest -q`: **1652 passed**. ruff is clean.
+
+PR **#90** (stacked on #89).
+
+**P4.6, checkpointing** (`app/db/engine_state.py`, `tests/integration/test_checkpoint.py`; collection failed first).
+- `DbLedger` keeps one `run_nodes` row per done node, keyed by a hash of (run, node, input hashes) and committed per node. `DbArtifactStore` writes `artifacts` rows with their lineage, and the content to a local blob folder until Phase 6 storage. `save_run` and `load_run` persist the run; it is found only in its own workspace.
+- The executor now takes a `Store` protocol and a `Ledger` protocol, resumes a RUNNING run (re-checking its approval), and calls `checkpoint` when the run starts and ends.
+- **T4.4:** killed at node 3 of 5, the run is RUNNING in the DB with 2 done nodes. A fresh process resumes, the done nodes are not re-executed, and the run ends SUCCEEDED.
+- Mutation checks: the resume path, both checkpoints, and the input-hash check each fail a test.
+- `uv run pytest -q`: **1660 passed**.
+
+**Session paused here (usage limit).** Phase 4 left: **T4.7 (rest)/T4.8** (job claim, never twice: a conditional UPDATE, plus SKIP LOCKED on Postgres) and **P4.7** (Postgres 17 CI job, with the DB tests parametrized on `TEST_POSTGRES_URL`). Then G4 (pre-approved once verified), then Phase 5.
 
 ## Session 15, part 2 — 2026-11-26: Phase 1 starts (P1.1)
 **Goal:** P1.1, the domain models `ArtifactType`, `ArtifactRef`, `Port` and `OperationContract`.

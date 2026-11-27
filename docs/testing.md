@@ -100,7 +100,7 @@ Each phase in `plan.md` has a matching section here. **A phase is not finished u
 - [x] T4.1 `alembic upgrade head`, then `downgrade base`, then `upgrade head` succeeds on both databases.
 - [x] T4.2 Autogenerate shows no diff between models and migrations (no drift).
 - [x] T4.3 Repository scoping: a query in workspace A never returns rows of workspace B (seeded with 2 workspaces).
-- [ ] T4.4 Engine checkpointing: kill the process after node 2 of 4, then resume. Nodes 1–2 are not re-executed.
+- [x] T4.4 Engine checkpointing: kill the process after node 2 of 4, then resume. Nodes 1–2 are not re-executed.
 - [x] T4.5 UUIDv7 ordering and UTC timestamps round-trip on both databases.
 - [x] T4.6 **Index coverage test:** every FK column has an index, and every index listed in plan.md §6 exists (it inspects `MetaData`).
 - [ ] T4.7 Unique constraints are enforced (duplicate email, case-insensitive; duplicate idempotency key).
