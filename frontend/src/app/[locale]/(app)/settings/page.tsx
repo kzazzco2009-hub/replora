@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
@@ -121,6 +122,12 @@ export default function SettingsPage() {
   return (
     <div className="grid gap-4 [max-inline-size:36rem]">
       <h1 className="text-xl font-semibold">{t("settings.profile")}</h1>
+      <Link
+        href={`/${locale}/settings/security`}
+        className="inline-flex items-center justify-self-start rounded-control text-petrol underline [min-block-size:44px] [min-inline-size:44px] focus-visible:outline-2 focus-visible:outline-focus-ring"
+      >
+        {t("security.heading")}
+      </Link>
       <form
         onSubmit={(event) => {
           event.preventDefault();
