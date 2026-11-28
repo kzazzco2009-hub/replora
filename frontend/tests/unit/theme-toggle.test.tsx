@@ -5,6 +5,8 @@ import { ThemeCookieSync } from "../../src/components/theme/theme-cookie-sync";
 import { ThemeProvider } from "../../src/components/theme/theme-provider";
 import { ThemeToggle } from "../../src/components/theme/theme-toggle";
 import messages from "../../messages/en.json";
+import ar from "../../messages/ar.json";
+import { THEME_COOKIE } from "../../src/lib/theme-cookie";
 
 function mockSystemTheme(prefersDark: boolean) {
   window.matchMedia = vi.fn().mockImplementation((query: string) => ({
@@ -68,5 +70,79 @@ describe("ThemeToggle", () => {
     // "system" is never cached as a cookie (see theme-cookie-sync.tsx):
     // a stale cookie could disagree with a future OS preference change.
     expect(document.cookie).not.toMatch(/theme=(light|dark)/);
+  });
+});
+
+describe.each([
+  { locale: "en", dir: "ltr", messages },
+  { locale: "ar", dir: "rtl", messages: ar },
+] as const)("ThemeToggle (dir=$dir)", ({ locale, dir, messages }) => {
+  const labels = messages.theme.toggle;
+
+  function renderToggle() {
+    return render(
+      <div dir={dir}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider defaultTheme="system">
+            <ThemeCookieSync />
+            <ThemeToggle />
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </div>,
+    );
+  }
+
+  function expectTheme(theme: "light" | "dark") {
+    expect(document.documentElement.getAttribute("data-theme")).toBe(theme);
+  }
+
+  it.each([
+    { theme: "dark", prefersDark: false },
+    { theme: "light", prefersDark: true },
+  ] as const)(
+    "restores the explicit $theme choice on remount",
+    ({ theme, prefersDark }) => {
+      mockSystemTheme(prefersDark);
+      const { unmount } = renderToggle();
+
+      fireEvent.click(screen.getByRole("button", { name: labels[theme] }));
+      expectTheme(theme);
+      expect(document.cookie.split("; ")).toContain(`${THEME_COOKIE}=${theme}`);
+
+      unmount();
+      document.documentElement.removeAttribute("data-theme");
+      renderToggle();
+
+      expectTheme(theme);
+      expect(
+        screen.getByRole("button", { name: labels[theme], pressed: true }),
+      ).toBeTruthy();
+    },
+  );
+
+  it.each([
+    { theme: "dark", prefersDark: true },
+    { theme: "light", prefersDark: false },
+  ] as const)(
+    "uses the system's $theme preference on first visit",
+    ({ theme, prefersDark }) => {
+      mockSystemTheme(prefersDark);
+      renderToggle();
+
+      expectTheme(theme);
+      expect(document.cookie).not.toContain(`${THEME_COOKIE}=`);
+    },
+  );
+
+  it("clears the explicit choice and resumes following the system", () => {
+    mockSystemTheme(true);
+    renderToggle();
+
+    fireEvent.click(screen.getByRole("button", { name: labels.light }));
+    expectTheme("light");
+
+    fireEvent.click(screen.getByRole("button", { name: labels.system }));
+    expectTheme("dark");
+    expect(document.cookie).not.toContain(`${THEME_COOKIE}=`);
   });
 });
