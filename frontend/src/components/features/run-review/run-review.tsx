@@ -17,6 +17,7 @@ import {
   type Run,
 } from "@/lib/api/runs";
 import { RunPlan } from "./run-plan";
+import { RunResolve } from "./run-resolve";
 
 export function RunReview({ wsId, runId }: { wsId: string; runId: string }) {
   const t = useTranslations();
@@ -93,6 +94,14 @@ export function RunReview({ wsId, runId }: { wsId: string; runId: string }) {
     <div className="flex flex-col gap-6">
       <h1 className="text-xl font-semibold">{t("runReview.heading")}</h1>
       <RunPlan run={run} />
+      {run.state === "NEEDS_REVIEW" && (
+        <RunResolve
+          key={JSON.stringify([run.id, run.plan_hash, run.review_issues])}
+          wsId={wsId}
+          run={run}
+          reload={async () => (await query.refetch()).isSuccess}
+        />
+      )}
       <section className="flex flex-col items-start gap-3 border-t border-line pt-4">
         <p>
           {t("runReview.planHash")}{" "}

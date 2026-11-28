@@ -140,7 +140,7 @@ function Pipeline({
 
 export function RunProgress({ wsId, runId }: { wsId: string; runId: string }) {
   const t = useTranslations();
-  const query = useRun(wsId, runId);
+  const query = useRun(wsId, runId, { pollApproval: true });
   const run = query.data;
   const events = useRunEvents(wsId, runId, run?.state);
   const cancel = useCancelRun(
