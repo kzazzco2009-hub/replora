@@ -1,7 +1,11 @@
 import { http, HttpResponse } from "msw";
+import type { UploadedFile } from "../../../src/lib/api/upload";
 import { getScenario } from "../scenarios";
 
-type FixtureCase = { status: number; body: Record<string, unknown> };
+type FixtureCase<Body = Record<string, unknown>> = {
+  status: number;
+  body: Body;
+};
 
 const UPLOAD_INTENT_FIXTURES: Record<string, FixtureCase> = {
   ok: {
@@ -38,7 +42,7 @@ const UPLOAD_INTENT_FIXTURES: Record<string, FixtureCase> = {
   },
 };
 
-const COMPLETE_FIXTURES: Record<string, FixtureCase> = {
+const COMPLETE_FIXTURES: Record<string, FixtureCase<UploadedFile>> = {
   ready: {
     status: 200,
     body: {
@@ -73,6 +77,20 @@ const COMPLETE_FIXTURES: Record<string, FixtureCase> = {
   },
 };
 
+export const filesCursor = "older+/=files";
+export const listedFiles = (["csv", null, "json", "zip"] as const).map(
+  (type, index) => {
+    const { body } = COMPLETE_FIXTURES[type ? "ready" : "rejected"];
+    return {
+      ...body,
+      id: `${body.id.slice(0, -1)}${index + 1}`,
+      display_name: `Orders طلبات ${index + 1}.${type ?? "dat"}`,
+      detected_type: type,
+      size: 1536,
+    };
+  },
+);
+
 const LIMITS_FIXTURE = {
   max_file_size: 52_428_800,
   max_files_per_run: 10,
@@ -86,6 +104,35 @@ const LIMITS_FIXTURE = {
  * inline here instead, following the same scenario-keyed shape.
  */
 export const filesHandlers = [
+  http.get("/api/v1/workspaces/:ws_id/files", ({ request }) => {
+    const scenario = getScenario("files_list");
+    if (scenario === "RATE_LIMITED") {
+      return HttpResponse.json(
+        {
+          type: "about:blank",
+          title: "Rate limited",
+          code: scenario,
+          status: 429,
+          detail: "internal detail",
+        },
+        { status: 429 },
+      );
+    }
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get("type");
+    const cursor = searchParams.get("cursor");
+    const items = type
+      ? listedFiles.filter((file) => file.detected_type === type)
+      : cursor
+        ? listedFiles.slice(2)
+        : listedFiles.slice(0, 2);
+    if (scenario === "EMPTY")
+      return HttpResponse.json({ items: [], next_cursor: null });
+    return HttpResponse.json({
+      items,
+      next_cursor: type || cursor ? null : filesCursor,
+    });
+  }),
   http.post("/api/v1/workspaces/:ws_id/files/upload-intent", () => {
     const { status, body } =
       UPLOAD_INTENT_FIXTURES[getScenario("files_create_upload_intent")];
