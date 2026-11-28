@@ -83,6 +83,20 @@
       "none": "No reconciliation status"
     }
   },
+  "runHistory": {
+    "heading": "Run history",
+    "loading": "Loading runs",
+    "filter": "Filter by status",
+    "all": "All statuses",
+    "run": "Run",
+    "status": "Status",
+    "created": "Created",
+    "finished": "Finished",
+    "unfinished": "Not finished",
+    "more": "Load more",
+    "empty": "No runs found.",
+    "noWorkspace": "No workspace is available."
+  },
   "runProgress": {
     "cancel": "Cancel run",
     "confirmCancel": "Cancel this run?",

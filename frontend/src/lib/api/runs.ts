@@ -1,13 +1,41 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getApiClient } from "./client";
 import { mapProblem } from "./error-messages";
 import { mapFieldErrors } from "./field-errors";
 import { isApiError } from "./problem";
-import type { components } from "./schema";
+import type { components, operations } from "./schema";
 
 export type Run = components["schemas"]["Run"];
 export type RunIssue = components["schemas"]["Issue"];
 export type Operation = components["schemas"]["OperationContract"];
+
+type RunsListParams = NonNullable<
+  operations["runs_list"]["parameters"]["query"]
+> & {
+  workspaceId: string;
+};
+
+export async function listRuns(
+  { workspaceId, cursor, limit, state }: RunsListParams,
+  signal?: AbortSignal,
+) {
+  const { data } = await getApiClient().GET("/api/v1/workspaces/{ws_id}/runs", {
+    params: { path: { ws_id: workspaceId }, query: { cursor, limit, state } },
+    signal,
+  });
+  if (!data) throw new Error("Missing runs list response");
+  return data;
+}
+
+export function useRuns(workspaceId: string, state?: Run["state"]) {
+  return useInfiniteQuery({
+    queryKey: ["runs", workspaceId, state],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam: cursor, signal }) =>
+      listRuns({ workspaceId, cursor, state }, signal),
+    getNextPageParam: (page) => page.next_cursor ?? undefined,
+  });
+}
 
 interface RunWrite {
   wsId: string;

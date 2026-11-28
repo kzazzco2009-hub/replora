@@ -22,6 +22,7 @@ export interface TableRowData<K extends string = string> {
 
 export interface TableProps<K extends string = string> {
   caption: string;
+  hideCaption?: boolean;
   columns: TableColumn<K>[];
   rows: TableRowData<K>[];
   /** Shown instead of rows when there are none and `loading` is unset. */
@@ -53,6 +54,7 @@ function cellContent(column: TableColumn, content: ReactNode): ReactNode {
  */
 export function Table<K extends string = string>({
   caption,
+  hideCaption = false,
   columns,
   rows,
   emptyState,
@@ -76,7 +78,11 @@ export function Table<K extends string = string>({
       >
         <caption
           id={captionId}
-          className="px-3 py-2 text-start text-sm font-medium text-ink"
+          className={
+            hideCaption
+              ? "sr-only"
+              : "px-3 py-2 text-start text-sm font-medium text-ink"
+          }
         >
           {caption}
         </caption>
