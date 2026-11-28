@@ -64,6 +64,17 @@ export const run: Run = {
 };
 
 const path = "/api/v1/workspaces/:ws_id/runs";
+export const historyCursor = "older+/=runs";
+export const historyRuns = (
+  ["AWAITING_APPROVAL", "NEEDS_REVIEW", "RUNNING", "SUCCEEDED"] as const
+).map((state, index) => ({
+  id: `${RUN_ID.slice(0, -1)}${index + 1}`,
+  title: `Orders ${index + 1} طلبات.csv`,
+  state,
+  created_at: run.created_at,
+  finished_at: state === "SUCCEEDED" ? "2026-11-27T10:00:00Z" : null,
+}));
+
 const resolvedRun: Run = {
   ...run,
   plan_hash: "b".repeat(64),
@@ -122,6 +133,25 @@ function eventsFor(scenario: string): RunEvent[] {
 
 export const runsHandlers = [
   http.get("/api/v1/operations", () => HttpResponse.json([operation])),
+  http.get(path, ({ request }) => {
+    const scenario = getScenario("runs_list");
+    if (scenario === "RATE_LIMITED") return problem(429, scenario);
+    const { searchParams } = new URL(request.url);
+    const cursor = searchParams.get("cursor");
+    const state = searchParams.get("state");
+    if (scenario === "EMPTY")
+      return HttpResponse.json({ items: [], next_cursor: null });
+    if (state) {
+      return HttpResponse.json({
+        items: historyRuns.filter((run) => run.state === state),
+        next_cursor: null,
+      });
+    }
+    return HttpResponse.json({
+      items: cursor ? historyRuns.slice(2) : historyRuns.slice(0, 2),
+      next_cursor: cursor ? null : historyCursor,
+    });
+  }),
   http.post(path, () =>
     getScenario("runs_create") === "DRAFT_INVALID"
       ? problem(422, "DRAFT_INVALID", { errors: [issue] })
