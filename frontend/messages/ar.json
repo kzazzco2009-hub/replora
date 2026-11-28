@@ -322,7 +322,13 @@
     "next": "التالي: الوصف"
   },
   "home": {
-    "title": "Replora"
+    "title": "Replora",
+    "newReconciliation": "مطابقة جديدة",
+    "recentRuns": "التشغيلات الأخيرة",
+    "viewAllRuns": "عرض كل التشغيلات",
+    "viewAllWorkflows": "عرض كل مسارات العمل",
+    "runsError": "تعذّر تحميل التشغيلات الأخيرة.",
+    "workflowsError": "تعذّر تحميل مسارات العمل المحفوظة."
   },
   "nav": {
     "home": "الرئيسية",

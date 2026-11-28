@@ -33,14 +33,17 @@ export const workflowsHandlers = [
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q")?.toLowerCase() ?? "";
     const cursor = searchParams.get("cursor");
+    const limit = Number(searchParams.get("limit") ?? 2);
     const matching =
       scenario === "EMPTY"
         ? []
         : listedWorkflows.filter(({ name }) => name.toLowerCase().includes(q));
     return HttpResponse.json({
       items:
-        cursor === workflowsCursor ? matching.slice(2) : matching.slice(0, 2),
-      next_cursor: !cursor && matching.length > 2 ? workflowsCursor : null,
+        cursor === workflowsCursor
+          ? matching.slice(limit)
+          : matching.slice(0, limit),
+      next_cursor: !cursor && matching.length > limit ? workflowsCursor : null,
     });
   }),
 ];
