@@ -19,7 +19,7 @@ export interface UploadItem {
   file: File;
   status: UploadItemStatus;
   progress: number;
-  detectedType?: "csv" | "zip" | null;
+  detectedType?: UploadedFile["detected_type"];
   rejectionCode?: RejectionCode;
   blockedIssue?: UploadLimitIssue;
   problem?: Problem;

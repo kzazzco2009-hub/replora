@@ -65,6 +65,23 @@ describe.each(["ltr", "rtl"] as const)("UploadStep (dir=%s)", (dir) => {
       expect(screen.getByText(/Ready — detected as CSV/)).toBeTruthy(),
     );
   });
+
+  it("shows and announces the detected JSON type with the ready status", async () => {
+    setScenario("files_complete", "ready_json");
+    renderStep(dir);
+    await screen.findByText(/Up to 10 files/);
+
+    pickFiles([file("orders.json", 10, "application/json")]);
+
+    const label = "Ready — detected as JSON";
+    const rowStatus = await screen.findByText(label);
+    expect(rowStatus.querySelector("svg")).not.toBeNull();
+    await waitFor(() =>
+      expect(screen.getByRole("status").textContent).toBe(
+        `orders.json: ${label}`,
+      ),
+    );
+  });
 });
 
 describe("UploadStep behavior", () => {

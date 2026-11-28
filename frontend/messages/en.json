@@ -78,6 +78,7 @@
       "value_diff": "Different",
       "missing_left": "Missing on the left",
       "missing_right": "Missing on the right",
+      "duplicate_key": "Duplicate key",
       "unknown": "Unrecognized status",
       "none": "No reconciliation status"
     }

@@ -10,6 +10,7 @@ const ALL_STATUSES: StatusChipStatus[] = [
   "value_diff",
   "missing_left",
   "missing_right",
+  "duplicate_key",
   "DRAFT",
   "VALIDATED",
   "AWAITING_APPROVAL",
@@ -36,6 +37,7 @@ describe.each(["ltr", "rtl"] as const)("StatusChip (dir=%s)", (dir) => {
 
       const text = screen.getByText(`Label for ${status}`);
       expect(text.closest("span")?.querySelector("svg")).not.toBeNull();
+      expect(text.classList.contains("[min-block-size:44px]")).toBe(true);
     },
   );
 

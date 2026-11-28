@@ -67,9 +67,9 @@ it("keeps an unfamiliar status safely", async () => {
   setScenario("outputs_preview", "unknown");
   const page = query(() => useOutputPreview(location, {}));
   await waitFor(() =>
-    expect(page.current.data?.rows[0].status).toBe("duplicate_key"),
+    expect(page.current.data?.rows[0].status).toBe("future_status"),
   );
-  expect(isResultStatus("duplicate_key")).toBe(false);
+  expect(isResultStatus("future_status")).toBe(false);
 });
 
 it.each(["409", "422", "501", "invalid"])(
