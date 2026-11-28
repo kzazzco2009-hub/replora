@@ -233,3 +233,22 @@ Docs-only PR (`frontend/docs-f0-progress`). Ticked and updated `docs/frontend/pl
 - Replaced the "the owner" phase-gate wording (line 16) with the co-owner gate-approver wording from `decisions.md` (2026-11-25). No occurrence of "the owner" in `frontend/CLAUDE.md`, so nothing to change there.
 
 Next step: finish P9.5 (Controls, Data display PR) and P9.6 (PR 2 review, PRs 3–4).
+
+---
+
+## Session 10 — 2026-11-27
+Docs-only (`docs/frontend-plan-progress`): tick P9.5, update P9.6 progress, add a P9.7 status note, re-baseline the timeline. No code changes.
+
+Merged since Session 9 (confirmed via `git log origin/main --oneline -40`):
+- #62 Select (P9.5 PR 4a) `6bb74cb`, #63 Tabs (P9.5 PR 4b) `a34d388`, #64 StatusChip + Skeleton (P9.5 PR 4c) `cb4e6a9`, #65 EmptyState + ErrorState (P9.5 PR 4d) `bb45d29`, #66 Table (P9.5 PR 4e) `fdf5e9d` — P9.5's last 4 PRs, all now merged.
+- #76 TanStack Query provider + useMe (P9.6 PR 3) `bf00cc5`, #67 error-code mapper + AR/EN parity test (P9.6 PR 4) `01aed72`, #92 session refresh + CSRF retry (P9.6 PR 5) `0fb8941`.
+
+- Ticked **P9.5**: all 12 components (Button, Input, Select, Dialog, Sheet, Toast, Tabs, Table, Badge, StatusChip, EmptyState, ErrorState, Skeleton) merged.
+- **P9.6** stays unticked: PRs 1–5 merged (#53, #58, #76, #67, #92), but PR 6 — field-level validation messages (#117) — is still open, sequenced as the first PR of the P9.7 auth-screens stack.
+- Added a status note under P9.7: auth screens open as PRs #117–#122 (#117 field-level validation, #118 auth route group/guard/safeReturnTo, #119 sign-in, #120 MFA challenge, #121 sign-up, #122 verify-email). T9.2/T9.3/T9.7/T9.9 and the rest of P9.7 onward left unticked.
+- Re-baselined the week numbers in the timeline table to today: F0–F1 "done", F2 "done (closing: #117 open)", F3 onward shifted so week 1 starts now, same order and durations as before.
+
+Open: #117–#122 (above).
+Waiting on the backend: **I1** (real auth) before F5 can start; **Phase 8** (runs/drafts — `feat/p8.1-drafts`, `feat/p8.1-runs`, `feat/p8.1-run-rows`, `feat/p8.1-file-facts`, `feat/p8.1-runs-list-events`, `feat/p8.2-artifact-store`, `feat/p8.2-worker`, all unmerged branches seen on fetch) before F4's wizard has real upload/run endpoints to build against.
+
+Next step: open the PR for this doc update (no code, no contract, no security impact). After merge, continue the P9.7 auth-screens stack (#117–#122) through review.

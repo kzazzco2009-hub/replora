@@ -73,22 +73,22 @@ frontend/
 ---
 
 ## 5. Timeline and dependencies on the backend
-*About 20 h/week. The week numbers are illustrative and are re-baselined after F3. Realistic MVP: 14–18 weeks.*
+*About 20 h/week. Re-baselined 2026-11-27: F0–F1 done, F2 closing out (#117 open); week 1 = this week, aligned to F3 in progress. Realistic MVP: 14–18 weeks.*
 
 | Week | Frontend phase | Needs from backend | Sync point |
 |---|---|---|---|
-| 1 | F0 Foundation + contract draft | — | **G0, both agree the contract** |
-| 2–3 | F1 Tokens, themes, i18n/RTL, app shell | — | — |
-| 3–4 | F2 UI kit, skeletons, API client, MSW | domain fixtures | — |
-| 4–5 | F3 Auth screens (mocked), loading routes | auth fixtures | **Gate G9** |
-| 5–7 | F4 Wizard: upload, describe, review (pipeline rail), approve | validation fixtures, templates | — |
-| 7–8 | F5 Run detail + results | run-state fixtures | **I1, real auth** |
-| 8–9 | F6 Home, files, runs, settings, invitations, MFA, onboarding | — | **I2, real upload** |
-| 10–11 | F7 Switch to the real API | frozen OpenAPI v1 | **I3, end to end → Gate G10** |
-| 11–12 | F8 UX iteration and accessibility | — | **Gate G11** |
-| 12–13 | F9 AI planner UI | AI planner endpoints | **I4 → Gate G12** |
-| 13–14 | F10 Workflows and replay UI | replay endpoints | **I5 → Gate G13** |
-| 15+ | F11 Format UI, OCR review UI, polish | new types and warning codes | — |
+| done | F0 Foundation + contract draft | — | **G0, both agree the contract** |
+| done | F1 Tokens, themes, i18n/RTL, app shell | — | — |
+| done (closing: #117 open) | F2 UI kit, skeletons, API client, MSW | domain fixtures | — |
+| 1–2 | F3 Auth screens (mocked), loading routes | auth fixtures | **Gate G9** |
+| 2–4 | F4 Wizard: upload, describe, review (pipeline rail), approve | validation fixtures, templates | — |
+| 4–5 | F5 Run detail + results | run-state fixtures | **I1, real auth** |
+| 5–6 | F6 Home, files, runs, settings, invitations, MFA, onboarding | — | **I2, real upload** |
+| 7–8 | F7 Switch to the real API | frozen OpenAPI v1 | **I3, end to end → Gate G10** |
+| 8–9 | F8 UX iteration and accessibility | — | **Gate G11** |
+| 9–10 | F9 AI planner UI | AI planner endpoints | **I4 → Gate G12** |
+| 10–11 | F10 Workflows and replay UI | replay endpoints | **I5 → Gate G13** |
+| 12+ | F11 Format UI, OCR review UI, polish | new types and warning codes | — |
 | later | Shared Phase 17, then Phase 19 | staging URL | **I6 staging**, go-live |
 
 ---
@@ -114,14 +114,15 @@ frontend/
 - [ ] Tests T9.2, T9.3, T9.7, T9.9
 
 ### F2 — UI kit and data layer (P9.5–P9.6)
-- [ ] P9.5 Components: Button, Input, Select, Dialog, Sheet, Toast, Tabs, Table, Badge, StatusChip (icon plus text), EmptyState, ErrorState, and Skeleton variants per layout. Each has a Vitest test in LTR and RTL.
-  - Progress: 3 of 4 PRs merged — #48 (Button, Input, Badge primitives), #49 (Dialog and Sheet), #54 (Toast). Still open: Controls (Select, Tabs) and Data display (Table, StatusChip, EmptyState, ErrorState, Skeleton).
+- [x] P9.5 Components: Button, Input, Select, Dialog, Sheet, Toast, Tabs, Table, Badge, StatusChip (icon plus text), EmptyState, ErrorState, and Skeleton variants per layout. Each has a Vitest test in LTR and RTL.
+  - Done: #48 (Button, Input, Badge), #49 (Dialog, Sheet), #54 (Toast), #62 (Select), #63 (Tabs), #64 (StatusChip, Skeleton), #65 (EmptyState, ErrorState), #66 (Table). All merged.
 - [ ] P9.6 The generated client (openapi-fetch) with CSRF header injection (on app start, call `GET /auth/csrf` if the `replora_csrf` cookie is missing; login and register send the token too; re-read the cookie after login and logout because the token rotates), an ETag-aware fetch and a 401 → refresh → retry-once flow. TanStack Query provider. MSW handlers from `contracts/fixtures`, with scenario switches (each run state, slow network, each error code). An error-code → AR/EN message mapper with a parity test against `contracts/error-codes.json`, and a CI check that `ar.json` and `en.json` have the same keys.
-  - Progress: PR 1 (#53, MSW auth handlers) merged. PR 2 (#58, typed client, CSRF, Idempotency-Key) in review. PRs 3 and 4 not started.
+  - (done: #53 MSW auth handlers, #58 typed client/CSRF/Idempotency-Key, #76 Query provider + useMe, #67 error mapper, #92 session refresh + CSRF retry; open: #117 field-level validation messages)
 - [ ] Tests T9.1, T9.4
 
 ### F3 — Auth screens and loading routes (P9.7–P9.8) · Gate G9
 - [ ] P9.7 Sign in, sign up, verify email, forgot and reset password, and the MFA challenge. Route protection runs in the Next.js request proxy, and `returnTo` accepts only relative same-origin paths.
+  - Status: auth screens open as PRs #117–#122.
 - [ ] P9.8 A `loading.tsx` with a layout-matched skeleton for every data route. Suspense boundaries for in-page data.
 - [ ] Tests T9.5, T9.6, T9.8 · Security S‑60…S‑64 · **Gate G9**
 
