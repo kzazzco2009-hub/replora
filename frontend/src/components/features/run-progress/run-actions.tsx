@@ -122,16 +122,13 @@ export function RunActions({
           </div>
         </>
       )}
-      {state === "NEEDS_REVIEW" && (
-        <>
-          <p>{t("runReview.reviewAnswersLater")}</p>
-          <Link
-            className={linkClass}
-            href={`/${locale}/runs/${encodeURIComponent(runId)}/review`}
-          >
-            {t("runReview.heading")}
-          </Link>
-        </>
+      {(state === "NEEDS_REVIEW" || state === "AWAITING_APPROVAL") && (
+        <Link
+          className={linkClass}
+          href={`/${locale}/runs/${encodeURIComponent(runId)}/review`}
+        >
+          {t("runReview.heading")}
+        </Link>
       )}
       {(canCancelRun(state) || cancel.isPending) && (
         <Button

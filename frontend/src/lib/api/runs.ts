@@ -35,9 +35,15 @@ export async function createRun(
 export const runQueryKey = (wsId: string, runId: string) =>
   ["run", wsId, runId] as const;
 
-export function useRun(wsId: string, runId: string) {
-  return useQuery({
+export function useRun(
+  wsId: string,
+  runId: string,
+  { pollApproval = false } = {},
+) {
+  return useQuery<Run>({
     queryKey: runQueryKey(wsId, runId),
+    refetchInterval: ({ state }) =>
+      pollApproval && state.data?.state === "AWAITING_APPROVAL" ? 5_000 : false,
     queryFn: async ({ signal }) => {
       const { data } = await getApiClient().GET(
         "/api/v1/workspaces/{ws_id}/runs/{run_id}",
@@ -68,6 +74,42 @@ export async function approveRun(
     },
   );
   if (!data) throw new Error("Missing approved run response");
+  return data;
+}
+
+// TODO: Replace these local types with generated types once #134 is in the schema.
+type JsonScalar = string | number | boolean | null;
+type ReviewOption =
+  JsonScalar | ReviewOption[] | { [key: string]: ReviewOption };
+type ReviewChoice = Pick<RunIssue, "code" | "path"> & { value: ReviewOption };
+type ResolveRequest = { plan_hash: string; choices: ReviewChoice[] };
+type ResolveInput = Pick<ResolveRequest, "choices"> & {
+  planHash: string;
+  idempotencyKey: string;
+};
+
+export function reviewOptions(issue: RunIssue): ReviewOption[] | undefined {
+  const options = issue.params?.options;
+  return Array.isArray(options) ? (options as ReviewOption[]) : undefined;
+}
+
+export async function resolveRun(
+  wsId: string,
+  runId: string,
+  { planHash, choices, idempotencyKey }: ResolveInput,
+): Promise<Run> {
+  const body: ResolveRequest = { plan_hash: planHash, choices };
+  const { data } = await getApiClient().POST(
+    "/api/v1/workspaces/{ws_id}/runs/{run_id}/resolve",
+    {
+      params: {
+        path: { ws_id: wsId, run_id: runId },
+        header: { "Idempotency-Key": idempotencyKey },
+      },
+      body,
+    },
+  );
+  if (!data) throw new Error("Missing resolved run response");
   return data;
 }
 

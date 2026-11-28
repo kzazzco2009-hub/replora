@@ -147,7 +147,9 @@
     "warnings": "Warnings",
     "issues": "Review issues",
     "genericIssue": "This issue needs attention.",
-    "reviewAnswersLater": "Answering these issues will be available in a later update.",
+    "answerQuestions": "Answer review questions",
+    "submitAnswers": "Submit answers",
+    "answersPlanChanged": "This plan changed. Reload it and review the questions again.",
 
     "requestFailed": "The request failed. Please try again."
   },
@@ -196,6 +198,7 @@
       "NOT_IMPLEMENTED": "This feature isn't available yet."
     },
     "validation": {
+      "DATE_AMBIGUOUS": "Choose the date order for this column.",
       "MISSING": "This field is required.",
       "EXTRA_FORBIDDEN": "This field isn't recognized.",
       "JSON_INVALID": "This request couldn't be read. Please try again.",

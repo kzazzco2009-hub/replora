@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import type { RunEvent } from "../../../src/lib/api/run-events";
 import type { Operation, Run } from "../../../src/lib/api/runs";
-import { getScenario } from "../scenarios";
+import { getScenario, setScenario } from "../scenarios";
 
 export const RUN_ID = "01937a5e-7f00-7000-8000-000000000401";
 export const PLAN_HASH = "a".repeat(64);
@@ -11,6 +11,13 @@ const issue = {
   node_id: "read",
   params: {},
 };
+export const reviewQuestions = ["paid_on تاريخ", "received_on"].map(
+  (column) => ({
+    code: "DATE_AMBIGUOUS",
+    path: `definition.${column}`,
+    params: { column, options: ["DMY", "MDY"] },
+  }),
+);
 
 export const operation: Operation = {
   id: "parse_csv",
@@ -57,6 +64,11 @@ export const run: Run = {
 };
 
 const path = "/api/v1/workspaces/:ws_id/runs";
+const resolvedRun: Run = {
+  ...run,
+  plan_hash: "b".repeat(64),
+  nodes: [],
+};
 
 function problem(status: number, code: string, errors = {}) {
   return HttpResponse.json(
@@ -119,13 +131,14 @@ export const runsHandlers = [
     const scenario = getScenario("runs_get");
     if (scenario === "EXPIRED")
       return HttpResponse.json({ ...run, state: "EXPIRED" });
-    if (scenario === "NEEDS_REVIEW") {
+    if (scenario === "NEEDS_REVIEW" || scenario === "REVIEW_QUESTIONS") {
       return HttpResponse.json({
         ...run,
         state: "NEEDS_REVIEW",
-        review_issues: [issue],
+        review_issues: scenario === "NEEDS_REVIEW" ? [issue] : reviewQuestions,
       });
     }
+    if (scenario === "RESOLVED") return HttpResponse.json(resolvedRun);
     if (scenario === "RATE_LIMITED") return problem(429, "RATE_LIMITED");
     return HttpResponse.json(run);
   }),
@@ -140,6 +153,18 @@ export const runsHandlers = [
       return problem(409, "PLAN_HASH_MISMATCH");
     }
     return HttpResponse.json({ ...run, state: "QUEUED" }, { status: 202 });
+  }),
+  http.post(`${path}/:run_id/resolve`, () => {
+    const scenario = getScenario("runs_resolve");
+    if (scenario === "NOT_IMPLEMENTED") return problem(501, scenario);
+    if (
+      scenario === "PLAN_HASH_MISMATCH" ||
+      scenario === "INVALID_STATE_TRANSITION"
+    ) {
+      return problem(409, scenario);
+    }
+    setScenario("runs_get", "RESOLVED");
+    return HttpResponse.json(resolvedRun);
   }),
   http.get(`${path}/:run_id/events`, ({ request }) => {
     const scenario = getScenario("runs_events");

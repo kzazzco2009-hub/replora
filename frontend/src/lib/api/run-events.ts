@@ -133,6 +133,9 @@ type Progress = {
   delay: number;
 };
 
+export const runEventsQueryKey = (wsId: string, runId: string) =>
+  ["run-events", wsId, runId] as const;
+
 export function useRunEvents(wsId: string, runId: string, state?: RunState) {
   const client = useQueryClient();
   const visible = useSyncExternalStore(
@@ -140,7 +143,7 @@ export function useRunEvents(wsId: string, runId: string, state?: RunState) {
     () => document.visibilityState !== "hidden",
     () => false,
   );
-  const queryKey = ["run-events", wsId, runId] as const;
+  const queryKey = runEventsQueryKey(wsId, runId);
   const canPoll = (progress?: Progress) =>
     visible && runIsLive(state) && runIsLive(progress?.state ?? state);
 

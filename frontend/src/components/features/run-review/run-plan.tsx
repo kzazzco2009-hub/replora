@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  reviewOptions,
   runErrorMessages,
   useOperations,
   type Run,
@@ -32,6 +33,14 @@ export function orderedNodes({ nodes, edges }: Run["definition"]) {
   return ordered;
 }
 
+export function IssueMessage({ issue }: { issue: RunIssue }) {
+  const t = useTranslations();
+  const key = `errors.validation.${issue.code}`;
+  return t.has(key)
+    ? t(key, issue.params as Record<string, string | number>)
+    : t("runReview.genericIssue");
+}
+
 export function IssueList({
   title,
   issues,
@@ -39,23 +48,17 @@ export function IssueList({
   title: string;
   issues: RunIssue[];
 }) {
-  const t = useTranslations();
   if (!issues.length) return null;
 
   return (
     <section className="flex flex-col gap-2">
       <h3 className="font-medium">{title}</h3>
       <ul className="list-disc ps-5">
-        {issues.map((issue, index) => {
-          const key = `errors.validation.${issue.code}`;
-          return (
-            <li key={index}>
-              {t.has(key)
-                ? t(key, issue.params as Record<string, string | number>)
-                : t("runReview.genericIssue")}
-            </li>
-          );
-        })}
+        {issues.map((issue, index) => (
+          <li key={index}>
+            <IssueMessage issue={issue} />
+          </li>
+        ))}
       </ul>
     </section>
   );
@@ -141,10 +144,14 @@ export function RunPlan({ run }: { run: Run }) {
           })}
         </ol>
       )}
-      <IssueList title={t("runReview.issues")} issues={run.review_issues} />
-      {run.state === "NEEDS_REVIEW" && (
-        <p>{t("runReview.reviewAnswersLater")}</p>
-      )}
+      <IssueList
+        title={t("runReview.issues")}
+        issues={
+          run.state === "NEEDS_REVIEW"
+            ? run.review_issues.filter((issue) => !reviewOptions(issue))
+            : run.review_issues
+        }
+      />
     </section>
   );
 }
