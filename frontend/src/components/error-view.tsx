@@ -42,7 +42,10 @@ export function ErrorView({
       </button>
       {reference ? (
         <p data-testid="error-reference" className="text-sm text-gray-500">
-          {strings.reference}: <span className="select-all">{reference}</span>
+          {strings.reference}:{" "}
+          <bdi dir="ltr" className="select-all">
+            {reference}
+          </bdi>
         </p>
       ) : null}
     </div>
