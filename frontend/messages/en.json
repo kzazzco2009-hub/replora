@@ -83,6 +83,20 @@
       "none": "No reconciliation status"
     }
   },
+  "fileList": {
+    "caption": "Workspace files",
+    "loading": "Loading files",
+    "filter": "Filter by type",
+    "all": "All types",
+    "name": "File name",
+    "type": "Type",
+    "size": "Size",
+    "created": "Created",
+    "unknown": "Unknown type",
+    "more": "Load more",
+    "empty": "No files found.",
+    "noWorkspace": "No workspace is available."
+  },
   "runHistory": {
     "heading": "Run history",
     "loading": "Loading runs",
