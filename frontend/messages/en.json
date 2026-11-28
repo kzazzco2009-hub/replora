@@ -83,6 +83,18 @@
       "none": "No reconciliation status"
     }
   },
+  "workflowList": {
+    "caption": "Saved workflows",
+    "loading": "Loading workflows",
+    "search": "Search by name",
+    "name": "Workflow name",
+    "version": "Latest version",
+    "created": "Created",
+    "more": "Load more",
+    "empty": "No saved workflows.",
+    "noResults": "No workflows match your search.",
+    "noWorkspace": "No workspace is available."
+  },
   "fileList": {
     "caption": "Workspace files",
     "loading": "Loading files",

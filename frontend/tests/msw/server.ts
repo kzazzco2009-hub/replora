@@ -5,6 +5,7 @@ import { filesHandlers } from "./handlers/files";
 import { resultsHandlers } from "./handlers/results";
 
 import { runsHandlers } from "./handlers/runs";
+import { workflowsHandlers } from "./handlers/workflows";
 
 export const server = setupServer(
   ...authHandlers,
@@ -12,4 +13,5 @@ export const server = setupServer(
   ...draftsHandlers,
   ...runsHandlers,
   ...resultsHandlers,
+  ...workflowsHandlers,
 );
