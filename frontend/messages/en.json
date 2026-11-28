@@ -330,6 +330,23 @@
     "runsError": "Recent runs couldn’t be loaded.",
     "workflowsError": "Saved workflows couldn’t be loaded."
   },
+  "security": {
+    "heading": "Security",
+    "loading": "Loading security settings",
+    "enabled": "Two-step verification is on.",
+    "disabled": "Two-step verification is off.",
+    "enable": "Enable two-step verification",
+    "setupKey": "Authenticator setup key",
+    "copyKey": "Copy setup key",
+    "openApp": "Open authenticator app",
+    "recoveryCodes": "Recovery codes",
+    "recoveryWarning": "Save these recovery codes in a safe place. They will not be shown again.",
+    "copyCodes": "Copy all recovery codes",
+    "copied": "Copied to clipboard.",
+    "confirm": "Confirm",
+    "disable": "Disable two-step verification",
+    "invalidCode": "That verification code didn’t match. Try again."
+  },
   "settings": {
     "profile": "Profile",
     "loading": "Loading profile",
