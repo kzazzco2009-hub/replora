@@ -12,19 +12,23 @@ type Preview = components["schemas"]["Preview"];
 export type PreviewPage = Omit<Preview, "rows"> & {
   rows: (Omit<Preview["rows"][number], "status"> & { status: string | null })[];
 };
-export type PreviewParams = NonNullable<
+type ContractPreviewParams = NonNullable<
   operations["outputs_preview"]["parameters"]["query"]
 >;
-export type ResultStatus = NonNullable<PreviewParams["status"]>;
 export const resultStatuses = [
   "matched",
   "value_diff",
   "missing_left",
   "missing_right",
-] as const satisfies readonly ResultStatus[];
+] as const satisfies readonly NonNullable<ContractPreviewParams["status"]>[];
+export const previewStatuses = [...resultStatuses, "duplicate_key"] as const;
+export type ResultStatus = (typeof previewStatuses)[number];
+export type PreviewParams = Omit<ContractPreviewParams, "status"> & {
+  status?: ResultStatus | null;
+};
 
 export function isResultStatus(status: string | null): status is ResultStatus {
-  return resultStatuses.some((known) => known === status);
+  return previewStatuses.some((known) => known === status);
 }
 
 export function isTabular(output: OutputArtifact) {
@@ -116,7 +120,11 @@ export function useOutputPreview(
     queryFn: async ({ signal }) => {
       try {
         const { data } = await getApiClient().GET(`${output}/preview`, {
-          params: { path: outputPath(location), query: params },
+          params: {
+            path: outputPath(location),
+            // The generated query type has yet to include duplicate_key.
+            query: params as ContractPreviewParams,
+          },
           signal,
         });
         return isPreview(data) ? data : null;

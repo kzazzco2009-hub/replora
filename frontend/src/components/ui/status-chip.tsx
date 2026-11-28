@@ -3,6 +3,7 @@ import {
   Ban,
   CheckCircle2,
   Clock,
+  Copy,
   Eye,
   FileEdit,
   Loader2,
@@ -16,6 +17,7 @@ export type StatusChipStatus =
   | "value_diff"
   | "missing_left"
   | "missing_right"
+  | "duplicate_key"
   | "DRAFT"
   | "VALIDATED"
   | "AWAITING_APPROVAL"
@@ -51,6 +53,7 @@ const STATUS_STYLES: Record<
   matched: { icon: CheckCircle2, color: "ok" },
   SUCCEEDED: { icon: CheckCircle2, color: "ok" },
   value_diff: { icon: AlertTriangle, color: "diff" },
+  duplicate_key: { icon: Copy, color: "diff" },
   PARTIAL: { icon: AlertTriangle, color: "diff" },
   missing_left: { icon: XCircle, color: "missing" },
   missing_right: { icon: XCircle, color: "missing" },
@@ -78,7 +81,7 @@ export function StatusChip({ status, label }: StatusChipProps) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-chip border border-line bg-surface px-2.5 py-0.5 text-xs font-medium ${COLOR_CLASSES[color]}`}
+      className={`inline-flex items-center gap-1 rounded-chip border border-line bg-surface px-2.5 py-0.5 text-xs font-medium [min-block-size:44px] ${COLOR_CLASSES[color]}`}
     >
       <Icon aria-hidden="true" size={14} strokeWidth={1.75} />
       {label}

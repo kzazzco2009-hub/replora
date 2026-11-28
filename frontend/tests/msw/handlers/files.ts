@@ -93,7 +93,15 @@ export const filesHandlers = [
   }),
   http.put("/mock-storage/:id", () => new HttpResponse(null, { status: 200 })),
   http.post("/api/v1/workspaces/:ws_id/files/:file_id/complete", () => {
-    const { status, body } = COMPLETE_FIXTURES[getScenario("files_complete")];
+    const scenario = getScenario("files_complete");
+    const { status, body } =
+      COMPLETE_FIXTURES[scenario === "ready_json" ? "ready" : scenario];
+    if (scenario === "ready_json") {
+      return HttpResponse.json(
+        { ...body, display_name: "orders.json", detected_type: "json" },
+        { status },
+      );
+    }
     return HttpResponse.json(body, { status });
   }),
   http.get("/api/v1/limits", () => HttpResponse.json(LIMITS_FIXTURE)),

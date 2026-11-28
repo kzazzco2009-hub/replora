@@ -3,7 +3,10 @@ import { getApiClient } from "./client";
 import type { components } from "./schema";
 
 export type Limits = components["schemas"]["Limits"];
-export type UploadedFile = components["schemas"]["File"];
+type ContractFile = components["schemas"]["File"];
+export type UploadedFile = Omit<ContractFile, "detected_type"> & {
+  detected_type: ContractFile["detected_type"] | "json";
+};
 
 export const limitsQueryKey = ["limits"] as const;
 

@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   CircleMinus,
+  Copy,
   ListFilter,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -22,7 +23,7 @@ import {
 import { Tabs } from "@/components/ui/tabs";
 import {
   isResultStatus,
-  resultStatuses,
+  previewStatuses,
   resultsErrorKey,
   useOutputPreview,
   type OutputArtifact,
@@ -31,12 +32,14 @@ import {
 import { RowLineage } from "./row-lineage";
 
 const LIMIT = 100;
+const filterStatuses = ["all", ...previewStatuses] as const;
 const icons = {
   all: ListFilter,
   matched: CheckCircle2,
   value_diff: AlertTriangle,
   missing_left: CircleMinus,
   missing_right: CircleMinus,
+  duplicate_key: Copy,
 };
 function changeQuery(values: Record<string, string | null>) {
   const url = new URL(window.location.href);
@@ -215,8 +218,8 @@ function Preview({ location }: { location: OutputLocation }) {
         onValueChange={(value) =>
           changeQuery({ status: value === "all" ? null : value, offset: null })
         }
-        tabs={["all", ...resultStatuses].map((key) => {
-          const Icon = icons[key as keyof typeof icons];
+        tabs={filterStatuses.map((key) => {
+          const Icon = icons[key];
           return {
             value: key,
             label: (

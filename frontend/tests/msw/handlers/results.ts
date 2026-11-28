@@ -64,10 +64,15 @@ export const resultsHandlers = [
             row: index + 7,
           }))
         : scenario === "unknown"
-          ? [{ ...rows[0], status: "duplicate_key" }]
-          : scenario === "empty"
-            ? []
-            : rows;
+          ? [{ ...rows[0], status: "future_status" }]
+          : scenario === "duplicate"
+            ? [
+                ...rows,
+                { row: 82, status: "duplicate_key", cells: ["O-104", null] },
+              ]
+            : scenario === "empty"
+              ? []
+              : rows;
     const filtered = all.filter(
       (row) =>
         (!status || status === row.status) &&
