@@ -330,6 +330,17 @@
     "runsError": "Recent runs couldn’t be loaded.",
     "workflowsError": "Saved workflows couldn’t be loaded."
   },
+  "settings": {
+    "profile": "Profile",
+    "loading": "Loading profile",
+    "display_name": "Display name",
+    "locale": "Language",
+    "timezone": "Time zone",
+    "save": "Save changes",
+    "saved": "Changes saved.",
+    "loadError": "Your profile couldn’t be loaded.",
+    "saveError": "Changes couldn’t be saved. Try saving again."
+  },
   "nav": {
     "home": "Home",
     "newRun": "New run",
