@@ -1,5 +1,21 @@
-import type { LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+"use client";
+
+import { Check, Copy, type LucideIcon } from "lucide-react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { Button } from "./button";
+
+function noopSubscribe() {
+  return () => {};
+}
+
+/** False on the server and on the client's first render, true after mount. */
+function useMounted(): boolean {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+}
 
 export interface ErrorStateProps {
   title: string;
@@ -13,6 +29,10 @@ export interface ErrorStateProps {
   correlationIdLabel?: string;
   /** Defaults to h2 so this fits any page outline. */
   headingLevel?: "h2" | "h3" | "h4";
+  /** Shown on a copy button next to correlationId, when both are given. */
+  copyLabel?: string;
+  /** Replaces copyLabel after a successful copy, and is announced. */
+  copiedLabel?: string;
 }
 
 /**
@@ -29,8 +49,26 @@ export function ErrorState({
   correlationId,
   correlationIdLabel,
   headingLevel = "h2",
+  copyLabel,
+  copiedLabel,
 }: ErrorStateProps) {
   const Heading = headingLevel;
+  const [copied, setCopied] = useState(false);
+  // `navigator` differs between the server render and the client's first
+  // paint, so the clipboard check only runs once `mounted` flips to true
+  // (after hydration), never inline during the first render.
+  const mounted = useMounted();
+  const canCopy =
+    mounted && typeof navigator !== "undefined" && !!navigator.clipboard;
+
+  async function handleCopy() {
+    if (!correlationId) return;
+    await navigator.clipboard.writeText(correlationId);
+    setCopied(true);
+  }
+
+  const showCopyButton =
+    canCopy && correlationId !== undefined && copyLabel !== undefined;
 
   return (
     <div
@@ -55,6 +93,21 @@ export function ErrorState({
           {correlationIdLabel}{" "}
           <span className="select-all font-mono">{correlationId}</span>
         </p>
+      ) : null}
+      {showCopyButton ? (
+        <Button variant="secondary" onClick={handleCopy}>
+          {copied ? (
+            <Check aria-hidden="true" size={16} strokeWidth={1.75} />
+          ) : (
+            <Copy aria-hidden="true" size={16} strokeWidth={1.75} />
+          )}
+          {copied ? copiedLabel : copyLabel}
+        </Button>
+      ) : null}
+      {showCopyButton ? (
+        <span role="status" className="sr-only">
+          {copied ? copiedLabel : ""}
+        </span>
       ) : null}
     </div>
   );

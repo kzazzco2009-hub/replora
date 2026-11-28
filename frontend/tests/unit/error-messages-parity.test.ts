@@ -8,6 +8,7 @@ import {
   PROBLEM_CODES,
   PROBLEM_MESSAGE_KEYS,
 } from "../../src/lib/api/error-messages";
+import { VALIDATION_CODES } from "../../src/lib/api/field-errors";
 import type { Problem } from "../../src/lib/api/problem";
 
 function problem(code: string): Problem {
@@ -27,31 +28,9 @@ describe("error-messages vs contracts/error-codes.json", () => {
     );
   });
 
-  it("validation_codes are allow-listed (field-level, not mapped in this PR)", () => {
-    const allowListed = [
-      "MISSING",
-      "EXTRA_FORBIDDEN",
-      "JSON_INVALID",
-      "MODEL_ATTRIBUTES_TYPE",
-      "STRING_TYPE",
-      "STRING_TOO_SHORT",
-      "STRING_TOO_LONG",
-      "STRING_PATTERN_MISMATCH",
-      "LITERAL_ERROR",
-      "UUID_PARSING",
-      "INVALID_EMAIL",
-      "MFA_CODE_OR_RECOVERY_REQUIRED",
-      "INT_PARSING",
-      "INT_FROM_FLOAT",
-      "GREATER_THAN",
-      "GREATER_THAN_EQUAL",
-      "LESS_THAN_EQUAL",
-      "TOO_SHORT",
-      "TOO_LONG",
-      "INVALID",
-    ];
-    expect(Object.keys(errorCodes.validation_codes).sort()).toEqual(
-      allowListed.sort(),
+  it("maps exactly the contract's validation_codes, no more and no fewer", () => {
+    expect([...VALIDATION_CODES].sort()).toEqual(
+      Object.keys(errorCodes.validation_codes).sort(),
     );
   });
 
@@ -88,6 +67,14 @@ describe("error message keys exist in both locales", () => {
   it("en.json and ar.json have the generic fallback key", () => {
     expect(en.errors.generic).toBeTruthy();
     expect(ar.errors.generic).toBeTruthy();
+  });
+
+  it.each(VALIDATION_CODES)("en.json has errors.validation.%s", (code) => {
+    expect(en.errors.validation).toHaveProperty(code);
+  });
+
+  it.each(VALIDATION_CODES)("ar.json has errors.validation.%s", (code) => {
+    expect(ar.errors.validation).toHaveProperty(code);
   });
 });
 
