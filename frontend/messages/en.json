@@ -322,7 +322,13 @@
     "next": "Next: Describe"
   },
   "home": {
-    "title": "Replora"
+    "title": "Replora",
+    "newReconciliation": "New reconciliation",
+    "recentRuns": "Recent runs",
+    "viewAllRuns": "View all runs",
+    "viewAllWorkflows": "View all workflows",
+    "runsError": "Recent runs couldn’t be loaded.",
+    "workflowsError": "Saved workflows couldn’t be loaded."
   },
   "nav": {
     "home": "Home",

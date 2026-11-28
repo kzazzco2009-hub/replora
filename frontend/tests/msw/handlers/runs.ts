@@ -139,6 +139,7 @@ export const runsHandlers = [
     const { searchParams } = new URL(request.url);
     const cursor = searchParams.get("cursor");
     const state = searchParams.get("state");
+    const limit = Number(searchParams.get("limit") ?? 2);
     if (scenario === "EMPTY")
       return HttpResponse.json({ items: [], next_cursor: null });
     if (state) {
@@ -148,8 +149,8 @@ export const runsHandlers = [
       });
     }
     return HttpResponse.json({
-      items: cursor ? historyRuns.slice(2) : historyRuns.slice(0, 2),
-      next_cursor: cursor ? null : historyCursor,
+      items: cursor ? historyRuns.slice(limit) : historyRuns.slice(0, limit),
+      next_cursor: !cursor && historyRuns.length > limit ? historyCursor : null,
     });
   }),
   http.post(path, () =>
