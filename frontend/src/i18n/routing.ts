@@ -6,7 +6,7 @@ export const routing = defineRouting({
   defaultLocale: "en",
 });
 
-export const { usePathname, useRouter } = createNavigation(routing);
+export const { usePathname, useRouter, Link } = createNavigation(routing);
 
 /** AR is the only RTL locale this product supports (design.md §7). */
 export function localeDirection(locale: string): "rtl" | "ltr" {

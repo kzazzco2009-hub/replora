@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it } from "vitest";
-import Home from "../../src/app/[locale]/page";
+import Home from "../../src/app/[locale]/(app)/page";
 import messages from "../../messages/en.json";
 
 function renderHome() {
